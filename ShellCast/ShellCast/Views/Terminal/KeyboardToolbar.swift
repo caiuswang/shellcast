@@ -33,7 +33,11 @@ class TerminalKeyboardToolbar: UIView {
     private var recognitionTask: SFSpeechRecognitionTask?
     private let audioEngine = AVAudioEngine()
     private var isListening = false
-    private var lastTranscript = ""
+
+    // Preview bar
+    private var previewBar: UIView!
+    private var previewTextField: UITextField!
+    var onPreviewVisibilityChanged: ((Bool) -> Void)?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -123,6 +127,70 @@ class TerminalKeyboardToolbar: UIView {
         micButton.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
         micButton.addTarget(self, action: #selector(tapMic), for: .touchUpInside)
         micGroup = [micButton]
+
+        // Preview bar (hidden by default, shown after speech recognition)
+        previewBar = UIView()
+        previewBar.translatesAutoresizingMaskIntoConstraints = false
+        previewBar.backgroundColor = UIColor(white: 0.12, alpha: 1.0)
+        previewBar.isHidden = true
+        addSubview(previewBar)
+
+        NSLayoutConstraint.activate([
+            previewBar.topAnchor.constraint(equalTo: topAnchor),
+            previewBar.bottomAnchor.constraint(equalTo: bottomAnchor),
+            previewBar.leadingAnchor.constraint(equalTo: leadingAnchor),
+            previewBar.trailingAnchor.constraint(equalTo: trailingAnchor),
+        ])
+
+        let cancelBtn = UIButton(type: .system)
+        cancelBtn.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        cancelBtn.tintColor = .gray
+        cancelBtn.addTarget(self, action: #selector(cancelPreview), for: .touchUpInside)
+        cancelBtn.translatesAutoresizingMaskIntoConstraints = false
+
+        let sendBtn = UIButton(type: .system)
+        sendBtn.setImage(UIImage(systemName: "arrow.up.circle.fill"), for: .normal)
+        sendBtn.tintColor = .green
+        sendBtn.addTarget(self, action: #selector(confirmPreview), for: .touchUpInside)
+        sendBtn.translatesAutoresizingMaskIntoConstraints = false
+
+        previewTextField = UITextField()
+        previewTextField.translatesAutoresizingMaskIntoConstraints = false
+        previewTextField.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
+        previewTextField.textColor = .white
+        previewTextField.tintColor = .green
+        previewTextField.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
+        previewTextField.layer.cornerRadius = 6
+        previewTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 0))
+        previewTextField.leftViewMode = .always
+        previewTextField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 0))
+        previewTextField.rightViewMode = .always
+        previewTextField.autocorrectionType = .no
+        previewTextField.autocapitalizationType = .none
+        previewTextField.spellCheckingType = .no
+        previewTextField.returnKeyType = .send
+        previewTextField.addTarget(self, action: #selector(confirmPreview), for: .editingDidEndOnExit)
+
+        previewBar.addSubview(cancelBtn)
+        previewBar.addSubview(previewTextField)
+        previewBar.addSubview(sendBtn)
+
+        NSLayoutConstraint.activate([
+            cancelBtn.leadingAnchor.constraint(equalTo: previewBar.leadingAnchor, constant: 8),
+            cancelBtn.centerYAnchor.constraint(equalTo: previewBar.centerYAnchor),
+            cancelBtn.widthAnchor.constraint(equalToConstant: 30),
+            cancelBtn.heightAnchor.constraint(equalToConstant: 30),
+
+            previewTextField.leadingAnchor.constraint(equalTo: cancelBtn.trailingAnchor, constant: 8),
+            previewTextField.trailingAnchor.constraint(equalTo: sendBtn.leadingAnchor, constant: -8),
+            previewTextField.centerYAnchor.constraint(equalTo: previewBar.centerYAnchor),
+            previewTextField.heightAnchor.constraint(equalToConstant: 32),
+
+            sendBtn.trailingAnchor.constraint(equalTo: previewBar.trailingAnchor, constant: -8),
+            sendBtn.centerYAnchor.constraint(equalTo: previewBar.centerYAnchor),
+            sendBtn.widthAnchor.constraint(equalToConstant: 30),
+            sendBtn.heightAnchor.constraint(equalToConstant: 30),
+        ])
 
         // Default: no-keyboard layout (PgUp/PgDn first)
         applyLayout(keyboardVisible: false)
@@ -311,7 +379,6 @@ class TerminalKeyboardToolbar: UIView {
     }
 
     private func beginRecognition() {
-        // Stop any existing task
         recognitionTask?.cancel()
         recognitionTask = nil
 
@@ -325,7 +392,7 @@ class TerminalKeyboardToolbar: UIView {
 
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         guard let recognitionRequest, let speechRecognizer, speechRecognizer.isAvailable else { return }
-        recognitionRequest.shouldReportPartialResults = false
+        recognitionRequest.shouldReportPartialResults = true
 
         let inputNode = audioEngine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
@@ -333,16 +400,32 @@ class TerminalKeyboardToolbar: UIView {
             recognitionRequest.append(buffer)
         }
 
+        // Show preview bar with placeholder
+        showPreview(text: "Listening...")
+
+        var didFinish = false
         recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
-            guard let self else { return }
+            guard let self, !didFinish else { return }
             if let result {
                 let text = result.bestTranscription.formattedString
+                DispatchQueue.main.async {
+                    self.previewTextField.text = text
+                }
                 if result.isFinal {
-                    self.sendKey(Array(text.utf8))
+                    didFinish = true
+                    DispatchQueue.main.async {
+                        self.stopListening()
+                    }
                 }
             }
-            if error != nil || (result?.isFinal ?? false) {
-                self.stopListening()
+            if error != nil {
+                didFinish = true
+                DispatchQueue.main.async {
+                    self.stopListening()
+                    if self.previewTextField.text == "Listening..." || (self.previewTextField.text?.isEmpty ?? true) {
+                        self.hidePreview()
+                    }
+                }
             }
         }
 
@@ -353,10 +436,12 @@ class TerminalKeyboardToolbar: UIView {
             micButton.backgroundColor = UIColor(red: 0.4, green: 0.15, blue: 0.15, alpha: 1.0)
         } catch {
             stopListening()
+            hidePreview()
         }
     }
 
     private func stopListening() {
+        guard isListening else { return }
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()
@@ -368,5 +453,36 @@ class TerminalKeyboardToolbar: UIView {
 
         micButton.tintColor = .white
         micButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
+    }
+
+    // MARK: - Preview Bar
+
+    private func showPreview(text: String) {
+        previewTextField.text = text
+        previewBar.isHidden = false
+        scrollView.isHidden = true
+        onPreviewVisibilityChanged?(true)
+    }
+
+    private func hidePreview() {
+        previewBar.isHidden = true
+        scrollView.isHidden = false
+        previewTextField.text = ""
+        previewTextField.resignFirstResponder()
+        onPreviewVisibilityChanged?(false)
+    }
+
+    @objc private func confirmPreview() {
+        guard !previewBar.isHidden else { return }
+        if let text = previewTextField.text, !text.isEmpty, text != "Listening..." {
+            sendKey(Array(text.utf8))
+        }
+        stopListening()
+        hidePreview()
+    }
+
+    @objc private func cancelPreview() {
+        stopListening()
+        hidePreview()
     }
 }
