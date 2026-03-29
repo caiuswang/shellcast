@@ -1,6 +1,20 @@
 import SwiftUI
 import SwiftData
 
+enum ActiveSheet: Identifiable {
+    case addConnection
+    case editConnection(Connection)
+    case tmuxBrowser([TmuxSession])
+
+    var id: String {
+        switch self {
+        case .addConnection: return "add"
+        case .editConnection(let c): return "edit-\(c.id)"
+        case .tmuxBrowser: return "tmux"
+        }
+    }
+}
+
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ConnectionManager.self) private var connectionManager
@@ -8,12 +22,9 @@ struct HomeView: View {
     @Query(filter: #Predicate<SessionRecord> { $0.isActive }, sort: \SessionRecord.lastActiveAt, order: .reverse)
     private var activeSessions: [SessionRecord]
 
-    @State private var showAddConnection = false
-    @State private var selectedConnection: Connection?
-    @State private var connectingConnection: Connection?
+    @State private var activeSheet: ActiveSheet?
     @State private var activeTransport: SSHSession?
     @State private var showTerminal = false
-    @State private var showTmuxBrowser = false
     @State private var tmuxSessions: [TmuxSession] = []
     @State private var errorMessage: String?
     @State private var showError = false
@@ -47,7 +58,7 @@ struct HomeView: View {
             }
             .overlay(alignment: .bottomTrailing) {
                 Button {
-                    showAddConnection = true
+                    activeSheet = .addConnection
                 } label: {
                     Image(systemName: "plus")
                         .font(.title2)
@@ -68,32 +79,26 @@ struct HomeView: View {
                         .foregroundStyle(.white)
                 }
             }
-            .sheet(isPresented: $showAddConnection) {
-                EditConnectionView(mode: .add) { connection in
-                    connectTo(connection)
+            .sheet(item: $activeSheet) { sheet in
+                switch sheet {
+                case .addConnection:
+                    EditConnectionView(mode: .add) { connection in
+                        connectTo(connection)
+                    }
+                case .editConnection(let connection):
+                    EditConnectionView(mode: .edit(connection))
+                case .tmuxBrowser(let sessions):
+                    TmuxBrowserView(sessions: sessions) { tmuxSession in
+                        activeSheet = nil
+                        if let transport = activeTransport {
+                            openShell(transport: transport, tmuxSession: tmuxSession)
+                        }
+                    }
                 }
-            }
-            .sheet(item: $selectedConnection) { connection in
-                EditConnectionView(mode: .edit(connection))
             }
             .fullScreenCover(isPresented: $showTerminal) {
                 if let transport = activeTransport {
                     TerminalContainerView(transport: transport)
-                }
-            }
-            .sheet(isPresented: $showTmuxBrowser) {
-                if let transport = activeTransport {
-                    TmuxBrowserView(sessions: tmuxSessions) { tmuxSession in
-                        showTmuxBrowser = false
-                        Task {
-                            if let tmuxSession {
-                                try await transport.openShell(tmuxCommand: "tmux attach -t \(tmuxSession.name)")
-                            } else {
-                                try await transport.openShell()
-                            }
-                            showTerminal = true
-                        }
-                    }
                 }
             }
             .alert("Connection Error", isPresented: $showError) {
@@ -107,28 +112,48 @@ struct HomeView: View {
 
     // MARK: - Connect
 
+    @MainActor
     private func connectTo(_ connection: Connection) {
-        Task {
+        Task { @MainActor in
             do {
                 let transport = try await connectionManager.connect(connection)
                 self.activeTransport = transport
 
                 // Try to list tmux sessions
+                var sessions: [TmuxSession] = []
                 do {
-                    let sessions = try await TmuxParser.listSessions(over: transport)
-                    if sessions.isEmpty {
-                        // No tmux sessions, open shell directly
-                        try await transport.openShell()
-                        showTerminal = true
-                    } else {
-                        tmuxSessions = sessions
-                        showTmuxBrowser = true
-                    }
+                    sessions = try await TmuxParser.listSessions(over: transport)
+
                 } catch {
-                    // tmux not available or failed, open shell directly
-                    try await transport.openShell()
-                    showTerminal = true
+
                 }
+
+                // Small delay to ensure any previous sheet has fully dismissed
+                try? await Task.sleep(for: .milliseconds(500))
+
+                self.activeSheet = .tmuxBrowser(sessions)
+            } catch {
+                errorMessage = error.localizedDescription
+                showError = true
+            }
+        }
+    }
+
+    private func openShell(transport: SSHSession, tmuxSession: TmuxSession?) {
+        Task { @MainActor in
+            do {
+                let tmuxCommand: String?
+                if let session = tmuxSession {
+                    if session.name == "new" {
+                        tmuxCommand = "tmux new-session"
+                    } else {
+                        tmuxCommand = "tmux attach -t \(session.name)"
+                    }
+                } else {
+                    tmuxCommand = nil
+                }
+                try await transport.openShell(tmuxCommand: tmuxCommand)
+                showTerminal = true
             } catch {
                 errorMessage = error.localizedDescription
                 showError = true
@@ -172,7 +197,7 @@ struct HomeView: View {
                     }
                     .contextMenu {
                         Button("Edit") {
-                            selectedConnection = connection
+                            activeSheet = .editConnection(connection)
                         }
                         Button("Delete", role: .destructive) {
                             modelContext.delete(connection)

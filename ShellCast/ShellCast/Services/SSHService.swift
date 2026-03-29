@@ -134,11 +134,24 @@ final class SSHSession: TransportSession {
 
     func exec(_ command: String) async throws -> String {
         guard let client = client else { throw SSHError.disconnected }
+
         do {
             let buffer = try await client.executeCommand(command)
-            return String(buffer: buffer)
+            let result = String(buffer: buffer)
+            return result
         } catch {
-            throw SSHError.execFailed(error.localizedDescription)
+            // Citadel's executeCommand uses mergeStreams: false by default,
+            // which throws TTYSTDError when stderr has output.
+            // Try again with mergeStreams to capture stdout regardless.
+
+            do {
+                let buffer = try await client.executeCommand(command, mergeStreams: true)
+                let result = String(buffer: buffer)
+                return result
+            } catch {
+
+                throw SSHError.execFailed("\(type(of: error)): \(error)")
+            }
         }
     }
 

@@ -1,30 +1,33 @@
 import Foundation
 
 struct TmuxParser {
+    private static let separator = "|||"
+
     static func listSessions(over session: SSHSession) async throws -> [TmuxSession] {
-        let format = "#{session_name}\\t#{session_windows}\\t#{session_last_attached}\\t#{session_attached}"
-        let output = try await session.exec("tmux list-sessions -F '\(format)' 2>/dev/null || true")
+        let format = "#{session_name}\(separator)#{session_windows}\(separator)#{session_last_attached}\(separator)#{session_attached}"
+        let command = "/opt/homebrew/bin/tmux list-sessions -F '\(format)'"
+        let output = try await session.exec(command)
 
         guard !output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return []
         }
 
         return output.split(separator: "\n").compactMap { line in
-            let parts = line.split(separator: "\t", omittingEmptySubsequences: false)
+            let parts = line.components(separatedBy: separator)
             guard parts.count >= 4 else { return nil }
 
             let lastAttached: Date?
-            if let timestamp = TimeInterval(String(parts[2])) {
+            if let timestamp = TimeInterval(parts[2].trimmingCharacters(in: .whitespaces)) {
                 lastAttached = Date(timeIntervalSince1970: timestamp)
             } else {
                 lastAttached = nil
             }
 
             return TmuxSession(
-                name: String(parts[0]),
-                windowCount: Int(parts[1]) ?? 0,
+                name: parts[0].trimmingCharacters(in: .whitespaces),
+                windowCount: Int(parts[1].trimmingCharacters(in: .whitespaces)) ?? 0,
                 lastAttached: lastAttached,
-                attachedClients: Int(parts[3]) ?? 0
+                attachedClients: Int(parts[3].trimmingCharacters(in: .whitespaces)) ?? 0
             )
         }
     }

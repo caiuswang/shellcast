@@ -15,6 +15,7 @@
 		7563E1D7A8085874F68DA607 /* AuthMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = D886DD705902431727A8D5CE /* AuthMethod.swift */; };
 		7CF08706B830298A77DFE525 /* Citadel in Frameworks */ = {isa = PBXBuildFile; productRef = 3688871340D57647A29D2743 /* Citadel */; };
 		82118C48FF254F1FD174CF61 /* EditConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D70BAEA3CD12FEADCFA387B /* EditConnectionView.swift */; };
+		977FC8F659DBF5F4FBD5F883 /* TerminalBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88ACE22C2518FC93E029EE41 /* TerminalBridge.swift */; };
 		97A5F4A101629D6161484D69 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472560D9CFD337796D28D1D3 /* HomeView.swift */; };
 		9BD757064C4FFB8E27A55496 /* TmuxSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */; };
 		9C1817F8A540EAB7E91E2F49 /* TerminalContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23317A00D128D5D060821218 /* TerminalContainerView.swift */; };
@@ -52,6 +53,7 @@
 		6726B66D9CC86DDD8EA70798 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
 		86A413C952647072F83FE1F3 /* SSHService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHService.swift; sourceTree = "<group>"; };
+		88ACE22C2518FC93E029EE41 /* TerminalBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalBridge.swift; sourceTree = "<group>"; };
 		A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCard.swift; sourceTree = "<group>"; };
 		AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSession.swift; sourceTree = "<group>"; };
 		AA4F2160E25985C381E065CE /* ShellCast.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ShellCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -186,10 +188,19 @@
 				18ED85687617B1A5C79A9437 /* ShellCastApp.swift */,
 				4143FC19FF587B2C248EAFB0 /* Models */,
 				908499341304C461901FD57B /* Services */,
+				F4754A5AE4A6C96397ED20C0 /* Terminal */,
 				CDE8B1A9EF0A6ED1FAD6EB26 /* Utilities */,
 				AC1CCE346402C5E2F7BD1129 /* Views */,
 			);
 			path = ShellCast;
+			sourceTree = "<group>";
+		};
+		F4754A5AE4A6C96397ED20C0 /* Terminal */ = {
+			isa = PBXGroup;
+			children = (
+				88ACE22C2518FC93E029EE41 /* TerminalBridge.swift */,
+			);
+			path = Terminal;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -296,6 +307,7 @@
 				EBDEDB9BE8D7E51EC0B98FEF /* SSHService.swift in Sources */,
 				B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */,
 				2F80963338411CA796CE07D4 /* ShellCastApp.swift in Sources */,
+				977FC8F659DBF5F4FBD5F883 /* TerminalBridge.swift in Sources */,
 				9C1817F8A540EAB7E91E2F49 /* TerminalContainerView.swift in Sources */,
 				AC7233A415BF3267D4EA4F06 /* TimeFormatting.swift in Sources */,
 				CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */,
