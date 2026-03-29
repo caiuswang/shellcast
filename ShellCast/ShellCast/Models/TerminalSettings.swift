@@ -105,40 +105,41 @@ final class TerminalSettings {
     static let shared = TerminalSettings()
 
     var theme: TerminalTheme {
-        get { TerminalTheme(rawValue: UserDefaults.standard.string(forKey: "terminal_theme") ?? "Default") ?? .default }
-        set { UserDefaults.standard.set(newValue.rawValue, forKey: "terminal_theme") }
+        didSet { UserDefaults.standard.set(theme.rawValue, forKey: "terminal_theme") }
     }
 
     var font: TerminalFont {
-        get { TerminalFont(rawValue: UserDefaults.standard.string(forKey: "terminal_font") ?? "JetBrains Mono") ?? .jetBrainsMono }
-        set { UserDefaults.standard.set(newValue.rawValue, forKey: "terminal_font") }
+        didSet { UserDefaults.standard.set(font.rawValue, forKey: "terminal_font") }
     }
 
     var fontSize: Int {
-        get {
-            let stored = UserDefaults.standard.integer(forKey: "terminal_font_size")
-            return stored == 0 ? 14 : stored
+        didSet {
+            let clamped = max(8, min(32, fontSize))
+            if fontSize != clamped { fontSize = clamped }
+            UserDefaults.standard.set(clamped, forKey: "terminal_font_size")
         }
-        set { UserDefaults.standard.set(max(8, min(32, newValue)), forKey: "terminal_font_size") }
     }
 
     var cursorMode: CursorMode {
-        get { CursorMode(rawValue: UserDefaults.standard.string(forKey: "terminal_cursor_mode") ?? "block") ?? .block }
-        set { UserDefaults.standard.set(newValue.rawValue, forKey: "terminal_cursor_mode") }
+        didSet { UserDefaults.standard.set(cursorMode.rawValue, forKey: "terminal_cursor_mode") }
     }
 
     var cursorBlink: Bool {
-        get {
-            if UserDefaults.standard.object(forKey: "terminal_cursor_blink") == nil { return true }
-            return UserDefaults.standard.bool(forKey: "terminal_cursor_blink")
-        }
-        set { UserDefaults.standard.set(newValue, forKey: "terminal_cursor_blink") }
+        didSet { UserDefaults.standard.set(cursorBlink, forKey: "terminal_cursor_blink") }
     }
 
     var scrollbackSize: ScrollbackSize {
-        get { ScrollbackSize(rawValue: UserDefaults.standard.integer(forKey: "terminal_scrollback")) ?? .k10 }
-        set { UserDefaults.standard.set(newValue.rawValue, forKey: "terminal_scrollback") }
+        didSet { UserDefaults.standard.set(scrollbackSize.rawValue, forKey: "terminal_scrollback") }
     }
 
-    private init() {}
+    private init() {
+        let ud = UserDefaults.standard
+        self.theme = TerminalTheme(rawValue: ud.string(forKey: "terminal_theme") ?? "") ?? .default
+        self.font = TerminalFont(rawValue: ud.string(forKey: "terminal_font") ?? "") ?? .jetBrainsMono
+        let storedSize = ud.integer(forKey: "terminal_font_size")
+        self.fontSize = storedSize == 0 ? 14 : storedSize
+        self.cursorMode = CursorMode(rawValue: ud.string(forKey: "terminal_cursor_mode") ?? "") ?? .block
+        self.cursorBlink = ud.object(forKey: "terminal_cursor_blink") == nil ? true : ud.bool(forKey: "terminal_cursor_blink")
+        self.scrollbackSize = ScrollbackSize(rawValue: ud.integer(forKey: "terminal_scrollback")) ?? .k10
+    }
 }
