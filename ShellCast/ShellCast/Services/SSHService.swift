@@ -99,7 +99,11 @@ final class SSHSession: TransportSession {
                         terminalPixelWidth: 0,
                         terminalPixelHeight: 0,
                         terminalModes: SSHTerminalModes([:])
-                    )
+                    ),
+                    environment: [
+                        .init(wantReply: true, name: "LANG", value: "en_US.UTF-8"),
+                        .init(wantReply: true, name: "LC_ALL", value: "en_US.UTF-8"),
+                    ]
                 ) { inbound, outbound in
                     // Store the writer for sending input and resize
                     self?.stdinWriter = outbound
