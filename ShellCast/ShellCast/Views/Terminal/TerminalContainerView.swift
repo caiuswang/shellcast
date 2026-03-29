@@ -55,11 +55,23 @@ struct SwiftTermView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: TerminalViewController, context: Context) {}
 }
 
+/// Subclass TerminalView to prevent iOS auto-paste on tap.
+class ShellCastTerminalView: TerminalView {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        self.pasteConfiguration = nil
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
 /// UIKit view controller hosting SwiftTerm's TerminalView.
 /// Using a UIViewController gives better control over keyboard, layout, and first responder.
 class TerminalViewController: UIViewController {
     let bridge: TerminalBridge
-    private var terminalView: TerminalView!
+    private var terminalView: ShellCastTerminalView!
 
     init(bridge: TerminalBridge) {
         self.bridge = bridge
@@ -78,7 +90,7 @@ class TerminalViewController: UIViewController {
         view.backgroundColor = .black
 
         // Create SwiftTerm TerminalView
-        terminalView = TerminalView(frame: view.bounds)
+        terminalView = ShellCastTerminalView(frame: view.bounds)
         terminalView.translatesAutoresizingMaskIntoConstraints = false
         terminalView.terminalDelegate = bridge
         terminalView.nativeBackgroundColor = .black
@@ -93,6 +105,7 @@ class TerminalViewController: UIViewController {
         terminalView.keyboardAppearance = .dark
         terminalView.optionAsMetaKey = true
         terminalView.customBlockGlyphs = false
+        terminalView.allowMouseReporting = false
         terminalView.autocorrectionType = .no
         terminalView.autocapitalizationType = .none
         terminalView.spellCheckingType = .no
