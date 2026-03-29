@@ -28,6 +28,7 @@ struct HomeView: View {
     @State private var tmuxSessions: [TmuxSession] = []
     @State private var errorMessage: String?
     @State private var showError = false
+    @State private var showSettings = false
 
     var body: some View {
         NavigationStack {
@@ -49,7 +50,7 @@ struct HomeView: View {
                             Image(systemName: "folder")
                                 .foregroundStyle(.white)
                         }
-                        Button(action: {}) {
+                        Button { showSettings = true } {
                             Image(systemName: "gearshape")
                                 .foregroundStyle(.white)
                         }
@@ -100,6 +101,9 @@ struct HomeView: View {
                 if let transport = activeTransport {
                     TerminalContainerView(transport: transport)
                 }
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
             }
             .alert("Connection Error", isPresented: $showError) {
                 Button("OK") {}
