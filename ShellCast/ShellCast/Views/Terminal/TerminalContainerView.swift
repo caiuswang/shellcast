@@ -70,6 +70,8 @@ class TerminalViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
+    private var bottomConstraint: NSLayoutConstraint!
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -85,30 +87,63 @@ class TerminalViewController: UIViewController {
         terminalView.font = UIFont.monospacedSystemFont(ofSize: 13, weight: .regular)
         terminalView.keyboardAppearance = .dark
         terminalView.optionAsMetaKey = true
+        terminalView.autocorrectionType = .no
+        terminalView.autocapitalizationType = .none
+        terminalView.spellCheckingType = .no
 
         view.addSubview(terminalView)
 
-        // Layout: fill the view, respecting keyboard
+        bottomConstraint = terminalView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+
         NSLayoutConstraint.activate([
-            terminalView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            terminalView.topAnchor.constraint(equalTo: view.topAnchor),
             terminalView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             terminalView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomConstraint,
         ])
 
-        // Use keyboard layout guide so terminal resizes when keyboard appears
-        if #available(iOS 15.0, *) {
-            view.keyboardLayoutGuide.topAnchor.constraint(equalTo: terminalView.bottomAnchor).isActive = true
-        } else {
-            terminalView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        }
+        // Custom keyboard toolbar
+        let toolbar = TerminalKeyboardToolbar(
+            frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 44),
+            inputViewStyle: .keyboard
+        )
+        toolbar.terminalView = terminalView
+        terminalView.inputView = nil
+        terminalView.inputAccessoryView = toolbar
 
         // Connect bridge to terminal view
         bridge.terminalView = terminalView
+
+        // Listen for keyboard show/hide to resize terminal
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)),
+                                               name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)),
+                                               name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+              let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+
+        bottomConstraint.constant = -frame.height
+        UIView.animate(withDuration: duration) {
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+
+        bottomConstraint.constant = 0
+        UIView.animate(withDuration: duration) {
+            self.view.layoutIfNeeded()
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        // Make terminal first responder to show keyboard
+
+        terminalView.reloadInputViews()
         terminalView.becomeFirstResponder()
         // Start reading SSH output
         bridge.startReading()
