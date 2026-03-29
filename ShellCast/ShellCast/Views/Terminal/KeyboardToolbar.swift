@@ -3,17 +3,29 @@ import SwiftTerm
 
 /// Custom keyboard accessory toolbar for terminal special keys.
 /// Layout: Ctrl Alt | Esc Tab | ↑ ↓ → ← | | / \ ~ - _
-class TerminalKeyboardToolbar: UIInputView {
+class TerminalKeyboardToolbar: UIView {
 
     weak var terminalView: TerminalView?
+    /// Direct send callback — sends bytes over SSH regardless of first responder state.
+    var onSend: (([UInt8]) -> Void)?
 
-    private var ctrlActive = false
-    private var altActive = false
+    private(set) var ctrlActive = false
+    private(set) var altActive = false
     private var ctrlButton: UIButton!
     private var altButton: UIButton!
 
-    override init(frame: CGRect, inputViewStyle: UIInputView.Style) {
-        super.init(frame: frame, inputViewStyle: inputViewStyle)
+    // Button groups for reordering
+    private var pageGroup: [UIView] = []
+    private var modifierGroup: [UIView] = []
+    private var escTabGroup: [UIView] = []
+    private var arrowGroup: [UIView] = []
+    private var symbolGroup: [UIView] = []
+    private var kbGroup: [UIView] = []
+    private var stack: UIStackView!
+    private var scrollView: UIScrollView!
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         setupUI()
     }
 
@@ -24,10 +36,8 @@ class TerminalKeyboardToolbar: UIInputView {
 
     private func setupUI() {
         backgroundColor = UIColor(white: 0.1, alpha: 1.0)
-        translatesAutoresizingMaskIntoConstraints = false
-        heightAnchor.constraint(equalToConstant: 44).isActive = true
 
-        let scrollView = UIScrollView()
+        scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.alwaysBounceHorizontal = true
@@ -40,7 +50,7 @@ class TerminalKeyboardToolbar: UIInputView {
             scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
 
-        let stack = UIStackView()
+        stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = 4
         stack.alignment = .center
@@ -55,28 +65,29 @@ class TerminalKeyboardToolbar: UIInputView {
             stack.heightAnchor.constraint(equalTo: scrollView.heightAnchor, constant: -8),
         ])
 
-        // Group 1: Ctrl, Alt (toggle buttons)
+        // Create button groups (no separators — those are added fresh each time)
+        pageGroup = [
+            makeButton("PgUp", action: #selector(tapPageUp)),
+            makeButton("PgDn", action: #selector(tapPageDown)),
+        ]
+
         ctrlButton = makeToggleButton("Ctrl", action: #selector(toggleCtrl))
         altButton = makeToggleButton("Alt", action: #selector(toggleAlt))
-        stack.addArrangedSubview(ctrlButton)
-        stack.addArrangedSubview(altButton)
-        stack.addArrangedSubview(makeSeparator())
+        modifierGroup = [ctrlButton, altButton]
 
-        // Group 2: Esc, Tab
-        stack.addArrangedSubview(makeButton("Esc", action: #selector(tapEsc)))
-        stack.addArrangedSubview(makeButton("Tab", action: #selector(tapTab)))
-        stack.addArrangedSubview(makeSeparator())
+        escTabGroup = [
+            makeButton("Esc", action: #selector(tapEsc)),
+            makeButton("Tab", action: #selector(tapTab)),
+        ]
 
-        // Group 3: Arrow keys + Page Up/Down
-        stack.addArrangedSubview(makeButton("↑", action: #selector(tapUp)))
-        stack.addArrangedSubview(makeButton("↓", action: #selector(tapDown)))
-        stack.addArrangedSubview(makeButton("←", action: #selector(tapLeft)))
-        stack.addArrangedSubview(makeButton("→", action: #selector(tapRight)))
-        stack.addArrangedSubview(makeButton("PgUp", action: #selector(tapPageUp)))
-        stack.addArrangedSubview(makeButton("PgDn", action: #selector(tapPageDown)))
-        stack.addArrangedSubview(makeSeparator())
+        arrowGroup = [
+            makeButton("↑", action: #selector(tapUp)),
+            makeButton("↓", action: #selector(tapDown)),
+            makeButton("←", action: #selector(tapLeft)),
+            makeButton("→", action: #selector(tapRight)),
+        ]
 
-        // Group 4: Special characters
+        var symbols: [UIView] = []
         for (char, sel) in [
             ("|", #selector(tapPipe)),
             ("/", #selector(tapSlash)),
@@ -85,15 +96,45 @@ class TerminalKeyboardToolbar: UIInputView {
             ("-", #selector(tapDash)),
             ("_", #selector(tapUnderscore)),
         ] {
-            stack.addArrangedSubview(makeButton(char, action: sel))
+            symbols.append(makeButton(char, action: sel))
         }
+        symbolGroup = symbols
 
-        stack.addArrangedSubview(makeSeparator())
-
-        // Keyboard dismiss button
         let kbButton = makeButton("⌨", action: #selector(tapKeyboard))
         kbButton.titleLabel?.font = .systemFont(ofSize: 18)
-        stack.addArrangedSubview(kbButton)
+        kbGroup = [kbButton]
+
+        // Default: no-keyboard layout (PgUp/PgDn first)
+        applyLayout(keyboardVisible: false)
+    }
+
+    /// Reorder buttons based on keyboard visibility.
+    func applyLayout(keyboardVisible: Bool) {
+        // Remove all arranged subviews
+        for view in stack.arrangedSubviews {
+            stack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+
+        // Reset scroll to start so first group is visible
+        scrollView.setContentOffset(.zero, animated: false)
+
+        let groups: [[UIView]]
+        if keyboardVisible {
+            groups = [modifierGroup, escTabGroup, arrowGroup, pageGroup, symbolGroup, kbGroup]
+        } else {
+            groups = [pageGroup, modifierGroup, escTabGroup, arrowGroup, symbolGroup, kbGroup]
+        }
+
+        for (i, group) in groups.enumerated() {
+            for view in group {
+                stack.addArrangedSubview(view)
+            }
+            // Add separator between groups (not after last)
+            if i < groups.count - 1 {
+                stack.addArrangedSubview(makeSeparator())
+            }
+        }
     }
 
     // MARK: - Button Factory
@@ -143,9 +184,24 @@ class TerminalKeyboardToolbar: UIInputView {
         updateToggleAppearance(altButton, active: altActive)
     }
 
-    /// Send bytes to terminal view, applying Ctrl/Alt modifiers if active.
+    /// Consume and reset modifier state. Returns (ctrl, alt) flags.
+    func consumeModifiers() -> (ctrl: Bool, alt: Bool) {
+        let result = (ctrl: ctrlActive, alt: altActive)
+        if ctrlActive {
+            ctrlActive = false
+            updateToggleAppearance(ctrlButton, active: false)
+        }
+        if altActive {
+            altActive = false
+            updateToggleAppearance(altButton, active: false)
+        }
+        return result
+    }
+
+    /// Send bytes — always uses onSend to go directly to SSH.
     private func sendKey(_ bytes: [UInt8]) {
-        terminalView?.send(bytes)
+        print("[Toolbar] sendKey called, bytes=\(bytes), onSend=\(onSend != nil)")
+        onSend?(bytes)
         // Auto-deactivate modifiers after use
         if ctrlActive {
             ctrlActive = false
@@ -182,8 +238,14 @@ class TerminalKeyboardToolbar: UIInputView {
     @objc private func tapDown()     { sendKey([0x1B, 0x5B, 0x42]) }  // ESC [ B
     @objc private func tapRight()    { sendKey([0x1B, 0x5B, 0x43]) }  // ESC [ C
     @objc private func tapLeft()     { sendKey([0x1B, 0x5B, 0x44]) }  // ESC [ D
-    @objc private func tapPageUp()   { sendKey([0x1B, 0x5B, 0x35, 0x7E]) }  // ESC [ 5 ~
-    @objc private func tapPageDown() { sendKey([0x1B, 0x5B, 0x36, 0x7E]) }  // ESC [ 6 ~
+    // Send Ctrl+B [ to enter tmux copy mode, then PgUp/PgDn to scroll
+    @objc private func tapPageUp() {
+        // Ctrl+B (tmux prefix) + PgUp — tmux default binds PgUp in copy mode
+        sendKey([0x02, 0x1B, 0x5B, 0x35, 0x7E])
+    }
+    @objc private func tapPageDown() {
+        sendKey([0x1B, 0x5B, 0x36, 0x7E])  // PgDn (works once already in copy mode)
+    }
 
     // Special characters
     @objc private func tapPipe()       { sendChar("|") }

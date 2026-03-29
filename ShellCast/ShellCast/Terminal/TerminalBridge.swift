@@ -7,6 +7,7 @@ import SwiftTerm
 final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
     let transport: SSHSession
     weak var terminalView: TerminalView?
+    weak var keyboardToolbar: TerminalKeyboardToolbar?
 
     private var readTask: Task<Void, Never>?
 
@@ -33,10 +34,31 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
 
     // MARK: - TerminalViewDelegate
 
-    /// User typed something — send it over SSH.
+    /// User typed something — send it over SSH, applying toolbar modifiers if active.
     func send(source: TerminalView, data: ArraySlice<UInt8>) {
+        let modifiers = keyboardToolbar?.consumeModifiers()
+        let finalData: Data
+
+        if let modifiers, modifiers.ctrl, data.count == 1,
+           let byte = data.first {
+            // Ctrl+key: convert to control character
+            let upper = byte & 0xDF  // uppercase ASCII
+            if upper >= 0x40 && upper <= 0x5F {
+                finalData = Data([upper - 0x40])
+            } else {
+                finalData = Data(data)
+            }
+        } else if let modifiers, modifiers.alt {
+            // Alt+key: send ESC prefix
+            var bytes: [UInt8] = [0x1B]
+            bytes.append(contentsOf: data)
+            finalData = Data(bytes)
+        } else {
+            finalData = Data(data)
+        }
+
         Task {
-            try? await transport.send(Data(data))
+            try? await transport.send(finalData)
         }
     }
 

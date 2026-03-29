@@ -82,12 +82,28 @@ class TerminalViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private var bottomConstraint: NSLayoutConstraint!
+    private var terminalBottomConstraint: NSLayoutConstraint!
+    private var toolbarBottomConstraint: NSLayoutConstraint!
+    private var toolbar: TerminalKeyboardToolbar!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         view.backgroundColor = .black
+
+        // Create toolbar (always visible — sits at bottom, moves up with keyboard)
+        toolbar = TerminalKeyboardToolbar(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 44))
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(toolbar)
+
+        toolbarBottomConstraint = toolbar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+
+        NSLayoutConstraint.activate([
+            toolbar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            toolbar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            toolbarBottomConstraint,
+            toolbar.heightAnchor.constraint(equalToConstant: 44),
+        ])
 
         // Create SwiftTerm TerminalView
         terminalView = ShellCastTerminalView(frame: view.bounds)
@@ -96,7 +112,6 @@ class TerminalViewController: UIViewController {
         terminalView.nativeBackgroundColor = .black
         terminalView.nativeForegroundColor = UIColor(red: 0.9, green: 0.95, blue: 0.9, alpha: 1.0)
         terminalView.caretColor = .green
-        // Use same font as iTerm2: JetBrainsMonoNF-Regular
         if let nerdFont = UIFont(name: "JetBrainsMonoNF-Regular", size: 12) {
             terminalView.font = nerdFont
         } else {
@@ -112,28 +127,40 @@ class TerminalViewController: UIViewController {
 
         view.addSubview(terminalView)
 
-        bottomConstraint = terminalView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        terminalBottomConstraint = terminalView.bottomAnchor.constraint(equalTo: toolbar.topAnchor)
 
         NSLayoutConstraint.activate([
             terminalView.topAnchor.constraint(equalTo: view.topAnchor),
             terminalView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             terminalView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomConstraint,
+            terminalBottomConstraint,
         ])
 
-        // Custom keyboard toolbar
-        let toolbar = TerminalKeyboardToolbar(
-            frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 44),
-            inputViewStyle: .keyboard
-        )
-        toolbar.terminalView = terminalView
+        // No inputAccessoryView — we manage toolbar position ourselves
         terminalView.inputView = nil
-        terminalView.inputAccessoryView = toolbar
+        terminalView.inputAccessoryView = nil
 
-        // Connect bridge to terminal view
+        // Toolbar must be in front of terminal view
+        view.bringSubviewToFront(toolbar)
+
+        // Wire up toolbar and bridge
+        toolbar.terminalView = terminalView
+        toolbar.onSend = { [weak self] bytes in
+            print("[Toolbar] onSend called, bytes=\(bytes), self=\(self != nil)")
+            guard let self else { return }
+            Task {
+                do {
+                    try await self.bridge.transport.send(Data(bytes))
+                    print("[Toolbar] send succeeded")
+                } catch {
+                    print("[Toolbar] send error: \(error)")
+                }
+            }
+        }
         bridge.terminalView = terminalView
+        bridge.keyboardToolbar = toolbar
 
-        // Listen for keyboard show/hide to resize terminal
+        // Listen for keyboard show/hide to reposition toolbar
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)),
                                                name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)),
@@ -173,12 +200,17 @@ class TerminalViewController: UIViewController {
 
         if cellSize == .zero { computeCellSize() }
 
-        // Convert keyboard frame from screen coordinates to view coordinates
-        let kbFrameInView = view.convert(kbFrame, from: nil)
-        let overlap = max(0, view.bounds.maxY - kbFrameInView.origin.y)
+        toolbar.applyLayout(keyboardVisible: true)
 
-        bottomConstraint.constant = -overlap
-        let availableHeight = view.bounds.height - overlap
+        // Move toolbar to sit on top of keyboard
+        let kbFrameInView = view.convert(kbFrame, from: nil)
+        let kbHeight = view.bounds.maxY - kbFrameInView.origin.y
+
+        // toolbar.bottom = view.bottom - kbHeight
+        toolbarBottomConstraint.constant = -kbHeight
+
+        // Terminal available height = above toolbar
+        let availableHeight = view.bounds.height - kbHeight - 44
 
         UIView.animate(withDuration: duration) {
             self.view.layoutIfNeeded()
@@ -188,24 +220,30 @@ class TerminalViewController: UIViewController {
     }
 
     @objc private func keyboardWillHide(_ notification: Notification) {
+        print("[KB] keyboardWillHide called")
         guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
 
-        bottomConstraint.constant = 0
+        toolbar.applyLayout(keyboardVisible: false)
+
+        // Move toolbar back to bottom of screen
+        toolbarBottomConstraint.constant = 0
+
+        let availableHeight = view.bounds.height - 44
 
         UIView.animate(withDuration: duration) {
             self.view.layoutIfNeeded()
         } completion: { _ in
-            self.resizeTerminal(availableHeight: self.view.bounds.height)
+            self.resizeTerminal(availableHeight: availableHeight)
         }
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        // Compute cell dimensions before keyboard appears
+        // Compute cell dimensions and resize for toolbar
         computeCellSize()
+        resizeTerminal(availableHeight: view.bounds.height - 44)
 
-        terminalView.reloadInputViews()
         terminalView.becomeFirstResponder()
         // Start reading SSH output
         bridge.startReading()
