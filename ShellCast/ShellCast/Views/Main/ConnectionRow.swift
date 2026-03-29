@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ConnectionRow: View {
     let connection: Connection
+    var onEdit: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 16) {
@@ -22,6 +23,19 @@ struct ConnectionRow: View {
             }
 
             Spacer()
+
+            if let onEdit {
+                Button {
+                    onEdit()
+                } label: {
+                    Image(systemName: "pencil")
+                        .font(.body)
+                        .foregroundStyle(.gray)
+                        .frame(width: 36, height: 36)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
 
             Image(systemName: "chevron.right")
                 .font(.caption)

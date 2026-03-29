@@ -193,8 +193,10 @@ struct HomeView: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(.gray)
 
-            ForEach(connections) { connection   in
-                ConnectionRow(connection: connection)
+            ForEach(connections) { connection in
+                ConnectionRow(connection: connection) {
+                    activeSheet = .editConnection(connection)
+                }
                     .contentShape(Rectangle())
                     .onTapGesture {
                         connectTo(connection)
