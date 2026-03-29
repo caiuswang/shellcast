@@ -1,6 +1,6 @@
 import UIKit
 import SwiftTerm
-import Speech
+import AVFoundation
 
 /// Custom keyboard accessory toolbar for terminal special keys.
 /// Layout: Ctrl Alt | Esc Tab | ↑ ↓ → ← | | / \ ~ - _
@@ -26,12 +26,8 @@ class TerminalKeyboardToolbar: UIView {
     private var stack: UIStackView!
     private var scrollView: UIScrollView!
 
-    // Speech recognition
+    // Voice input
     private var micButton: UIButton!
-    private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
-    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
-    private var recognitionTask: SFSpeechRecognitionTask?
-    private let audioEngine = AVAudioEngine()
     private var isListening = false
 
     // Preview bar
@@ -350,107 +346,82 @@ class TerminalKeyboardToolbar: UIView {
         }
     }
 
-    // MARK: - Speech Recognition
+    // MARK: - Voice Input (WhisperKit)
 
     @objc private func tapMic() {
         if isListening {
-            stopListening()
+            stopAndTranscribe()
         } else {
             startListening()
         }
     }
 
     private func startListening() {
-        SFSpeechRecognizer.requestAuthorization { [weak self] status in
-            DispatchQueue.main.async {
-                guard let self, status == .authorized else { return }
-                self.requestMicAndStart()
-            }
-        }
-    }
-
-    private func requestMicAndStart() {
         AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
             DispatchQueue.main.async {
                 guard let self, granted else { return }
-                self.beginRecognition()
+                self.beginRecording()
             }
         }
     }
 
-    private func beginRecognition() {
-        recognitionTask?.cancel()
-        recognitionTask = nil
+    private func beginRecording() {
+        let whisper = WhisperService.shared
 
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-        } catch {
-            return
-        }
-
-        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-        guard let recognitionRequest, let speechRecognizer, speechRecognizer.isAvailable else { return }
-        recognitionRequest.shouldReportPartialResults = true
-
-        let inputNode = audioEngine.inputNode
-        let recordingFormat = inputNode.outputFormat(forBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
-            recognitionRequest.append(buffer)
-        }
-
-        // Show preview bar with placeholder
-        showPreview(text: "Listening...")
-
-        var didFinish = false
-        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
-            guard let self, !didFinish else { return }
-            if let result {
-                let text = result.bestTranscription.formattedString
-                DispatchQueue.main.async {
-                    self.previewTextField.text = text
-                }
-                if result.isFinal {
-                    didFinish = true
-                    DispatchQueue.main.async {
-                        self.stopListening()
-                    }
-                }
+        // Load model if needed
+        if !whisper.isModelLoaded {
+            showPreview(text: "Preparing model...")
+            whisper.onStatusUpdate = { [weak self] status in
+                self?.previewTextField.text = status
             }
-            if error != nil {
-                didFinish = true
-                DispatchQueue.main.async {
-                    self.stopListening()
-                    if self.previewTextField.text == "Listening..." || (self.previewTextField.text?.isEmpty ?? true) {
+            Task { @MainActor in
+                do {
+                    try await whisper.loadModel()
+                    whisper.onStatusUpdate = nil
+                    self.doStartRecording()
+                } catch {
+                    whisper.onStatusUpdate = nil
+                    self.showPreview(text: "Load failed: \(error.localizedDescription)")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                         self.hidePreview()
                     }
                 }
             }
+            return
         }
 
+        doStartRecording()
+    }
+
+    private func doStartRecording() {
         do {
-            try audioEngine.start()
+            try WhisperService.shared.startRecording()
             isListening = true
             micButton.tintColor = .red
             micButton.backgroundColor = UIColor(red: 0.4, green: 0.15, blue: 0.15, alpha: 1.0)
+            showPreview(text: "Listening... tap mic to stop")
         } catch {
-            stopListening()
             hidePreview()
+        }
+    }
+
+    private func stopAndTranscribe() {
+        guard isListening else { return }
+        isListening = false
+        micButton.tintColor = .white
+        micButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
+        showPreview(text: "Transcribing...")
+
+        Task { @MainActor in
+            let text = await WhisperService.shared.stopAndTranscribe()
+            self.previewTextField.text = text.isEmpty ? "(no speech detected)" : text
         }
     }
 
     private func stopListening() {
         guard isListening else { return }
-        audioEngine.stop()
-        audioEngine.inputNode.removeTap(onBus: 0)
-        recognitionRequest?.endAudio()
-        recognitionRequest = nil
-        recognitionTask = nil
+        WhisperService.shared.cancelRecording()
         isListening = false
-
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-
         micButton.tintColor = .white
         micButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
     }
@@ -474,10 +445,19 @@ class TerminalKeyboardToolbar: UIView {
 
     @objc private func confirmPreview() {
         guard !previewBar.isHidden else { return }
-        if let text = previewTextField.text, !text.isEmpty, text != "Listening..." {
+
+        // If still recording, stop and transcribe first
+        if isListening {
+            stopAndTranscribe()
+            return
+        }
+
+        if let text = previewTextField.text, !text.isEmpty,
+           text != "Listening... tap mic to stop",
+           text != "Transcribing...",
+           text != "(no speech detected)" {
             sendKey(Array(text.utf8))
         }
-        stopListening()
         hidePreview()
     }
 

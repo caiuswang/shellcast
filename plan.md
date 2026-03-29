@@ -25,6 +25,7 @@ ShellCast/
 │   │   ├── Connection.swift             # SwiftData @Model: host, port, username, auth, type
 │   │   ├── SessionRecord.swift          # SwiftData @Model: active session tracking + thumbnail
 │   │   ├── TmuxSession.swift            # Parsed tmux session struct
+│   │   ├── TerminalSettings.swift       # @Observable: theme, font, cursor, scrollback (UserDefaults)
 │   │   ├── AuthMethod.swift             # Enum: password, keyFile, tailscaleSSH
 │   │   └── ConnectionType.swift         # Enum: auto, ssh, mosh
 │   ├── Views/
@@ -40,8 +41,7 @@ ShellCast/
 │   │   │   ├── TerminalContainerView.swift  # Hosts SwiftTerm TerminalView
 │   │   │   └── KeyboardToolbar.swift        # Custom key bar: Ctrl Alt Esc Tab arrows symbols
 │   │   └── Settings/
-│   │       ├── SettingsView.swift           # (planned)
-│   │       └── KeyManagementView.swift      # (planned)
+│   │       └── SettingsView.swift           # Theme/font/cursor/scrollback settings + pickers
 │   ├── Services/
 │   │   ├── SSHService.swift             # SSH via Citadel: connect, exec, PTY shell
 │   │   ├── TransportSession.swift       # Protocol: outputStream, send, resize, disconnect
@@ -49,11 +49,9 @@ ShellCast/
 │   │   ├── TmuxParser.swift             # Parse `tmux list-sessions` output
 │   │   └── KeychainService.swift        # iOS Keychain CRUD for passwords & SSH keys
 │   ├── Terminal/
-│   │   ├── TerminalBridge.swift         # (planned) Pipes TransportSession ↔ SwiftTerm
-│   │   └── TerminalSessionManager.swift # (planned) Multi-session management
+│   │   └── TerminalBridge.swift         # Pipes TransportSession ↔ SwiftTerm TerminalView
 │   └── Utilities/
-│       ├── TimeFormatting.swift          # Relative time display ("1d ago")
-│       └── SnapshotRenderer.swift       # (planned) Terminal → UIImage for thumbnails
+│       └── TimeFormatting.swift          # Relative time display ("1d ago")
 ```
 
 ## Architecture
@@ -118,7 +116,7 @@ HomeView (root)
 
 ## Phased Implementation
 
-### Phase 1: Foundation — SSH + Terminal ← IN PROGRESS
+### Phase 1: Foundation — SSH + Terminal ✅ COMPLETE
 - [x] Create Xcode project with XcodeGen, add SwiftTerm + Citadel via SPM
 - [x] `Connection` SwiftData model + `KeychainService`
 - [x] `HomeView` with saved connections list
@@ -127,30 +125,31 @@ HomeView (root)
 - [x] `ConnectionManager` — orchestrates connections, error handling
 - [x] `TmuxParser` — list tmux sessions over SSH exec
 - [x] Connection flow wired up: tap connection → SSH → tmux browser or terminal
-- [ ] `TerminalBridge` — pipe SSHSession output ↔ SwiftTerm TerminalView
-- [ ] `TerminalContainerView` — UIViewRepresentable wrapping SwiftTerm (currently placeholder)
-- [ ] Test real SSH connection end-to-end on device
+- [x] `TerminalBridge` — pipes SSHSession output ↔ SwiftTerm TerminalView
+- [x] `TerminalContainerView` — UIViewRepresentable wrapping SwiftTerm
+- [x] Test real SSH connection end-to-end on device
 
-**Milestone: SSH into Tailscale machine and type commands from phone.**
+**Milestone: SSH into Tailscale machine and type commands from phone.** ✅
 
-### Phase 2: Tmux Integration
-- [ ] Flow: connect → tmux browser → select session → `tmux attach -t` → terminal
-- [ ] "Connect without tmux" and "New tmux session" actions
+### Phase 2: Tmux Integration — IN PROGRESS
+- [x] Flow: connect → tmux browser → select session → `tmux attach -t` → terminal
+- [x] "Connect without tmux" and "New tmux session" actions
 - [ ] Tmux window listing within a session
 - [ ] In-terminal tmux session/window switcher overlay
 
-**Milestone: Full flow from home → tmux session → terminal.**
+**Milestone: Full flow from home → tmux session → terminal.** (core flow ✅, window-level switching TODO)
 
-### Phase 3: Keyboard Toolbar + UX Polish
-- [ ] Custom `KeyboardToolbar` as `inputAccessoryView` on TerminalView
-  - Layout: `Ctrl Alt | Esc Tab | ↑ ↓ → ← | | / \ ~ - _ | ...`
-  - Each key sends correct escape sequence / control character
+### Phase 3: Keyboard Toolbar + UX Polish — IN PROGRESS
+- [x] Custom `KeyboardToolbar` — persistent toolbar with Ctrl/Alt modifiers, Esc, Tab, arrows, PgUp/PgDn, symbols
+  - Layout adapts based on keyboard visibility
+  - Sends correct ANSI escape sequences and control characters
+- [x] iPhone keyboard testing and layout
 - [ ] Terminal snapshot rendering for active session cards
 - [ ] `ActiveSessionCard` with live thumbnail preview
 - [ ] Background session persistence (`beginBackgroundTask`)
-- [ ] iPhone + iPad keyboard testing and layout
+- [ ] iPad layout optimization
 
-**Milestone: Comfortable daily-driver terminal experience.**
+**Milestone: Comfortable daily-driver terminal experience.** (keyboard ✅, polish TODO)
 
 ### Phase 4: Mosh Integration
 - [ ] Clone and build `blinksh/build-mosh` → produce `libmoshios.xcframework`
@@ -165,7 +164,9 @@ HomeView (root)
 ### Phase 5: Polish + Ship
 - [ ] SSH key file import via Files app (`UIDocumentPickerViewController`)
 - [ ] Tailscale SSH "none" auth support
-- [ ] Settings view (font size, color theme, default shell)
+- [x] Settings view — theme, font, font size, cursor mode/blink, scrollback
+- [x] Settings applied to SwiftTerm TerminalView (colors, font, cursor style, scrollback)
+- [x] Visible edit button on connection rows in main menu
 - [ ] iPad layout optimization (larger terminal, sidebar option)
 - [ ] App icon and launch screen
 - [ ] Error handling, edge cases, empty states

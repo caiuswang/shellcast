@@ -33,6 +33,19 @@ struct SettingsView: View {
                     }
                     .background(Color(white: 0.1))
                     .cornerRadius(12)
+
+                    // VOICE INPUT section
+                    Text("VOICE INPUT")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.gray)
+                        .padding(.horizontal, 4)
+
+                    VStack(spacing: 0) {
+                        whisperModelRow
+                    }
+                    .background(Color(white: 0.1))
+                    .cornerRadius(12)
                 }
                 .padding()
             }
@@ -203,6 +216,17 @@ struct SettingsView: View {
             }
             .background(Color(white: 0.2))
             .cornerRadius(8)
+        }
+    }
+
+    private var whisperModelRow: some View {
+        settingsRow(
+            icon: "mic",
+            title: "Speech Model"
+        ) {
+            Text("\(settings.whisperModel.displayName) · \(settings.whisperModel.sizeLabel)")
+                .font(.caption)
+                .foregroundStyle(.gray)
         }
     }
 

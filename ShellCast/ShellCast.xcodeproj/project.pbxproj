@@ -8,15 +8,22 @@
 
 /* Begin PBXBuildFile section */
 		077428F7CF8D6557B70C1C6A /* JetBrainsMonoNerdFont-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A7764FF4377D60000A6D5B61 /* JetBrainsMonoNerdFont-Regular.ttf */; };
+		0B6941701BCFCBA7DD665F6E /* normalizer.json in Resources */ = {isa = PBXBuildFile; fileRef = 934D46518265B5BF6A5DEDBF /* normalizer.json */; };
+		1728B69915976FB516D2F266 /* generation_config.json in Resources */ = {isa = PBXBuildFile; fileRef = 32382F16DCDC62F522C6AEAF /* generation_config.json */; };
 		2166959FB8276DDF0B2D0415 /* ConnectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D941806241DCF9F5A72299C8 /* ConnectionType.swift */; };
 		2F80963338411CA796CE07D4 /* ShellCastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ED85687617B1A5C79A9437 /* ShellCastApp.swift */; };
 		2FA6DDCBC8ED256F995110F1 /* ActiveSessionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */; };
+		3D2DA54CB589249F06E03E24 /* special_tokens_map.json in Resources */ = {isa = PBXBuildFile; fileRef = 61579C0F481E05873DEEB3A2 /* special_tokens_map.json */; };
+		3EDF88602F7E0DE722E8174D /* vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = 76DF3B39727ABA9F4C4327A3 /* vocab.json */; };
 		3F092D55A30EA060E5CC9281 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6726B66D9CC86DDD8EA70798 /* KeychainService.swift */; };
 		41CE7E2EBD800643D19F03EE /* TransportSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD78C13923FD491B76957AD7 /* TransportSession.swift */; };
+		5149F292471846A0B2B70560 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 90386C1F71AF752095B7FB33 /* WhisperKit */; };
+		54330C917B154E3D36EEF18D /* tokenizer.json in Resources */ = {isa = PBXBuildFile; fileRef = FA207C1E249CDFC75F5AAB75 /* tokenizer.json */; };
 		67E85238EDBA27838AA7DF29 /* JetBrainsMonoNerdFontMono-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */; };
 		7563E1D7A8085874F68DA607 /* AuthMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = D886DD705902431727A8D5CE /* AuthMethod.swift */; };
 		7CF08706B830298A77DFE525 /* Citadel in Frameworks */ = {isa = PBXBuildFile; productRef = 3688871340D57647A29D2743 /* Citadel */; };
 		82118C48FF254F1FD174CF61 /* EditConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D70BAEA3CD12FEADCFA387B /* EditConnectionView.swift */; };
+		95A11B7D19067799A640C7C4 /* tokenizer_config.json in Resources */ = {isa = PBXBuildFile; fileRef = D5124CDBF147AA4F8371D642 /* tokenizer_config.json */; };
 		977FC8F659DBF5F4FBD5F883 /* TerminalBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88ACE22C2518FC93E029EE41 /* TerminalBridge.swift */; };
 		97A5F4A101629D6161484D69 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472560D9CFD337796D28D1D3 /* HomeView.swift */; };
 		9BD757064C4FFB8E27A55496 /* TmuxSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */; };
@@ -24,14 +31,19 @@
 		A9C02678D8863EC499917960 /* KeyboardToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2EA76447CCB1F4716C33090 /* KeyboardToolbar.swift */; };
 		AC7233A415BF3267D4EA4F06 /* TimeFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */; };
 		B454F67039C8678AC55B49F8 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = BAF34F9CC9AA10B8DB178F33 /* SwiftTerm */; };
+		B8F0A8D4D5C8C4745A87846F /* WhisperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FFFC26F812935ACB1AE1A9 /* WhisperService.swift */; };
 		B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */; };
-		BB4A2A512F79445600A540E7 /* TerminalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB4A2A502F79445600A540E7 /* TerminalSettings.swift */; };
-		BB4A2A532F79447D00A540E7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB4A2A522F79447D00A540E7 /* SettingsView.swift */; };
+		BFB95968FB306F0A8F0DABE6 /* TerminalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4800BD4740F6F26923B912F2 /* TerminalSettings.swift */; };
 		CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */; };
 		D1697AFEF68A9BC9D6B098CE /* ConnectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */; };
 		D8E0106A70EA257C8160A171 /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */; };
+		E16D2496E935F03D5D4DE84E /* config.json in Resources */ = {isa = PBXBuildFile; fileRef = B3BD57C2918A942D29425698 /* config.json */; };
+		E667F6D8BA692FFA54926FD5 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A6BDCA94266B0457F457D2 /* SettingsView.swift */; };
+		E7BF50AE512C431EBC34DABF /* merges.txt in Resources */ = {isa = PBXBuildFile; fileRef = 25786352B6CFFDAC177133C9 /* merges.txt */; };
 		EADE230217D5A26870FD16C4 /* Connection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B824D527DCAF8B7F84AA2C /* Connection.swift */; };
 		EBDEDB9BE8D7E51EC0B98FEF /* SSHService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A413C952647072F83FE1F3 /* SSHService.swift */; };
+		ECB884667B094C35447F9977 /* added_tokens.json in Resources */ = {isa = PBXBuildFile; fileRef = 1CF9CE4693072E56B9DFA92B /* added_tokens.json */; };
+		F1E997558F10B1D67AEC348E /* WhisperModels in Resources */ = {isa = PBXBuildFile; fileRef = F992B3B0F836D3D8CDF50AB8 /* WhisperModels */; };
 		FF1B49821455A2ABFF7F6468 /* TmuxParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037CB0AA879D4E4E6496F4D7 /* TmuxParser.swift */; };
 /* End PBXBuildFile section */
 
@@ -48,31 +60,42 @@
 /* Begin PBXFileReference section */
 		037CB0AA879D4E4E6496F4D7 /* TmuxParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxParser.swift; sourceTree = "<group>"; };
 		18ED85687617B1A5C79A9437 /* ShellCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellCastApp.swift; sourceTree = "<group>"; };
+		1CF9CE4693072E56B9DFA92B /* added_tokens.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = added_tokens.json; sourceTree = "<group>"; };
 		23317A00D128D5D060821218 /* TerminalContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalContainerView.swift; sourceTree = "<group>"; };
+		23FFFC26F812935ACB1AE1A9 /* WhisperService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperService.swift; sourceTree = "<group>"; };
+		25786352B6CFFDAC177133C9 /* merges.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = merges.txt; sourceTree = "<group>"; };
 		2D70BAEA3CD12FEADCFA387B /* EditConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditConnectionView.swift; sourceTree = "<group>"; };
+		32382F16DCDC62F522C6AEAF /* generation_config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = generation_config.json; sourceTree = "<group>"; };
 		35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxBrowserView.swift; sourceTree = "<group>"; };
 		36B824D527DCAF8B7F84AA2C /* Connection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Connection.swift; sourceTree = "<group>"; };
 		472560D9CFD337796D28D1D3 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		4800BD4740F6F26923B912F2 /* TerminalSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSettings.swift; sourceTree = "<group>"; };
 		4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormatting.swift; sourceTree = "<group>"; };
+		61579C0F481E05873DEEB3A2 /* special_tokens_map.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = special_tokens_map.json; sourceTree = "<group>"; };
 		6726B66D9CC86DDD8EA70798 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		76DF3B39727ABA9F4C4327A3 /* vocab.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = vocab.json; sourceTree = "<group>"; };
 		7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
 		86A413C952647072F83FE1F3 /* SSHService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHService.swift; sourceTree = "<group>"; };
 		88ACE22C2518FC93E029EE41 /* TerminalBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalBridge.swift; sourceTree = "<group>"; };
 		929BB1504B1393CB658133E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		934D46518265B5BF6A5DEDBF /* normalizer.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = normalizer.json; sourceTree = "<group>"; };
 		9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFontMono-Light.ttf"; sourceTree = "<group>"; };
 		A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCard.swift; sourceTree = "<group>"; };
 		A7764FF4377D60000A6D5B61 /* JetBrainsMonoNerdFont-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFont-Regular.ttf"; sourceTree = "<group>"; };
 		AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSession.swift; sourceTree = "<group>"; };
 		AA4F2160E25985C381E065CE /* ShellCast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShellCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD78C13923FD491B76957AD7 /* TransportSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportSession.swift; sourceTree = "<group>"; };
+		B3BD57C2918A942D29425698 /* config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = config.json; sourceTree = "<group>"; };
 		B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionRow.swift; sourceTree = "<group>"; };
-		BB4A2A502F79445600A540E7 /* TerminalSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSettings.swift; sourceTree = "<group>"; };
-		BB4A2A522F79447D00A540E7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		C2A6BDCA94266B0457F457D2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		D5124CDBF147AA4F8371D642 /* tokenizer_config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokenizer_config.json; sourceTree = "<group>"; };
 		D886DD705902431727A8D5CE /* AuthMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethod.swift; sourceTree = "<group>"; };
 		D941806241DCF9F5A72299C8 /* ConnectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionType.swift; sourceTree = "<group>"; };
 		E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecord.swift; sourceTree = "<group>"; };
 		E2EA76447CCB1F4716C33090 /* KeyboardToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardToolbar.swift; sourceTree = "<group>"; };
 		F844CA2ECE9A070493D67508 /* ShellCastTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ShellCastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F992B3B0F836D3D8CDF50AB8 /* WhisperModels */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WhisperModels; path = ShellCast/Resources/WhisperModels; sourceTree = SOURCE_ROOT; };
+		FA207C1E249CDFC75F5AAB75 /* tokenizer.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokenizer.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +105,7 @@
 			files = (
 				B454F67039C8678AC55B49F8 /* SwiftTerm in Frameworks */,
 				7CF08706B830298A77DFE525 /* Citadel in Frameworks */,
+				5149F292471846A0B2B70560 /* WhisperKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,10 +129,19 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		280DDBB16454508F533AFAFD /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				C2A6BDCA94266B0457F457D2 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		40137F718BE3651DFD330CFB /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				BFADC85404EDF73F02446E9D /* Fonts */,
+				7ED1B78EE5F4B0AA5F44CCD9 /* WhisperModels */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -120,7 +153,7 @@
 				36B824D527DCAF8B7F84AA2C /* Connection.swift */,
 				D941806241DCF9F5A72299C8 /* ConnectionType.swift */,
 				E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */,
-				BB4A2A502F79445600A540E7 /* TerminalSettings.swift */,
+				4800BD4740F6F26923B912F2 /* TerminalSettings.swift */,
 				AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */,
 			);
 			path = Models;
@@ -150,6 +183,14 @@
 			path = ShellCastTests;
 			sourceTree = "<group>";
 		};
+		7ED1B78EE5F4B0AA5F44CCD9 /* WhisperModels */ = {
+			isa = PBXGroup;
+			children = (
+				C9849168FB0CEC067FE7EBE4 /* openai_whisper-base */,
+			);
+			path = WhisperModels;
+			sourceTree = "<group>";
+		};
 		908499341304C461901FD57B /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -158,6 +199,7 @@
 				86A413C952647072F83FE1F3 /* SSHService.swift */,
 				037CB0AA879D4E4E6496F4D7 /* TmuxParser.swift */,
 				AD78C13923FD491B76957AD7 /* TransportSession.swift */,
+				23FFFC26F812935ACB1AE1A9 /* WhisperService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -165,18 +207,11 @@
 		A6426A17DBDA064AC9142253 = {
 			isa = PBXGroup;
 			children = (
+				F992B3B0F836D3D8CDF50AB8 /* WhisperModels */,
 				DC51846B66FDE36A491D73B6 /* ShellCast */,
 				6CB46C42112EF084E206405B /* ShellCastTests */,
 				21B25A86D6C9101E8E95FFF9 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		BB4A2A5F2F79500000A540E7 /* Settings */ = {
-			isa = PBXGroup;
-			children = (
-				BB4A2A522F79447D00A540E7 /* SettingsView.swift */,
-			);
-			path = Settings;
 			sourceTree = "<group>";
 		};
 		AC1CCE346402C5E2F7BD1129 /* Views */ = {
@@ -184,7 +219,7 @@
 			children = (
 				49567D0123958379FA4D7A7D /* Connection */,
 				B4192286BC2E4CB5E89B9324 /* Main */,
-				BB4A2A5F2F79500000A540E7 /* Settings */,
+				280DDBB16454508F533AFAFD /* Settings */,
 				659945E7603587C82B96429D /* Terminal */,
 				10C6E78D1FC2627FAFABAC12 /* Tmux */,
 			);
@@ -208,6 +243,22 @@
 				9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */,
 			);
 			path = Fonts;
+			sourceTree = "<group>";
+		};
+		C9849168FB0CEC067FE7EBE4 /* openai_whisper-base */ = {
+			isa = PBXGroup;
+			children = (
+				1CF9CE4693072E56B9DFA92B /* added_tokens.json */,
+				B3BD57C2918A942D29425698 /* config.json */,
+				32382F16DCDC62F522C6AEAF /* generation_config.json */,
+				25786352B6CFFDAC177133C9 /* merges.txt */,
+				934D46518265B5BF6A5DEDBF /* normalizer.json */,
+				61579C0F481E05873DEEB3A2 /* special_tokens_map.json */,
+				D5124CDBF147AA4F8371D642 /* tokenizer_config.json */,
+				FA207C1E249CDFC75F5AAB75 /* tokenizer.json */,
+				76DF3B39727ABA9F4C4327A3 /* vocab.json */,
+			);
+			path = "openai_whisper-base";
 			sourceTree = "<group>";
 		};
 		CDE8B1A9EF0A6ED1FAD6EB26 /* Utilities */ = {
@@ -260,6 +311,7 @@
 			packageProductDependencies = (
 				BAF34F9CC9AA10B8DB178F33 /* SwiftTerm */,
 				3688871340D57647A29D2743 /* Citadel */,
+				90386C1F71AF752095B7FB33 /* WhisperKit */,
 			);
 			productName = ShellCast;
 			productReference = AA4F2160E25985C381E065CE /* ShellCast.app */;
@@ -304,6 +356,7 @@
 			packageReferences = (
 				A3690F720B254AAC6FA8AAAF /* XCRemoteSwiftPackageReference "Citadel" */,
 				1628F3AE06BA0B54E9513EC4 /* XCRemoteSwiftPackageReference "SwiftTerm" */,
+				04FF4DF80F006AA4E7E35EA6 /* XCRemoteSwiftPackageReference "WhisperKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 21B25A86D6C9101E8E95FFF9 /* Products */;
@@ -323,6 +376,16 @@
 			files = (
 				077428F7CF8D6557B70C1C6A /* JetBrainsMonoNerdFont-Regular.ttf in Resources */,
 				67E85238EDBA27838AA7DF29 /* JetBrainsMonoNerdFontMono-Light.ttf in Resources */,
+				F1E997558F10B1D67AEC348E /* WhisperModels in Resources */,
+				ECB884667B094C35447F9977 /* added_tokens.json in Resources */,
+				E16D2496E935F03D5D4DE84E /* config.json in Resources */,
+				1728B69915976FB516D2F266 /* generation_config.json in Resources */,
+				E7BF50AE512C431EBC34DABF /* merges.txt in Resources */,
+				0B6941701BCFCBA7DD665F6E /* normalizer.json in Resources */,
+				3D2DA54CB589249F06E03E24 /* special_tokens_map.json in Resources */,
+				54330C917B154E3D36EEF18D /* tokenizer.json in Resources */,
+				95A11B7D19067799A640C7C4 /* tokenizer_config.json in Resources */,
+				3EDF88602F7E0DE722E8174D /* vocab.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -350,18 +413,19 @@
 				97A5F4A101629D6161484D69 /* HomeView.swift in Sources */,
 				A9C02678D8863EC499917960 /* KeyboardToolbar.swift in Sources */,
 				3F092D55A30EA060E5CC9281 /* KeychainService.swift in Sources */,
-				BB4A2A512F79445600A540E7 /* TerminalSettings.swift in Sources */,
 				EBDEDB9BE8D7E51EC0B98FEF /* SSHService.swift in Sources */,
 				B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */,
+				E667F6D8BA692FFA54926FD5 /* SettingsView.swift in Sources */,
 				2F80963338411CA796CE07D4 /* ShellCastApp.swift in Sources */,
 				977FC8F659DBF5F4FBD5F883 /* TerminalBridge.swift in Sources */,
 				9C1817F8A540EAB7E91E2F49 /* TerminalContainerView.swift in Sources */,
+				BFB95968FB306F0A8F0DABE6 /* TerminalSettings.swift in Sources */,
 				AC7233A415BF3267D4EA4F06 /* TimeFormatting.swift in Sources */,
 				CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */,
 				FF1B49821455A2ABFF7F6468 /* TmuxParser.swift in Sources */,
 				9BD757064C4FFB8E27A55496 /* TmuxSession.swift in Sources */,
 				41CE7E2EBD800643D19F03EE /* TransportSession.swift in Sources */,
-				BB4A2A532F79447D00A540E7 /* SettingsView.swift in Sources */,
+				B8F0A8D4D5C8C4745A87846F /* WhisperService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -481,6 +545,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ShellCast/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ShellCast needs local network access to connect to your servers via SSH.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "ShellCast uses the microphone for voice input to the terminal.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -564,6 +629,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ShellCast/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ShellCast needs local network access to connect to your servers via SSH.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "ShellCast uses the microphone for voice input to the terminal.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -614,6 +680,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		04FF4DF80F006AA4E7E35EA6 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.0;
+			};
+		};
 		1628F3AE06BA0B54E9513EC4 /* XCRemoteSwiftPackageReference "SwiftTerm" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/migueldeicaza/SwiftTerm";
@@ -637,6 +711,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A3690F720B254AAC6FA8AAAF /* XCRemoteSwiftPackageReference "Citadel" */;
 			productName = Citadel;
+		};
+		90386C1F71AF752095B7FB33 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04FF4DF80F006AA4E7E35EA6 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
 		};
 		BAF34F9CC9AA10B8DB178F33 /* SwiftTerm */ = {
 			isa = XCSwiftPackageProductDependency;

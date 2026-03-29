@@ -12,12 +12,21 @@ packages:
   Citadel:
     url: https://github.com/orlandos-nl/Citadel.git
     from: "0.7.0"
+  WhisperKit:
+    url: https://github.com/argmaxinc/WhisperKit.git
+    from: "0.9.0"
 
 targets:
   ShellCast:
     type: application
     platform: iOS
-    sources: [ShellCast]
+    sources:
+      - path: ShellCast
+        excludes:
+          - "Resources/WhisperModels/**/*.mlmodelc"
+      - path: ShellCast/Resources/WhisperModels
+        type: folder
+        buildPhase: resources
     info:
       path: ShellCast/Info.plist
       properties:
@@ -38,9 +47,11 @@ targets:
         CURRENT_PROJECT_VERSION: 1
         DEVELOPMENT_TEAM: ""
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: "ShellCast needs local network access to connect to your servers via SSH."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "ShellCast uses the microphone for voice input to the terminal."
     dependencies:
       - package: SwiftTerm
       - package: Citadel
+      - package: WhisperKit
 
   ShellCastTests:
     type: bundle.unit-test

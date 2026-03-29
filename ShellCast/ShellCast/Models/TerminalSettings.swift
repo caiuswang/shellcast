@@ -100,6 +100,33 @@ enum TerminalFont: String, CaseIterable {
     }
 }
 
+enum WhisperModel: String, CaseIterable {
+    case base = "openai_whisper-base"
+
+    var displayName: String {
+        switch self {
+        case .base: "Base"
+        }
+    }
+
+    var sizeLabel: String {
+        switch self {
+        case .base: "~140 MB"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .base: "Good balance of speed and accuracy"
+        }
+    }
+
+    /// Check if this model is bundled with the app
+    var isBundled: Bool {
+        Bundle.main.path(forResource: rawValue, ofType: nil, inDirectory: "WhisperModels") != nil
+    }
+}
+
 @Observable
 final class TerminalSettings {
     static let shared = TerminalSettings()
@@ -132,6 +159,10 @@ final class TerminalSettings {
         didSet { UserDefaults.standard.set(scrollbackSize.rawValue, forKey: "terminal_scrollback") }
     }
 
+    var whisperModel: WhisperModel {
+        didSet { UserDefaults.standard.set(whisperModel.rawValue, forKey: "whisper_model") }
+    }
+
     private init() {
         let ud = UserDefaults.standard
         self.theme = TerminalTheme(rawValue: ud.string(forKey: "terminal_theme") ?? "") ?? .default
@@ -141,5 +172,6 @@ final class TerminalSettings {
         self.cursorMode = CursorMode(rawValue: ud.string(forKey: "terminal_cursor_mode") ?? "") ?? .block
         self.cursorBlink = ud.object(forKey: "terminal_cursor_blink") == nil ? true : ud.bool(forKey: "terminal_cursor_blink")
         self.scrollbackSize = ScrollbackSize(rawValue: ud.integer(forKey: "terminal_scrollback")) ?? .k10
+        self.whisperModel = WhisperModel(rawValue: ud.string(forKey: "whisper_model") ?? "") ?? .base
     }
 }

@@ -18,10 +18,6 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>ShellCast uses the microphone for voice input to the terminal.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>ShellCast uses speech recognition to convert voice to terminal commands.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>JetBrainsMonoNerdFont-Regular.ttf</string>
