@@ -165,25 +165,17 @@ class TerminalViewController: UIViewController {
         // Wire up toolbar and bridge
         toolbar.terminalView = terminalView
         toolbar.onSend = { [weak self] bytes in
-            print("[Toolbar] onSend called, bytes=\(bytes), self=\(self != nil)")
             guard let self else { return }
             Task {
-                do {
-                    try await self.bridge.transport.send(Data(bytes))
-                    print("[Toolbar] send succeeded")
-                } catch {
-                    print("[Toolbar] send error: \(error)")
-                }
+                try? await self.bridge.transport.send(Data(bytes))
             }
         }
         bridge.terminalView = terminalView
         bridge.keyboardToolbar = toolbar
 
-        // Listen for keyboard show/hide to reposition toolbar
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)),
-                                               name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)),
-                                               name: UIResponder.keyboardWillHideNotification, object: nil)
+        // Listen for all keyboard frame changes (covers show, hide, and language switch)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillChangeFrame(_:)),
+                                               name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
     }
 
     private var cellSize: CGSize = .zero
@@ -213,41 +205,20 @@ class TerminalViewController: UIViewController {
         }
     }
 
-    @objc private func keyboardWillShow(_ notification: Notification) {
+    @objc private func keyboardWillChangeFrame(_ notification: Notification) {
         guard let kbFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
               let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
 
         if cellSize == .zero { computeCellSize() }
 
-        toolbar.applyLayout(keyboardVisible: true)
-
-        // Move toolbar to sit on top of keyboard
         let kbFrameInView = view.convert(kbFrame, from: nil)
-        let kbHeight = view.bounds.maxY - kbFrameInView.origin.y
+        let kbHeight = max(0, view.bounds.maxY - kbFrameInView.origin.y)
+        let keyboardVisible = kbHeight > 0
 
-        // toolbar.bottom = view.bottom - kbHeight
+        toolbar.applyLayout(keyboardVisible: keyboardVisible)
         toolbarBottomConstraint.constant = -kbHeight
 
-        // Terminal available height = above toolbar
         let availableHeight = view.bounds.height - kbHeight - 44
-
-        UIView.animate(withDuration: duration) {
-            self.view.layoutIfNeeded()
-        } completion: { _ in
-            self.resizeTerminal(availableHeight: availableHeight)
-        }
-    }
-
-    @objc private func keyboardWillHide(_ notification: Notification) {
-        print("[KB] keyboardWillHide called")
-        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
-
-        toolbar.applyLayout(keyboardVisible: false)
-
-        // Move toolbar back to bottom of screen
-        toolbarBottomConstraint.constant = 0
-
-        let availableHeight = view.bounds.height - 44
 
         UIView.animate(withDuration: duration) {
             self.view.layoutIfNeeded()
