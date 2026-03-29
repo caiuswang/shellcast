@@ -67,11 +67,13 @@ class TerminalKeyboardToolbar: UIInputView {
         stack.addArrangedSubview(makeButton("Tab", action: #selector(tapTab)))
         stack.addArrangedSubview(makeSeparator())
 
-        // Group 3: Arrow keys
+        // Group 3: Arrow keys + Page Up/Down
         stack.addArrangedSubview(makeButton("↑", action: #selector(tapUp)))
         stack.addArrangedSubview(makeButton("↓", action: #selector(tapDown)))
         stack.addArrangedSubview(makeButton("←", action: #selector(tapLeft)))
         stack.addArrangedSubview(makeButton("→", action: #selector(tapRight)))
+        stack.addArrangedSubview(makeButton("PgUp", action: #selector(tapPageUp)))
+        stack.addArrangedSubview(makeButton("PgDn", action: #selector(tapPageDown)))
         stack.addArrangedSubview(makeSeparator())
 
         // Group 4: Special characters
@@ -176,10 +178,12 @@ class TerminalKeyboardToolbar: UIInputView {
     @objc private func tapTab() { sendKey([0x09]) }
 
     // Arrow keys: send ANSI escape sequences
-    @objc private func tapUp()    { sendKey([0x1B, 0x5B, 0x41]) }  // ESC [ A
-    @objc private func tapDown()  { sendKey([0x1B, 0x5B, 0x42]) }  // ESC [ B
-    @objc private func tapRight() { sendKey([0x1B, 0x5B, 0x43]) }  // ESC [ C
-    @objc private func tapLeft()  { sendKey([0x1B, 0x5B, 0x44]) }  // ESC [ D
+    @objc private func tapUp()       { sendKey([0x1B, 0x5B, 0x41]) }  // ESC [ A
+    @objc private func tapDown()     { sendKey([0x1B, 0x5B, 0x42]) }  // ESC [ B
+    @objc private func tapRight()    { sendKey([0x1B, 0x5B, 0x43]) }  // ESC [ C
+    @objc private func tapLeft()     { sendKey([0x1B, 0x5B, 0x44]) }  // ESC [ D
+    @objc private func tapPageUp()   { sendKey([0x1B, 0x5B, 0x35, 0x7E]) }  // ESC [ 5 ~
+    @objc private func tapPageDown() { sendKey([0x1B, 0x5B, 0x36, 0x7E]) }  // ESC [ 6 ~
 
     // Special characters
     @objc private func tapPipe()       { sendChar("|") }

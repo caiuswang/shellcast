@@ -55,7 +55,7 @@ struct SwiftTermView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: TerminalViewController, context: Context) {}
 }
 
-/// Subclass TerminalView to prevent iOS auto-paste on tap.
+/// Subclass TerminalView — disables mouse reporting to prevent tap issues.
 class ShellCastTerminalView: TerminalView {
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -140,13 +140,50 @@ class TerminalViewController: UIViewController {
                                                name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 
+    private var cellSize: CGSize = .zero
+
+    private func computeCellSize() {
+        let terminal = terminalView.getTerminal()
+        let optimalFrame = terminalView.getOptimalFrameSize()
+        guard terminal.cols > 0 && terminal.rows > 0 else { return }
+        cellSize = CGSize(
+            width: optimalFrame.width / CGFloat(terminal.cols),
+            height: optimalFrame.height / CGFloat(terminal.rows)
+        )
+    }
+
+    private func resizeTerminal(availableHeight: CGFloat) {
+        guard cellSize.width > 0 && cellSize.height > 0 else { return }
+
+        let newCols = max(1, Int(view.bounds.width / cellSize.width))
+        let newRows = max(1, Int(availableHeight / cellSize.height))
+        let terminal = terminalView.getTerminal()
+
+        if newCols != terminal.cols || newRows != terminal.rows {
+            terminalView.resize(cols: newCols, rows: newRows)
+            Task {
+                try? await bridge.transport.resize(cols: newCols, rows: newRows)
+            }
+        }
+    }
+
     @objc private func keyboardWillShow(_ notification: Notification) {
-        guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+        guard let kbFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
               let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
 
-        bottomConstraint.constant = -frame.height
+        if cellSize == .zero { computeCellSize() }
+
+        // Convert keyboard frame from screen coordinates to view coordinates
+        let kbFrameInView = view.convert(kbFrame, from: nil)
+        let overlap = max(0, view.bounds.maxY - kbFrameInView.origin.y)
+
+        bottomConstraint.constant = -overlap
+        let availableHeight = view.bounds.height - overlap
+
         UIView.animate(withDuration: duration) {
             self.view.layoutIfNeeded()
+        } completion: { _ in
+            self.resizeTerminal(availableHeight: availableHeight)
         }
     }
 
@@ -154,13 +191,19 @@ class TerminalViewController: UIViewController {
         guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
 
         bottomConstraint.constant = 0
+
         UIView.animate(withDuration: duration) {
             self.view.layoutIfNeeded()
+        } completion: { _ in
+            self.resizeTerminal(availableHeight: self.view.bounds.height)
         }
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+
+        // Compute cell dimensions before keyboard appears
+        computeCellSize()
 
         terminalView.reloadInputViews()
         terminalView.becomeFirstResponder()
