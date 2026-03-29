@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		077428F7CF8D6557B70C1C6A /* JetBrainsMonoNerdFont-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A7764FF4377D60000A6D5B61 /* JetBrainsMonoNerdFont-Regular.ttf */; };
 		2166959FB8276DDF0B2D0415 /* ConnectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D941806241DCF9F5A72299C8 /* ConnectionType.swift */; };
 		2F80963338411CA796CE07D4 /* ShellCastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ED85687617B1A5C79A9437 /* ShellCastApp.swift */; };
 		2FA6DDCBC8ED256F995110F1 /* ActiveSessionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */; };
 		3F092D55A30EA060E5CC9281 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6726B66D9CC86DDD8EA70798 /* KeychainService.swift */; };
 		41CE7E2EBD800643D19F03EE /* TransportSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD78C13923FD491B76957AD7 /* TransportSession.swift */; };
+		67E85238EDBA27838AA7DF29 /* JetBrainsMonoNerdFontMono-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */; };
 		7563E1D7A8085874F68DA607 /* AuthMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = D886DD705902431727A8D5CE /* AuthMethod.swift */; };
 		7CF08706B830298A77DFE525 /* Citadel in Frameworks */ = {isa = PBXBuildFile; productRef = 3688871340D57647A29D2743 /* Citadel */; };
 		82118C48FF254F1FD174CF61 /* EditConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D70BAEA3CD12FEADCFA387B /* EditConnectionView.swift */; };
@@ -54,9 +56,12 @@
 		7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
 		86A413C952647072F83FE1F3 /* SSHService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHService.swift; sourceTree = "<group>"; };
 		88ACE22C2518FC93E029EE41 /* TerminalBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalBridge.swift; sourceTree = "<group>"; };
+		929BB1504B1393CB658133E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFontMono-Light.ttf"; sourceTree = "<group>"; };
 		A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCard.swift; sourceTree = "<group>"; };
+		A7764FF4377D60000A6D5B61 /* JetBrainsMonoNerdFont-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFont-Regular.ttf"; sourceTree = "<group>"; };
 		AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSession.swift; sourceTree = "<group>"; };
-		AA4F2160E25985C381E065CE /* ShellCast.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ShellCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA4F2160E25985C381E065CE /* ShellCast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShellCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD78C13923FD491B76957AD7 /* TransportSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportSession.swift; sourceTree = "<group>"; };
 		B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionRow.swift; sourceTree = "<group>"; };
 		D886DD705902431727A8D5CE /* AuthMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethod.swift; sourceTree = "<group>"; };
@@ -94,6 +99,14 @@
 				F844CA2ECE9A070493D67508 /* ShellCastTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		40137F718BE3651DFD330CFB /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				BFADC85404EDF73F02446E9D /* Fonts */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		4143FC19FF587B2C248EAFB0 /* Models */ = {
@@ -174,6 +187,15 @@
 			path = Main;
 			sourceTree = "<group>";
 		};
+		BFADC85404EDF73F02446E9D /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				A7764FF4377D60000A6D5B61 /* JetBrainsMonoNerdFont-Regular.ttf */,
+				9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
 		CDE8B1A9EF0A6ED1FAD6EB26 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
@@ -185,8 +207,10 @@
 		DC51846B66FDE36A491D73B6 /* ShellCast */ = {
 			isa = PBXGroup;
 			children = (
+				929BB1504B1393CB658133E9 /* Info.plist */,
 				18ED85687617B1A5C79A9437 /* ShellCastApp.swift */,
 				4143FC19FF587B2C248EAFB0 /* Models */,
+				40137F718BE3651DFD330CFB /* Resources */,
 				908499341304C461901FD57B /* Services */,
 				F4754A5AE4A6C96397ED20C0 /* Terminal */,
 				CDE8B1A9EF0A6ED1FAD6EB26 /* Utilities */,
@@ -211,6 +235,7 @@
 			buildConfigurationList = BDDE505BEC7EB7240E34176E /* Build configuration list for PBXNativeTarget "ShellCast" */;
 			buildPhases = (
 				30F4CC6AE0C17BF57FE1785B /* Sources */,
+				E496A617ED3AE9C20BF2BE83 /* Resources */,
 				1BCB6796CEA3AF0DD949F3AE /* Frameworks */,
 			);
 			buildRules = (
@@ -252,11 +277,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
-				TargetAttributes = {
-					2DB9E1E934CFCED0689F5211 = {
-						DevelopmentTeam = "";
-					};
-				};
 			};
 			buildConfigurationList = 8D26705189B5FE5C872C9531 /* Build configuration list for PBXProject "ShellCast" */;
 			developmentRegion = en;
@@ -281,6 +301,18 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E496A617ED3AE9C20BF2BE83 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				077428F7CF8D6557B70C1C6A /* JetBrainsMonoNerdFont-Regular.ttf in Resources */,
+				67E85238EDBA27838AA7DF29 /* JetBrainsMonoNerdFontMono-Light.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0E956EBA9E06159E2F4E7AEE /* Sources */ = {
@@ -429,8 +461,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = RR3B8A7J66;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShellCast/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ShellCast needs local network access to connect to your servers via SSH.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -511,8 +544,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = RR3B8A7J66;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShellCast/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ShellCast needs local network access to connect to your servers via SSH.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

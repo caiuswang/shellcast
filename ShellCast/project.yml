@@ -18,6 +18,12 @@ targets:
     type: application
     platform: iOS
     sources: [ShellCast]
+    info:
+      path: ShellCast/Info.plist
+      properties:
+        UIAppFonts:
+          - JetBrainsMonoNerdFont-Regular.ttf
+          - JetBrainsMonoNerdFontMono-Light.ttf
     settings:
       base:
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true

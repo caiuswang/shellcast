@@ -84,9 +84,17 @@ class TerminalViewController: UIViewController {
         terminalView.nativeBackgroundColor = .black
         terminalView.nativeForegroundColor = UIColor(red: 0.9, green: 0.95, blue: 0.9, alpha: 1.0)
         terminalView.caretColor = .green
-        terminalView.font = UIFont.monospacedSystemFont(ofSize: 13, weight: .regular)
+        // Use Nerd Font Mono for icon + monospace rendering
+        if let nerdFont = UIFont(name: "JetBrainsMonoNFM-Light", size: 13) {
+            terminalView.font = nerdFont
+        } else if let nerdFont = UIFont(name: "JetBrainsMonoNF-Regular", size: 13) {
+            terminalView.font = nerdFont
+        } else {
+            terminalView.font = UIFont.monospacedSystemFont(ofSize: 13, weight: .regular)
+        }
         terminalView.keyboardAppearance = .dark
         terminalView.optionAsMetaKey = true
+        terminalView.customBlockGlyphs = false
         terminalView.autocorrectionType = .no
         terminalView.autocapitalizationType = .none
         terminalView.spellCheckingType = .no
