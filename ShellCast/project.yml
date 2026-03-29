@@ -31,6 +31,7 @@ targets:
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: 1
         DEVELOPMENT_TEAM: ""
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: "ShellCast needs local network access to connect to your servers via SSH."
     dependencies:
       - package: SwiftTerm
       - package: Citadel

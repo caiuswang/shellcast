@@ -56,7 +56,7 @@ final class SSHSession: TransportSession {
             self.client = client
             isConnected = true
         } catch {
-            throw SSHError.connectionFailed(error.localizedDescription)
+            throw SSHError.connectionFailed("\(type(of: error)): \(error)")
         }
     }
 
@@ -94,10 +94,11 @@ final class SSHSession: TransportSession {
                     SSHChannelRequestEvent.PseudoTerminalRequest(
                         wantReply: true,
                         term: "xterm-256color",
-                        terminalCharacterWidth: UInt32(cols),
-                        terminalRowHeight: UInt32(rows),
+                        terminalCharacterWidth: cols,
+                        terminalRowHeight: rows,
                         terminalPixelWidth: 0,
-                        terminalPixelHeight: 0
+                        terminalPixelHeight: 0,
+                        terminalModes: SSHTerminalModes([:])
                     )
                 ) { inbound, outbound in
                     // Store the writer for sending input and resize
