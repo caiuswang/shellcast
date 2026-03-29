@@ -11,6 +11,7 @@
 		0B6941701BCFCBA7DD665F6E /* normalizer.json in Resources */ = {isa = PBXBuildFile; fileRef = 934D46518265B5BF6A5DEDBF /* normalizer.json */; };
 		1728B69915976FB516D2F266 /* generation_config.json in Resources */ = {isa = PBXBuildFile; fileRef = 32382F16DCDC62F522C6AEAF /* generation_config.json */; };
 		2166959FB8276DDF0B2D0415 /* ConnectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D941806241DCF9F5A72299C8 /* ConnectionType.swift */; };
+		2A564E6C7C7292E1311CF8C6 /* AppleSpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0361E85DF9B8851B5F4B10 /* AppleSpeechService.swift */; };
 		2F80963338411CA796CE07D4 /* ShellCastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ED85687617B1A5C79A9437 /* ShellCastApp.swift */; };
 		2FA6DDCBC8ED256F995110F1 /* ActiveSessionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */; };
 		3D2DA54CB589249F06E03E24 /* special_tokens_map.json in Resources */ = {isa = PBXBuildFile; fileRef = 61579C0F481E05873DEEB3A2 /* special_tokens_map.json */; };
@@ -96,6 +97,7 @@
 		F844CA2ECE9A070493D67508 /* ShellCastTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ShellCastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F992B3B0F836D3D8CDF50AB8 /* WhisperModels */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WhisperModels; path = ShellCast/Resources/WhisperModels; sourceTree = SOURCE_ROOT; };
 		FA207C1E249CDFC75F5AAB75 /* tokenizer.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokenizer.json; sourceTree = "<group>"; };
+		FC0361E85DF9B8851B5F4B10 /* AppleSpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSpeechService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -194,6 +196,7 @@
 		908499341304C461901FD57B /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				FC0361E85DF9B8851B5F4B10 /* AppleSpeechService.swift */,
 				7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */,
 				6726B66D9CC86DDD8EA70798 /* KeychainService.swift */,
 				86A413C952647072F83FE1F3 /* SSHService.swift */,
@@ -404,6 +407,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2FA6DDCBC8ED256F995110F1 /* ActiveSessionCard.swift in Sources */,
+				2A564E6C7C7292E1311CF8C6 /* AppleSpeechService.swift in Sources */,
 				7563E1D7A8085874F68DA607 /* AuthMethod.swift in Sources */,
 				EADE230217D5A26870FD16C4 /* Connection.swift in Sources */,
 				D8E0106A70EA257C8160A171 /* ConnectionManager.swift in Sources */,
@@ -546,6 +550,7 @@
 				INFOPLIST_FILE = ShellCast/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ShellCast needs local network access to connect to your servers via SSH.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "ShellCast uses the microphone for voice input to the terminal.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "ShellCast uses speech recognition to convert voice to terminal commands.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -630,6 +635,7 @@
 				INFOPLIST_FILE = ShellCast/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ShellCast needs local network access to connect to your servers via SSH.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "ShellCast uses the microphone for voice input to the terminal.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "ShellCast uses speech recognition to convert voice to terminal commands.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

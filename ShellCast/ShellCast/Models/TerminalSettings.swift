@@ -100,6 +100,25 @@ enum TerminalFont: String, CaseIterable {
     }
 }
 
+enum SpeechEngine: String, CaseIterable {
+    case apple = "apple"
+    case whisper = "whisper"
+
+    var displayName: String {
+        switch self {
+        case .apple: "Apple Speech"
+        case .whisper: "WhisperKit"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .apple: "Built-in, requires network"
+        case .whisper: "Local AI model, fully offline"
+        }
+    }
+}
+
 enum WhisperModel: String, CaseIterable {
     case base = "openai_whisper-base"
 
@@ -159,6 +178,10 @@ final class TerminalSettings {
         didSet { UserDefaults.standard.set(scrollbackSize.rawValue, forKey: "terminal_scrollback") }
     }
 
+    var speechEngine: SpeechEngine {
+        didSet { UserDefaults.standard.set(speechEngine.rawValue, forKey: "speech_engine") }
+    }
+
     var whisperModel: WhisperModel {
         didSet { UserDefaults.standard.set(whisperModel.rawValue, forKey: "whisper_model") }
     }
@@ -172,6 +195,7 @@ final class TerminalSettings {
         self.cursorMode = CursorMode(rawValue: ud.string(forKey: "terminal_cursor_mode") ?? "") ?? .block
         self.cursorBlink = ud.object(forKey: "terminal_cursor_blink") == nil ? true : ud.bool(forKey: "terminal_cursor_blink")
         self.scrollbackSize = ScrollbackSize(rawValue: ud.integer(forKey: "terminal_scrollback")) ?? .k10
+        self.speechEngine = SpeechEngine(rawValue: ud.string(forKey: "speech_engine") ?? "") ?? .apple
         self.whisperModel = WhisperModel(rawValue: ud.string(forKey: "whisper_model") ?? "") ?? .base
     }
 }

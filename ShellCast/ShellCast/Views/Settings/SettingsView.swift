@@ -42,6 +42,8 @@ struct SettingsView: View {
                         .padding(.horizontal, 4)
 
                     VStack(spacing: 0) {
+                        speechEngineRow
+                        divider
                         whisperModelRow
                     }
                     .background(Color(white: 0.1))
@@ -219,15 +221,42 @@ struct SettingsView: View {
         }
     }
 
+    private var speechEngineRow: some View {
+        settingsRow(
+            icon: "waveform",
+            title: "Engine"
+        ) {
+            HStack(spacing: 2) {
+                ForEach(SpeechEngine.allCases, id: \.self) { engine in
+                    Button {
+                        settings.speechEngine = engine
+                    } label: {
+                        Text(engine.displayName)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundStyle(settings.speechEngine == engine ? .white : .gray)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 8)
+                            .background(settings.speechEngine == engine ? Color(white: 0.3) : Color.clear)
+                            .cornerRadius(6)
+                    }
+                }
+            }
+            .background(Color(white: 0.2))
+            .cornerRadius(8)
+        }
+    }
+
     private var whisperModelRow: some View {
         settingsRow(
             icon: "mic",
-            title: "Speech Model"
+            title: "Model"
         ) {
             Text("\(settings.whisperModel.displayName) · \(settings.whisperModel.sizeLabel)")
                 .font(.caption)
                 .foregroundStyle(.gray)
         }
+        .opacity(settings.speechEngine == .whisper ? 1 : 0.4)
     }
 
     // MARK: - Helpers

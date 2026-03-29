@@ -346,7 +346,7 @@ class TerminalKeyboardToolbar: UIView {
         }
     }
 
-    // MARK: - Voice Input (WhisperKit)
+    // MARK: - Voice Input
 
     @objc private func tapMic() {
         if isListening {
@@ -366,28 +366,30 @@ class TerminalKeyboardToolbar: UIView {
     }
 
     private func beginRecording() {
-        let whisper = WhisperService.shared
+        let engine = TerminalSettings.shared.speechEngine
 
-        // Load model if needed
-        if !whisper.isModelLoaded {
-            showPreview(text: "Preparing model...")
-            whisper.onStatusUpdate = { [weak self] status in
-                self?.previewTextField.text = status
-            }
-            Task { @MainActor in
-                do {
-                    try await whisper.loadModel()
-                    whisper.onStatusUpdate = nil
-                    self.doStartRecording()
-                } catch {
-                    whisper.onStatusUpdate = nil
-                    self.showPreview(text: "Load failed: \(error.localizedDescription)")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        self.hidePreview()
+        if engine == .whisper {
+            let whisper = WhisperService.shared
+            if !whisper.isModelLoaded {
+                showPreview(text: "Loading model...")
+                whisper.onStatusUpdate = { [weak self] status in
+                    self?.previewTextField.text = status
+                }
+                Task { @MainActor in
+                    do {
+                        try await whisper.loadModel()
+                        whisper.onStatusUpdate = nil
+                        self.doStartRecording()
+                    } catch {
+                        whisper.onStatusUpdate = nil
+                        self.showPreview(text: "Load failed: \(error.localizedDescription)")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            self.hidePreview()
+                        }
                     }
                 }
+                return
             }
-            return
         }
 
         doStartRecording()
@@ -395,11 +397,16 @@ class TerminalKeyboardToolbar: UIView {
 
     private func doStartRecording() {
         do {
-            try WhisperService.shared.startRecording()
+            let engine = TerminalSettings.shared.speechEngine
+            if engine == .whisper {
+                try WhisperService.shared.startRecording()
+            } else {
+                try AppleSpeechService.shared.startRecording()
+            }
             isListening = true
             micButton.tintColor = .red
             micButton.backgroundColor = UIColor(red: 0.4, green: 0.15, blue: 0.15, alpha: 1.0)
-            showPreview(text: "Listening... tap mic to stop")
+            showPreview(text: "Listening...")
         } catch {
             hidePreview()
         }
@@ -412,15 +419,26 @@ class TerminalKeyboardToolbar: UIView {
         micButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
         showPreview(text: "Transcribing...")
 
+        let engine = TerminalSettings.shared.speechEngine
         Task { @MainActor in
-            let text = await WhisperService.shared.stopAndTranscribe()
+            let text: String
+            if engine == .whisper {
+                text = await WhisperService.shared.stopAndTranscribe()
+            } else {
+                text = await AppleSpeechService.shared.stopAndTranscribe()
+            }
             self.previewTextField.text = text.isEmpty ? "(no speech detected)" : text
         }
     }
 
     private func stopListening() {
         guard isListening else { return }
-        WhisperService.shared.cancelRecording()
+        let engine = TerminalSettings.shared.speechEngine
+        if engine == .whisper {
+            WhisperService.shared.cancelRecording()
+        } else {
+            AppleSpeechService.shared.cancelRecording()
+        }
         isListening = false
         micButton.tintColor = .white
         micButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)

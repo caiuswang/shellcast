@@ -48,6 +48,7 @@ targets:
         DEVELOPMENT_TEAM: ""
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: "ShellCast needs local network access to connect to your servers via SSH."
         INFOPLIST_KEY_NSMicrophoneUsageDescription: "ShellCast uses the microphone for voice input to the terminal."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "ShellCast uses speech recognition to convert voice to terminal commands."
     dependencies:
       - package: SwiftTerm
       - package: Citadel
