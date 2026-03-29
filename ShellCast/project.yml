@@ -1,0 +1,43 @@
+name: ShellCast
+options:
+  bundleIdPrefix: com.shellcast
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+
+packages:
+  SwiftTerm:
+    url: https://github.com/migueldeicaza/SwiftTerm
+    from: "1.2.0"
+  Citadel:
+    url: https://github.com/orlandos-nl/Citadel.git
+    from: "0.7.0"
+
+targets:
+  ShellCast:
+    type: application
+    platform: iOS
+    sources: [ShellCast]
+    settings:
+      base:
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: true
+        INFOPLIST_KEY_UILaunchScreen_Generation: true
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationAllButUpsideDown"
+        SWIFT_EMIT_LOC_STRINGS: true
+        GENERATE_INFOPLIST_FILE: true
+        PRODUCT_BUNDLE_IDENTIFIER: com.shellcast.app
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: 1
+        DEVELOPMENT_TEAM: ""
+    dependencies:
+      - package: SwiftTerm
+      - package: Citadel
+
+  ShellCastTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [ShellCastTests]
+    dependencies:
+      - target: ShellCast

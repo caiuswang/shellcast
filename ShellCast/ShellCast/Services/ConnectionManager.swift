@@ -1,0 +1,67 @@
+import Foundation
+import SwiftUI
+
+@Observable
+final class ConnectionManager {
+    var activeSessions: [ActiveSession] = []
+    var connectionError: String?
+    var isConnecting = false
+
+    struct ActiveSession: Identifiable {
+        let id = UUID()
+        let connection: Connection
+        let transport: SSHSession
+    }
+
+    func connect(_ connection: Connection) async throws -> SSHSession {
+        isConnecting = true
+        connectionError = nil
+        defer { isConnecting = false }
+
+        do {
+            let transport = try await connectSSH(connection)
+            let session = ActiveSession(connection: connection, transport: transport)
+            activeSessions.append(session)
+            connection.lastConnectedAt = Date()
+            return transport
+        } catch {
+            connectionError = error.localizedDescription
+            throw error
+        }
+    }
+
+    func disconnect(_ session: ActiveSession) async {
+        await session.transport.disconnect()
+        activeSessions.removeAll { $0.id == session.id }
+    }
+
+    private func connectSSH(_ connection: Connection) async throws -> SSHSession {
+        switch connection.authMethod {
+        case .password:
+            let password = KeychainService.getPassword(for: connection.id) ?? ""
+            return try await SSHService.connect(
+                host: connection.host,
+                port: connection.port,
+                username: connection.username,
+                password: password
+            )
+        case .keyFile:
+            // TODO: key-based auth in Phase 5
+            let password = KeychainService.getPassword(for: connection.id) ?? ""
+            return try await SSHService.connect(
+                host: connection.host,
+                port: connection.port,
+                username: connection.username,
+                password: password
+            )
+        case .tailscaleSSH:
+            // Tailscale SSH uses no password — auth is handled at the network layer
+            return try await SSHService.connect(
+                host: connection.host,
+                port: connection.port,
+                username: connection.username,
+                password: ""
+            )
+        }
+    }
+}

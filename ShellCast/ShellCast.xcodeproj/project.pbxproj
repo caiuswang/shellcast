@@ -1,0 +1,585 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2166959FB8276DDF0B2D0415 /* ConnectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D941806241DCF9F5A72299C8 /* ConnectionType.swift */; };
+		2F80963338411CA796CE07D4 /* ShellCastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ED85687617B1A5C79A9437 /* ShellCastApp.swift */; };
+		2FA6DDCBC8ED256F995110F1 /* ActiveSessionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */; };
+		3F092D55A30EA060E5CC9281 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6726B66D9CC86DDD8EA70798 /* KeychainService.swift */; };
+		41CE7E2EBD800643D19F03EE /* TransportSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD78C13923FD491B76957AD7 /* TransportSession.swift */; };
+		7563E1D7A8085874F68DA607 /* AuthMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = D886DD705902431727A8D5CE /* AuthMethod.swift */; };
+		7CF08706B830298A77DFE525 /* Citadel in Frameworks */ = {isa = PBXBuildFile; productRef = 3688871340D57647A29D2743 /* Citadel */; };
+		82118C48FF254F1FD174CF61 /* EditConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D70BAEA3CD12FEADCFA387B /* EditConnectionView.swift */; };
+		97A5F4A101629D6161484D69 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472560D9CFD337796D28D1D3 /* HomeView.swift */; };
+		9BD757064C4FFB8E27A55496 /* TmuxSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */; };
+		9C1817F8A540EAB7E91E2F49 /* TerminalContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23317A00D128D5D060821218 /* TerminalContainerView.swift */; };
+		A9C02678D8863EC499917960 /* KeyboardToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2EA76447CCB1F4716C33090 /* KeyboardToolbar.swift */; };
+		AC7233A415BF3267D4EA4F06 /* TimeFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */; };
+		B454F67039C8678AC55B49F8 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = BAF34F9CC9AA10B8DB178F33 /* SwiftTerm */; };
+		B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */; };
+		CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */; };
+		D1697AFEF68A9BC9D6B098CE /* ConnectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */; };
+		D8E0106A70EA257C8160A171 /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */; };
+		EADE230217D5A26870FD16C4 /* Connection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B824D527DCAF8B7F84AA2C /* Connection.swift */; };
+		EBDEDB9BE8D7E51EC0B98FEF /* SSHService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A413C952647072F83FE1F3 /* SSHService.swift */; };
+		FF1B49821455A2ABFF7F6468 /* TmuxParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037CB0AA879D4E4E6496F4D7 /* TmuxParser.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		ED58B6C1D99E93C842EEA6FA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 254D68674B0B636BD8FB8E94 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2DB9E1E934CFCED0689F5211;
+			remoteInfo = ShellCast;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		037CB0AA879D4E4E6496F4D7 /* TmuxParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxParser.swift; sourceTree = "<group>"; };
+		18ED85687617B1A5C79A9437 /* ShellCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellCastApp.swift; sourceTree = "<group>"; };
+		23317A00D128D5D060821218 /* TerminalContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalContainerView.swift; sourceTree = "<group>"; };
+		2D70BAEA3CD12FEADCFA387B /* EditConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditConnectionView.swift; sourceTree = "<group>"; };
+		35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxBrowserView.swift; sourceTree = "<group>"; };
+		36B824D527DCAF8B7F84AA2C /* Connection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Connection.swift; sourceTree = "<group>"; };
+		472560D9CFD337796D28D1D3 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormatting.swift; sourceTree = "<group>"; };
+		6726B66D9CC86DDD8EA70798 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
+		86A413C952647072F83FE1F3 /* SSHService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHService.swift; sourceTree = "<group>"; };
+		A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCard.swift; sourceTree = "<group>"; };
+		AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSession.swift; sourceTree = "<group>"; };
+		AA4F2160E25985C381E065CE /* ShellCast.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ShellCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD78C13923FD491B76957AD7 /* TransportSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportSession.swift; sourceTree = "<group>"; };
+		B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionRow.swift; sourceTree = "<group>"; };
+		D886DD705902431727A8D5CE /* AuthMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethod.swift; sourceTree = "<group>"; };
+		D941806241DCF9F5A72299C8 /* ConnectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionType.swift; sourceTree = "<group>"; };
+		E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecord.swift; sourceTree = "<group>"; };
+		E2EA76447CCB1F4716C33090 /* KeyboardToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardToolbar.swift; sourceTree = "<group>"; };
+		F844CA2ECE9A070493D67508 /* ShellCastTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ShellCastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1BCB6796CEA3AF0DD949F3AE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B454F67039C8678AC55B49F8 /* SwiftTerm in Frameworks */,
+				7CF08706B830298A77DFE525 /* Citadel in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		10C6E78D1FC2627FAFABAC12 /* Tmux */ = {
+			isa = PBXGroup;
+			children = (
+				35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */,
+			);
+			path = Tmux;
+			sourceTree = "<group>";
+		};
+		21B25A86D6C9101E8E95FFF9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA4F2160E25985C381E065CE /* ShellCast.app */,
+				F844CA2ECE9A070493D67508 /* ShellCastTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4143FC19FF587B2C248EAFB0 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D886DD705902431727A8D5CE /* AuthMethod.swift */,
+				36B824D527DCAF8B7F84AA2C /* Connection.swift */,
+				D941806241DCF9F5A72299C8 /* ConnectionType.swift */,
+				E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */,
+				AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		49567D0123958379FA4D7A7D /* Connection */ = {
+			isa = PBXGroup;
+			children = (
+				2D70BAEA3CD12FEADCFA387B /* EditConnectionView.swift */,
+			);
+			path = Connection;
+			sourceTree = "<group>";
+		};
+		659945E7603587C82B96429D /* Terminal */ = {
+			isa = PBXGroup;
+			children = (
+				E2EA76447CCB1F4716C33090 /* KeyboardToolbar.swift */,
+				23317A00D128D5D060821218 /* TerminalContainerView.swift */,
+			);
+			path = Terminal;
+			sourceTree = "<group>";
+		};
+		6CB46C42112EF084E206405B /* ShellCastTests */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ShellCastTests;
+			sourceTree = "<group>";
+		};
+		908499341304C461901FD57B /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */,
+				6726B66D9CC86DDD8EA70798 /* KeychainService.swift */,
+				86A413C952647072F83FE1F3 /* SSHService.swift */,
+				037CB0AA879D4E4E6496F4D7 /* TmuxParser.swift */,
+				AD78C13923FD491B76957AD7 /* TransportSession.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A6426A17DBDA064AC9142253 = {
+			isa = PBXGroup;
+			children = (
+				DC51846B66FDE36A491D73B6 /* ShellCast */,
+				6CB46C42112EF084E206405B /* ShellCastTests */,
+				21B25A86D6C9101E8E95FFF9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AC1CCE346402C5E2F7BD1129 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				49567D0123958379FA4D7A7D /* Connection */,
+				B4192286BC2E4CB5E89B9324 /* Main */,
+				659945E7603587C82B96429D /* Terminal */,
+				10C6E78D1FC2627FAFABAC12 /* Tmux */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		B4192286BC2E4CB5E89B9324 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */,
+				B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */,
+				472560D9CFD337796D28D1D3 /* HomeView.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		CDE8B1A9EF0A6ED1FAD6EB26 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		DC51846B66FDE36A491D73B6 /* ShellCast */ = {
+			isa = PBXGroup;
+			children = (
+				18ED85687617B1A5C79A9437 /* ShellCastApp.swift */,
+				4143FC19FF587B2C248EAFB0 /* Models */,
+				908499341304C461901FD57B /* Services */,
+				CDE8B1A9EF0A6ED1FAD6EB26 /* Utilities */,
+				AC1CCE346402C5E2F7BD1129 /* Views */,
+			);
+			path = ShellCast;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2DB9E1E934CFCED0689F5211 /* ShellCast */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BDDE505BEC7EB7240E34176E /* Build configuration list for PBXNativeTarget "ShellCast" */;
+			buildPhases = (
+				30F4CC6AE0C17BF57FE1785B /* Sources */,
+				1BCB6796CEA3AF0DD949F3AE /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ShellCast;
+			packageProductDependencies = (
+				BAF34F9CC9AA10B8DB178F33 /* SwiftTerm */,
+				3688871340D57647A29D2743 /* Citadel */,
+			);
+			productName = ShellCast;
+			productReference = AA4F2160E25985C381E065CE /* ShellCast.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C96B90D5038EE8BB35079F2E /* ShellCastTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 82F54E63A1A8D8C770D4976F /* Build configuration list for PBXNativeTarget "ShellCastTests" */;
+			buildPhases = (
+				0E956EBA9E06159E2F4E7AEE /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				85CB1E21AADF6B277682D0CC /* PBXTargetDependency */,
+			);
+			name = ShellCastTests;
+			packageProductDependencies = (
+			);
+			productName = ShellCastTests;
+			productReference = F844CA2ECE9A070493D67508 /* ShellCastTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		254D68674B0B636BD8FB8E94 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					2DB9E1E934CFCED0689F5211 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 8D26705189B5FE5C872C9531 /* Build configuration list for PBXProject "ShellCast" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = A6426A17DBDA064AC9142253;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A3690F720B254AAC6FA8AAAF /* XCRemoteSwiftPackageReference "Citadel" */,
+				1628F3AE06BA0B54E9513EC4 /* XCRemoteSwiftPackageReference "SwiftTerm" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 21B25A86D6C9101E8E95FFF9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2DB9E1E934CFCED0689F5211 /* ShellCast */,
+				C96B90D5038EE8BB35079F2E /* ShellCastTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0E956EBA9E06159E2F4E7AEE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		30F4CC6AE0C17BF57FE1785B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2FA6DDCBC8ED256F995110F1 /* ActiveSessionCard.swift in Sources */,
+				7563E1D7A8085874F68DA607 /* AuthMethod.swift in Sources */,
+				EADE230217D5A26870FD16C4 /* Connection.swift in Sources */,
+				D8E0106A70EA257C8160A171 /* ConnectionManager.swift in Sources */,
+				D1697AFEF68A9BC9D6B098CE /* ConnectionRow.swift in Sources */,
+				2166959FB8276DDF0B2D0415 /* ConnectionType.swift in Sources */,
+				82118C48FF254F1FD174CF61 /* EditConnectionView.swift in Sources */,
+				97A5F4A101629D6161484D69 /* HomeView.swift in Sources */,
+				A9C02678D8863EC499917960 /* KeyboardToolbar.swift in Sources */,
+				3F092D55A30EA060E5CC9281 /* KeychainService.swift in Sources */,
+				EBDEDB9BE8D7E51EC0B98FEF /* SSHService.swift in Sources */,
+				B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */,
+				2F80963338411CA796CE07D4 /* ShellCastApp.swift in Sources */,
+				9C1817F8A540EAB7E91E2F49 /* TerminalContainerView.swift in Sources */,
+				AC7233A415BF3267D4EA4F06 /* TimeFormatting.swift in Sources */,
+				CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */,
+				FF1B49821455A2ABFF7F6468 /* TmuxParser.swift in Sources */,
+				9BD757064C4FFB8E27A55496 /* TmuxSession.swift in Sources */,
+				41CE7E2EBD800643D19F03EE /* TransportSession.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		85CB1E21AADF6B277682D0CC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2DB9E1E934CFCED0689F5211 /* ShellCast */;
+			targetProxy = ED58B6C1D99E93C842EEA6FA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		01E0316574005787EE91002E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shellcast.ShellCastTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ShellCast.app/ShellCast";
+			};
+			name = Debug;
+		};
+		0A7557ACFF25923CCA44C6B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		0D9F0FCE797F82E09BA61EDF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shellcast.ShellCastTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ShellCast.app/ShellCast";
+			};
+			name = Release;
+		};
+		7222679893743420288B35F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationAllButUpsideDown;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shellcast.app;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		95E48F6148082E7CEDE602FD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		FF1DDC9454EC74277722DAE1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationAllButUpsideDown;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shellcast.app;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		82F54E63A1A8D8C770D4976F /* Build configuration list for PBXNativeTarget "ShellCastTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				01E0316574005787EE91002E /* Debug */,
+				0D9F0FCE797F82E09BA61EDF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		8D26705189B5FE5C872C9531 /* Build configuration list for PBXProject "ShellCast" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0A7557ACFF25923CCA44C6B3 /* Debug */,
+				95E48F6148082E7CEDE602FD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BDDE505BEC7EB7240E34176E /* Build configuration list for PBXNativeTarget "ShellCast" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7222679893743420288B35F8 /* Debug */,
+				FF1DDC9454EC74277722DAE1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1628F3AE06BA0B54E9513EC4 /* XCRemoteSwiftPackageReference "SwiftTerm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/migueldeicaza/SwiftTerm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+		A3690F720B254AAC6FA8AAAF /* XCRemoteSwiftPackageReference "Citadel" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/orlandos-nl/Citadel.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3688871340D57647A29D2743 /* Citadel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A3690F720B254AAC6FA8AAAF /* XCRemoteSwiftPackageReference "Citadel" */;
+			productName = Citadel;
+		};
+		BAF34F9CC9AA10B8DB178F33 /* SwiftTerm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1628F3AE06BA0B54E9513EC4 /* XCRemoteSwiftPackageReference "SwiftTerm" */;
+			productName = SwiftTerm;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 254D68674B0B636BD8FB8E94 /* Project object */;
+}
