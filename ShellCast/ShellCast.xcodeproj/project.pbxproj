@@ -25,6 +25,8 @@
 		AC7233A415BF3267D4EA4F06 /* TimeFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */; };
 		B454F67039C8678AC55B49F8 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = BAF34F9CC9AA10B8DB178F33 /* SwiftTerm */; };
 		B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */; };
+		BB4A2A512F79445600A540E7 /* TerminalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB4A2A502F79445600A540E7 /* TerminalSettings.swift */; };
+		BB4A2A532F79447D00A540E7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB4A2A522F79447D00A540E7 /* SettingsView.swift */; };
 		CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */; };
 		D1697AFEF68A9BC9D6B098CE /* ConnectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */; };
 		D8E0106A70EA257C8160A171 /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */; };
@@ -64,6 +66,8 @@
 		AA4F2160E25985C381E065CE /* ShellCast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShellCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD78C13923FD491B76957AD7 /* TransportSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportSession.swift; sourceTree = "<group>"; };
 		B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionRow.swift; sourceTree = "<group>"; };
+		BB4A2A502F79445600A540E7 /* TerminalSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSettings.swift; sourceTree = "<group>"; };
+		BB4A2A522F79447D00A540E7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D886DD705902431727A8D5CE /* AuthMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethod.swift; sourceTree = "<group>"; };
 		D941806241DCF9F5A72299C8 /* ConnectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionType.swift; sourceTree = "<group>"; };
 		E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecord.swift; sourceTree = "<group>"; };
@@ -116,6 +120,7 @@
 				36B824D527DCAF8B7F84AA2C /* Connection.swift */,
 				D941806241DCF9F5A72299C8 /* ConnectionType.swift */,
 				E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */,
+				BB4A2A502F79445600A540E7 /* TerminalSettings.swift */,
 				AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */,
 			);
 			path = Models;
@@ -166,11 +171,20 @@
 			);
 			sourceTree = "<group>";
 		};
+		BB4A2A5F2F79500000A540E7 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				BB4A2A522F79447D00A540E7 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		AC1CCE346402C5E2F7BD1129 /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				49567D0123958379FA4D7A7D /* Connection */,
 				B4192286BC2E4CB5E89B9324 /* Main */,
+				BB4A2A5F2F79500000A540E7 /* Settings */,
 				659945E7603587C82B96429D /* Terminal */,
 				10C6E78D1FC2627FAFABAC12 /* Tmux */,
 			);
@@ -336,6 +350,7 @@
 				97A5F4A101629D6161484D69 /* HomeView.swift in Sources */,
 				A9C02678D8863EC499917960 /* KeyboardToolbar.swift in Sources */,
 				3F092D55A30EA060E5CC9281 /* KeychainService.swift in Sources */,
+				BB4A2A512F79445600A540E7 /* TerminalSettings.swift in Sources */,
 				EBDEDB9BE8D7E51EC0B98FEF /* SSHService.swift in Sources */,
 				B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */,
 				2F80963338411CA796CE07D4 /* ShellCastApp.swift in Sources */,
@@ -346,6 +361,7 @@
 				FF1B49821455A2ABFF7F6468 /* TmuxParser.swift in Sources */,
 				9BD757064C4FFB8E27A55496 /* TmuxSession.swift in Sources */,
 				41CE7E2EBD800643D19F03EE /* TransportSession.swift in Sources */,
+				BB4A2A532F79447D00A540E7 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

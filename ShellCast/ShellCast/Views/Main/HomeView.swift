@@ -50,7 +50,7 @@ struct HomeView: View {
                             Image(systemName: "folder")
                                 .foregroundStyle(.white)
                         }
-                        Button { showSettings = true } {
+                        Button(action: { showSettings = true }) {
                             Image(systemName: "gearshape")
                                 .foregroundStyle(.white)
                         }
@@ -193,7 +193,7 @@ struct HomeView: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(.gray)
 
-            ForEach(connections) { connection in
+            ForEach(connections) { connection   in
                 ConnectionRow(connection: connection)
                     .contentShape(Rectangle())
                     .onTapGesture {
