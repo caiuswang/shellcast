@@ -106,17 +106,21 @@ class TerminalViewController: UIViewController {
         ])
 
         // Create SwiftTerm TerminalView
+        let settings = TerminalSettings.shared
         terminalView = ShellCastTerminalView(frame: view.bounds)
         terminalView.translatesAutoresizingMaskIntoConstraints = false
         terminalView.terminalDelegate = bridge
-        terminalView.nativeBackgroundColor = .black
-        terminalView.nativeForegroundColor = UIColor(red: 0.9, green: 0.95, blue: 0.9, alpha: 1.0)
-        terminalView.caretColor = .green
-        if let nerdFont = UIFont(name: "JetBrainsMonoNF-Regular", size: 12) {
-            terminalView.font = nerdFont
-        } else {
-            terminalView.font = UIFont.monospacedSystemFont(ofSize: 12, weight: .regular)
-        }
+
+        // Apply theme colors
+        let theme = settings.theme
+        terminalView.nativeBackgroundColor = theme.backgroundColor
+        terminalView.nativeForegroundColor = theme.foregroundColor
+        terminalView.caretColor = theme.caretColor
+        view.backgroundColor = theme.backgroundColor
+
+        // Apply font settings
+        terminalView.font = settings.font.uiFont(size: CGFloat(settings.fontSize))
+
         terminalView.keyboardAppearance = .dark
         terminalView.optionAsMetaKey = true
         terminalView.customBlockGlyphs = false
@@ -124,6 +128,21 @@ class TerminalViewController: UIViewController {
         terminalView.autocorrectionType = .no
         terminalView.autocapitalizationType = .none
         terminalView.spellCheckingType = .no
+
+        // Apply cursor style
+        let cursorStyle: CursorStyle
+        switch (settings.cursorMode, settings.cursorBlink) {
+        case (.block, true): cursorStyle = .blinkBlock
+        case (.block, false): cursorStyle = .steadyBlock
+        case (.underline, true): cursorStyle = .blinkUnderline
+        case (.underline, false): cursorStyle = .steadyUnderline
+        case (.bar, true): cursorStyle = .blinkBar
+        case (.bar, false): cursorStyle = .steadyBar
+        }
+        terminalView.getTerminal().options.cursorStyle = cursorStyle
+
+        // Apply scrollback size
+        terminalView.changeScrollback(settings.scrollbackSize.rawValue)
 
         view.addSubview(terminalView)
 

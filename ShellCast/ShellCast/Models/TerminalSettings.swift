@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UIKit
 
 enum CursorMode: String, CaseIterable {
     case block
@@ -39,6 +40,36 @@ enum TerminalTheme: String, CaseIterable {
         case .nord: Color(red: 0.18, green: 0.20, blue: 0.25)
         }
     }
+
+    var backgroundColor: UIColor {
+        switch self {
+        case .default: UIColor(red: 0.12, green: 0.12, blue: 0.12, alpha: 1)
+        case .solarizedDark: UIColor(red: 0.0, green: 0.17, blue: 0.21, alpha: 1)
+        case .monokai: UIColor(red: 0.15, green: 0.16, blue: 0.13, alpha: 1)
+        case .dracula: UIColor(red: 0.16, green: 0.16, blue: 0.21, alpha: 1)
+        case .nord: UIColor(red: 0.18, green: 0.20, blue: 0.25, alpha: 1)
+        }
+    }
+
+    var foregroundColor: UIColor {
+        switch self {
+        case .default: UIColor(red: 0.9, green: 0.95, blue: 0.9, alpha: 1)
+        case .solarizedDark: UIColor(red: 0.51, green: 0.58, blue: 0.59, alpha: 1)
+        case .monokai: UIColor(red: 0.97, green: 0.97, blue: 0.95, alpha: 1)
+        case .dracula: UIColor(red: 0.97, green: 0.97, blue: 0.98, alpha: 1)
+        case .nord: UIColor(red: 0.85, green: 0.87, blue: 0.91, alpha: 1)
+        }
+    }
+
+    var caretColor: UIColor {
+        switch self {
+        case .default: .green
+        case .solarizedDark: UIColor(red: 0.58, green: 0.63, blue: 0.0, alpha: 1)
+        case .monokai: UIColor(red: 0.66, green: 0.88, blue: 0.07, alpha: 1)
+        case .dracula: UIColor(red: 0.94, green: 0.47, blue: 0.68, alpha: 1)
+        case .nord: UIColor(red: 0.53, green: 0.75, blue: 0.82, alpha: 1)
+        }
+    }
 }
 
 enum TerminalFont: String, CaseIterable {
@@ -47,6 +78,26 @@ enum TerminalFont: String, CaseIterable {
     case sfMono = "SF Mono"
     case menlo = "Menlo"
     case courier = "Courier"
+
+    func uiFont(size: CGFloat) -> UIFont {
+        switch self {
+        case .system:
+            return UIFont.monospacedSystemFont(ofSize: size, weight: .regular)
+        case .jetBrainsMono:
+            return UIFont(name: "JetBrainsMonoNF-Regular", size: size)
+                ?? UIFont(name: "JetBrainsMono-Regular", size: size)
+                ?? UIFont.monospacedSystemFont(ofSize: size, weight: .regular)
+        case .sfMono:
+            return UIFont(name: "SFMono-Regular", size: size)
+                ?? UIFont.monospacedSystemFont(ofSize: size, weight: .regular)
+        case .menlo:
+            return UIFont(name: "Menlo-Regular", size: size)
+                ?? UIFont.monospacedSystemFont(ofSize: size, weight: .regular)
+        case .courier:
+            return UIFont(name: "Courier", size: size)
+                ?? UIFont.monospacedSystemFont(ofSize: size, weight: .regular)
+        }
+    }
 }
 
 @Observable
