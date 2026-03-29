@@ -1,5 +1,6 @@
 import UIKit
 import SwiftTerm
+import Speech
 
 /// Custom keyboard accessory toolbar for terminal special keys.
 /// Layout: Ctrl Alt | Esc Tab | ↑ ↓ → ← | | / \ ~ - _
@@ -21,8 +22,18 @@ class TerminalKeyboardToolbar: UIView {
     private var arrowGroup: [UIView] = []
     private var symbolGroup: [UIView] = []
     private var kbGroup: [UIView] = []
+    private var micGroup: [UIView] = []
     private var stack: UIStackView!
     private var scrollView: UIScrollView!
+
+    // Speech recognition
+    private var micButton: UIButton!
+    private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
+    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    private var recognitionTask: SFSpeechRecognitionTask?
+    private let audioEngine = AVAudioEngine()
+    private var isListening = false
+    private var lastTranscript = ""
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -104,6 +115,15 @@ class TerminalKeyboardToolbar: UIView {
         kbButton.titleLabel?.font = .systemFont(ofSize: 18)
         kbGroup = [kbButton]
 
+        micButton = UIButton(type: .system)
+        micButton.setImage(UIImage(systemName: "mic"), for: .normal)
+        micButton.tintColor = .white
+        micButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
+        micButton.layer.cornerRadius = 6
+        micButton.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
+        micButton.addTarget(self, action: #selector(tapMic), for: .touchUpInside)
+        micGroup = [micButton]
+
         // Default: no-keyboard layout (PgUp/PgDn first)
         applyLayout(keyboardVisible: false)
     }
@@ -121,9 +141,9 @@ class TerminalKeyboardToolbar: UIView {
 
         let groups: [[UIView]]
         if keyboardVisible {
-            groups = [modifierGroup, escTabGroup, arrowGroup, pageGroup, symbolGroup, kbGroup]
+            groups = [modifierGroup, escTabGroup, arrowGroup, pageGroup, symbolGroup, micGroup, kbGroup]
         } else {
-            groups = [pageGroup, modifierGroup, escTabGroup, arrowGroup, symbolGroup, kbGroup]
+            groups = [pageGroup, modifierGroup, escTabGroup, arrowGroup, symbolGroup, micGroup, kbGroup]
         }
 
         for (i, group) in groups.enumerated() {
@@ -200,7 +220,6 @@ class TerminalKeyboardToolbar: UIView {
 
     /// Send bytes — always uses onSend to go directly to SSH.
     private func sendKey(_ bytes: [UInt8]) {
-        print("[Toolbar] sendKey called, bytes=\(bytes), onSend=\(onSend != nil)")
         onSend?(bytes)
         // Auto-deactivate modifiers after use
         if ctrlActive {
@@ -261,5 +280,93 @@ class TerminalKeyboardToolbar: UIView {
         } else {
             terminalView?.becomeFirstResponder()
         }
+    }
+
+    // MARK: - Speech Recognition
+
+    @objc private func tapMic() {
+        if isListening {
+            stopListening()
+        } else {
+            startListening()
+        }
+    }
+
+    private func startListening() {
+        SFSpeechRecognizer.requestAuthorization { [weak self] status in
+            DispatchQueue.main.async {
+                guard let self, status == .authorized else { return }
+                self.requestMicAndStart()
+            }
+        }
+    }
+
+    private func requestMicAndStart() {
+        AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
+            DispatchQueue.main.async {
+                guard let self, granted else { return }
+                self.beginRecognition()
+            }
+        }
+    }
+
+    private func beginRecognition() {
+        // Stop any existing task
+        recognitionTask?.cancel()
+        recognitionTask = nil
+
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        } catch {
+            return
+        }
+
+        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+        guard let recognitionRequest, let speechRecognizer, speechRecognizer.isAvailable else { return }
+        recognitionRequest.shouldReportPartialResults = false
+
+        let inputNode = audioEngine.inputNode
+        let recordingFormat = inputNode.outputFormat(forBus: 0)
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
+            recognitionRequest.append(buffer)
+        }
+
+        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
+            guard let self else { return }
+            if let result {
+                let text = result.bestTranscription.formattedString
+                if result.isFinal {
+                    self.sendKey(Array(text.utf8))
+                }
+            }
+            if error != nil || (result?.isFinal ?? false) {
+                self.stopListening()
+            }
+        }
+
+        do {
+            try audioEngine.start()
+            isListening = true
+            micButton.tintColor = .red
+            micButton.backgroundColor = UIColor(red: 0.4, green: 0.15, blue: 0.15, alpha: 1.0)
+        } catch {
+            stopListening()
+        }
+    }
+
+    private func stopListening() {
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        recognitionRequest?.endAudio()
+        recognitionRequest = nil
+        recognitionTask = nil
+        isListening = false
+
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+
+        micButton.tintColor = .white
+        micButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
     }
 }
