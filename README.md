@@ -54,4 +54,4 @@ Dependencies are managed via Swift Package Manager and resolve automatically on 
 
 ## License
 
-Private project.
+MIT
