@@ -140,6 +140,10 @@ HomeView (root)
   - Add `TmuxWindowBrowserView` — drill-down from session to windows
   - Update `TmuxBrowserView` to navigate to window list on session tap
   - Update `HomeView.openShell` to support `tmux attach -t session:window`
+- [x] Rename and delete sessions/windows from browser
+  - Add `TmuxParser` commands: renameSession, killSession, renameWindow, killWindow
+  - Context menus on session/window rows with rename (text alert) and delete (confirmation)
+  - Auto-refresh list after each action
 - [ ] In-terminal tmux session/window switcher overlay
 
 **Milestone: Full flow from home → tmux session → terminal.** (core flow ✅, window-level switching TODO)
