@@ -71,9 +71,10 @@ struct EditConnectionView: View {
                             Picker("", selection: $authMethod) {
                                 Text("Password").tag(AuthMethod.password)
                                 Text("Key File").tag(AuthMethod.keyFile)
+                                Text("Tailscale").tag(AuthMethod.tailscaleSSH)
                             }
                             .pickerStyle(.segmented)
-                            .frame(width: 200)
+                            .frame(width: 260)
                         }
 
                         if authMethod == .password {
@@ -109,9 +110,15 @@ struct EditConnectionView: View {
                         }
                     }
 
-                    Text("Using Tailscale SSH? You can leave the password empty since Tailscale handles authentication via ACLs.")
-                        .font(.caption)
-                        .foregroundStyle(.gray)
+                    if authMethod == .tailscaleSSH {
+                        Text("Tailscale handles authentication via ACLs at the network layer. No password or key needed.")
+                            .font(.caption)
+                            .foregroundStyle(.gray)
+                    } else if authMethod == .password {
+                        Text("Using Tailscale SSH? Select \"Tailscale\" auth instead — no password needed.")
+                            .font(.caption)
+                            .foregroundStyle(.gray)
+                    }
 
                     // Connection Type
                     VStack(alignment: .leading, spacing: 8) {
@@ -183,11 +190,9 @@ struct EditConnectionView: View {
                     connectionType = connection.connectionType
                     password = KeychainService.getPassword(for: connection.id) ?? ""
                     keyPassphrase = KeychainService.getKeyPassphrase(for: connection.id) ?? ""
-                    if connection.authMethod == .keyFile {
-                        keyFileName = connection.keyFilePath
-                        if KeychainService.getPrivateKey(for: connection.id) != nil {
-                            keyFileData = Data() // placeholder to show key is loaded
-                        }
+                    keyFileName = connection.keyFilePath
+                    if KeychainService.getPrivateKey(for: connection.id) != nil {
+                        keyFileData = Data() // placeholder to show key is loaded
                     }
                 }
             }
@@ -240,20 +245,7 @@ struct EditConnectionView: View {
             connection.username = username
             connection.authMethod = authMethod
             connection.connectionType = connectionType
-            if authMethod == .password && !password.isEmpty {
-                try? KeychainService.savePassword(password, for: connection.id)
-            }
-            if authMethod == .keyFile {
-                connection.keyFilePath = keyFileName
-                if let keyData = keyFileData, !keyData.isEmpty {
-                    try? KeychainService.savePrivateKey(keyData, for: connection.id)
-                }
-                if !keyPassphrase.isEmpty {
-                    try? KeychainService.saveKeyPassphrase(keyPassphrase, for: connection.id)
-                } else {
-                    try? KeychainService.deleteKeyPassphrase(for: connection.id)
-                }
-            }
+            saveCredentials(for: connection.id, keyFilePath: &connection.keyFilePath)
             return connection
         } else {
             let connection = Connection(
@@ -265,19 +257,23 @@ struct EditConnectionView: View {
                 connectionType: connectionType
             )
             modelContext.insert(connection)
-            if authMethod == .password && !password.isEmpty {
-                try? KeychainService.savePassword(password, for: connection.id)
-            }
-            if authMethod == .keyFile {
-                connection.keyFilePath = keyFileName
-                if let keyData = keyFileData, !keyData.isEmpty {
-                    try? KeychainService.savePrivateKey(keyData, for: connection.id)
-                }
-                if !keyPassphrase.isEmpty {
-                    try? KeychainService.saveKeyPassphrase(keyPassphrase, for: connection.id)
-                }
-            }
+            saveCredentials(for: connection.id, keyFilePath: &connection.keyFilePath)
             return connection
+        }
+    }
+
+    /// Save all provided credentials regardless of selected auth method,
+    /// so switching auth modes doesn't discard previously entered secrets.
+    private func saveCredentials(for connectionId: UUID, keyFilePath: inout String?) {
+        if !password.isEmpty {
+            try? KeychainService.savePassword(password, for: connectionId)
+        }
+        if let keyData = keyFileData, !keyData.isEmpty {
+            try? KeychainService.savePrivateKey(keyData, for: connectionId)
+        }
+        keyFilePath = keyFileName
+        if !keyPassphrase.isEmpty {
+            try? KeychainService.saveKeyPassphrase(keyPassphrase, for: connectionId)
         }
     }
 

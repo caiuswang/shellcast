@@ -204,7 +204,7 @@ HomeView (root)
 
 ### Phase 5: Polish + Ship
 - [x] SSH key file import via Files app (`fileImporter` + Keychain storage)
-- [ ] Tailscale SSH "none" auth support
+- [x] Tailscale SSH "none" auth support (added to auth picker, no credentials needed)
 - [x] Settings view — theme, font, font size, cursor mode/blink, scrollback
 - [x] Settings applied to SwiftTerm TerminalView (colors, font, cursor style, scrollback)
 - [x] Visible edit button on connection rows in main menu
