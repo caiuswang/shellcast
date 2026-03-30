@@ -35,6 +35,7 @@ final class SSHSession: TransportSession {
     /// Stored credentials for reconnection
     private var storedPassword: String?
     private var storedPrivateKey: String?
+    private var storedPassphrase: String?
 
     /// Called when connection is lost unexpectedly (not from explicit disconnect)
     var onDisconnect: (() -> Void)?
@@ -68,8 +69,9 @@ final class SSHSession: TransportSession {
         }
     }
 
-    func connect(privateKey: String) async throws {
+    func connect(privateKey: String, passphrase: String? = nil) async throws {
         self.storedPrivateKey = privateKey
+        self.storedPassphrase = passphrase
         do {
             let client = try await SSHClient.connect(
                 host: host,
@@ -115,7 +117,7 @@ final class SSHSession: TransportSession {
 
         // Reconnect using stored credentials
         if let privateKey = storedPrivateKey {
-            try await connect(privateKey: privateKey)
+            try await connect(privateKey: privateKey, passphrase: storedPassphrase)
         } else if let password = storedPassword {
             try await connect(password: password)
         } else {
@@ -245,10 +247,11 @@ struct SSHService {
         host: String,
         port: Int,
         username: String,
-        privateKey: String
+        privateKey: String,
+        passphrase: String? = nil
     ) async throws -> SSHSession {
         let session = SSHSession(host: host, port: port, username: username)
-        try await session.connect(privateKey: privateKey)
+        try await session.connect(privateKey: privateKey, passphrase: passphrase)
         return session
     }
 }

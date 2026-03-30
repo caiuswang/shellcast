@@ -203,7 +203,7 @@ HomeView (root)
 **Milestone: Connections survive network changes and phone sleep.**
 
 ### Phase 5: Polish + Ship
-- [ ] SSH key file import via Files app (`UIDocumentPickerViewController`)
+- [x] SSH key file import via Files app (`fileImporter` + Keychain storage)
 - [ ] Tailscale SSH "none" auth support
 - [x] Settings view — theme, font, font size, cursor mode/blink, scrollback
 - [x] Settings applied to SwiftTerm TerminalView (colors, font, cursor style, scrollback)

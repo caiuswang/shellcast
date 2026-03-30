@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 struct EditConnectionView: View {
     enum Mode {
@@ -20,6 +21,10 @@ struct EditConnectionView: View {
     @State private var password: String = ""
     @State private var authMethod: AuthMethod = .password
     @State private var connectionType: ConnectionType = .ssh
+    @State private var keyFileName: String?
+    @State private var keyFileData: Data?
+    @State private var showKeyFilePicker = false
+    @State private var keyPassphrase: String = ""
 
     init(mode: Mode, onConnect: ((Connection) -> Void)? = nil) {
         self.mode = mode
@@ -73,6 +78,33 @@ struct EditConnectionView: View {
 
                         if authMethod == .password {
                             SecureField("Password", text: $password)
+                                .textFieldStyle(DarkFieldStyle())
+                        } else if authMethod == .keyFile {
+                            Button {
+                                showKeyFilePicker = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: keyFileName != nil ? "key.fill" : "doc.badge.plus")
+                                        .foregroundStyle(keyFileName != nil ? .green : .gray)
+                                    Text(keyFileName ?? "Import Private Key")
+                                        .foregroundStyle(keyFileName != nil ? .white : .gray)
+                                    Spacer()
+                                    if keyFileName != nil {
+                                        Button {
+                                            keyFileName = nil
+                                            keyFileData = nil
+                                        } label: {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundStyle(.gray)
+                                        }
+                                    }
+                                }
+                                .padding(12)
+                                .background(Color(white: 0.12))
+                                .cornerRadius(8)
+                            }
+
+                            SecureField("Passphrase (optional)", text: $keyPassphrase)
                                 .textFieldStyle(DarkFieldStyle())
                         }
                     }
@@ -150,10 +182,35 @@ struct EditConnectionView: View {
                     authMethod = connection.authMethod
                     connectionType = connection.connectionType
                     password = KeychainService.getPassword(for: connection.id) ?? ""
+                    keyPassphrase = KeychainService.getKeyPassphrase(for: connection.id) ?? ""
+                    if connection.authMethod == .keyFile {
+                        keyFileName = connection.keyFilePath
+                        if KeychainService.getPrivateKey(for: connection.id) != nil {
+                            keyFileData = Data() // placeholder to show key is loaded
+                        }
+                    }
                 }
             }
         }
         .preferredColorScheme(.dark)
+        .fileImporter(
+            isPresented: $showKeyFilePicker,
+            allowedContentTypes: [.data, .plainText],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let url = urls.first else { return }
+                guard url.startAccessingSecurityScopedResource() else { return }
+                defer { url.stopAccessingSecurityScopedResource() }
+                if let data = try? Data(contentsOf: url) {
+                    keyFileData = data
+                    keyFileName = url.lastPathComponent
+                }
+            case .failure:
+                break
+            }
+        }
     }
 
     private var isEditing: Bool {
@@ -186,6 +243,17 @@ struct EditConnectionView: View {
             if authMethod == .password && !password.isEmpty {
                 try? KeychainService.savePassword(password, for: connection.id)
             }
+            if authMethod == .keyFile {
+                connection.keyFilePath = keyFileName
+                if let keyData = keyFileData, !keyData.isEmpty {
+                    try? KeychainService.savePrivateKey(keyData, for: connection.id)
+                }
+                if !keyPassphrase.isEmpty {
+                    try? KeychainService.saveKeyPassphrase(keyPassphrase, for: connection.id)
+                } else {
+                    try? KeychainService.deleteKeyPassphrase(for: connection.id)
+                }
+            }
             return connection
         } else {
             let connection = Connection(
@@ -199,6 +267,15 @@ struct EditConnectionView: View {
             modelContext.insert(connection)
             if authMethod == .password && !password.isEmpty {
                 try? KeychainService.savePassword(password, for: connection.id)
+            }
+            if authMethod == .keyFile {
+                connection.keyFilePath = keyFileName
+                if let keyData = keyFileData, !keyData.isEmpty {
+                    try? KeychainService.savePrivateKey(keyData, for: connection.id)
+                }
+                if !keyPassphrase.isEmpty {
+                    try? KeychainService.saveKeyPassphrase(keyPassphrase, for: connection.id)
+                }
             }
             return connection
         }

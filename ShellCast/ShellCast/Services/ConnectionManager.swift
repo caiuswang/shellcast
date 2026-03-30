@@ -72,13 +72,17 @@ final class ConnectionManager {
                 password: password
             )
         case .keyFile:
-            // TODO: key-based auth in Phase 5
-            let password = KeychainService.getPassword(for: connection.id) ?? ""
+            guard let keyData = KeychainService.getPrivateKey(for: connection.id),
+                  let keyString = String(data: keyData, encoding: .utf8) else {
+                throw SSHError.connectionFailed("No SSH key found. Please import a private key file.")
+            }
+            let passphrase = KeychainService.getKeyPassphrase(for: connection.id)
             return try await SSHService.connect(
                 host: connection.host,
                 port: connection.port,
                 username: connection.username,
-                password: password
+                privateKey: keyString,
+                passphrase: passphrase
             )
         case .tailscaleSSH:
             // Tailscale SSH uses no password — auth is handled at the network layer
