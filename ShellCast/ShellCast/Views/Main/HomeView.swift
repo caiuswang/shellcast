@@ -90,10 +90,10 @@ struct HomeView: View {
                 case .editConnection(let connection):
                     EditConnectionView(mode: .edit(connection))
                 case .tmuxBrowser(let sessions):
-                    TmuxBrowserView(sessions: sessions) { tmuxSession in
+                    TmuxBrowserView(sessions: sessions, transport: activeTransport!) { tmuxSession, windowIndex in
                         activeSheet = nil
                         if let transport = activeTransport {
-                            openShell(transport: transport, tmuxSession: tmuxSession)
+                            openShell(transport: transport, tmuxSession: tmuxSession, windowIndex: windowIndex)
                         }
                     }
                 }
@@ -144,13 +144,15 @@ struct HomeView: View {
         }
     }
 
-    private func openShell(transport: SSHSession, tmuxSession: TmuxSession?) {
+    private func openShell(transport: SSHSession, tmuxSession: TmuxSession?, windowIndex: Int? = nil) {
         Task { @MainActor in
             do {
                 let tmuxCommand: String?
                 if let session = tmuxSession {
                     if session.name == "new" {
                         tmuxCommand = "tmux new-session"
+                    } else if let windowIndex {
+                        tmuxCommand = "tmux attach -t \(session.name):\(windowIndex)"
                     } else {
                         tmuxCommand = "tmux attach -t \(session.name)"
                     }

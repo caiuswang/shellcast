@@ -134,7 +134,12 @@ HomeView (root)
 ### Phase 2: Tmux Integration — IN PROGRESS
 - [x] Flow: connect → tmux browser → select session → `tmux attach -t` → terminal
 - [x] "Connect without tmux" and "New tmux session" actions
-- [ ] Tmux window listing within a session
+- [x] Tmux window listing within a session
+  - Add `TmuxWindow` model (index, name, isActive, paneCount)
+  - Add `TmuxParser.listWindows()` — `tmux list-windows -t session -F format`
+  - Add `TmuxWindowBrowserView` — drill-down from session to windows
+  - Update `TmuxBrowserView` to navigate to window list on session tap
+  - Update `HomeView.openShell` to support `tmux attach -t session:window`
 - [ ] In-terminal tmux session/window switcher overlay
 
 **Milestone: Full flow from home → tmux session → terminal.** (core flow ✅, window-level switching TODO)

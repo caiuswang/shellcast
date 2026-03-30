@@ -31,4 +31,26 @@ struct TmuxParser {
             )
         }
     }
+
+    static func listWindows(over session: SSHSession, sessionName: String) async throws -> [TmuxWindow] {
+        let format = "#{window_index}\(separator)#{window_name}\(separator)#{window_active}\(separator)#{window_panes}"
+        let command = "/opt/homebrew/bin/tmux list-windows -t \(sessionName) -F '\(format)'"
+        let output = try await session.exec(command)
+
+        guard !output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return []
+        }
+
+        return output.split(separator: "\n").compactMap { line in
+            let parts = line.components(separatedBy: separator)
+            guard parts.count >= 4 else { return nil }
+
+            return TmuxWindow(
+                index: Int(parts[0].trimmingCharacters(in: .whitespaces)) ?? 0,
+                name: parts[1].trimmingCharacters(in: .whitespaces),
+                isActive: parts[2].trimmingCharacters(in: .whitespaces) == "1",
+                paneCount: Int(parts[3].trimmingCharacters(in: .whitespaces)) ?? 1
+            )
+        }
+    }
 }
