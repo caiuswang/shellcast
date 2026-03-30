@@ -336,7 +336,7 @@ class TerminalViewController: UIViewController {
         terminalBottomConstraint = terminalView.bottomAnchor.constraint(equalTo: toolbar.topAnchor)
 
         NSLayoutConstraint.activate([
-            terminalView.topAnchor.constraint(equalTo: view.topAnchor),
+            terminalView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             terminalView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             terminalView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             terminalBottomConstraint,
@@ -409,7 +409,7 @@ class TerminalViewController: UIViewController {
         toolbar.applyLayout(keyboardVisible: keyboardVisible)
         toolbarBottomConstraint.constant = -kbHeight
 
-        let availableHeight = view.bounds.height - kbHeight - 44
+        let availableHeight = view.bounds.height - kbHeight - 44 - view.safeAreaInsets.top
 
         UIView.animate(withDuration: duration) {
             self.view.layoutIfNeeded()
@@ -423,7 +423,7 @@ class TerminalViewController: UIViewController {
 
         // Compute cell dimensions and resize for toolbar
         computeCellSize()
-        resizeTerminal(availableHeight: view.bounds.height - 44)
+        resizeTerminal(availableHeight: view.bounds.height - 44 - view.safeAreaInsets.top)
 
         terminalView.becomeFirstResponder()
 

@@ -15,6 +15,15 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
 
     private var readTask: Task<Void, Never>?
 
+    /// Tracks whether the transport is mosh (needs cursor position fix).
+    private var isMoshTransport: Bool {
+        transport.needsDeferredStart
+    }
+
+    /// Last known cursor position NOT on the status bar (for mosh cursor fix).
+    private var lastContentCursorRow: Int = 0
+    private var lastContentCursorCol: Int = 0
+
     init(transport: any TransportSession) {
         self.transport = transport
         super.init()
@@ -38,6 +47,14 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
                 }
                 let bytes = Array(data)
                 self.terminalView?.feed(byteArray: bytes[...])
+
+                // Mosh cursor fix: mosh's Display::new_frame may not send
+                // the final CUP to reposition the cursor after painting the
+                // tmux status bar. Detect this and inject a corrective CUP.
+                if self.isMoshTransport {
+                    self.fixMoshCursorPosition()
+                }
+
                 self.terminalView?.setNeedsDisplay()
             }
             print("[BRIDGE] stream ended, isCancelled=\(Task.isCancelled)")
@@ -46,6 +63,70 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
                 self.isDisconnected = true
             }
         }
+    }
+
+    // MARK: - Mosh Cursor Fix
+
+    /// Detects when mosh leaves the cursor on the tmux status bar (last row)
+    /// and repositions it to the last known content position.
+    ///
+    /// Background: mosh renders the screen by painting cells with CUP commands,
+    /// then should send a final CUP to set the cursor at the server's cursor
+    /// position. The iOS mosh framework sometimes omits this final CUP,
+    /// leaving the cursor wherever the last cell was painted — typically the
+    /// tmux status bar on the bottom row.
+    func fixMoshCursorPosition() {
+        guard let tv = terminalView else { return }
+        let terminal = tv.getTerminal()
+        let buffer = terminal.buffer
+        let rows = terminal.rows
+        let cursorY = buffer.y
+        let cursorX = buffer.x
+
+        guard rows > 1 else { return }
+
+        let lastRow = rows - 1
+
+        if cursorY == lastRow && isStatusBarRow(buffer: buffer, row: lastRow, cols: terminal.cols) {
+            // Cursor is on the status bar — reposition to last known content position.
+            // Clamp to valid range (above status bar).
+            let fixRow = min(lastContentCursorRow, lastRow - 1)
+            let fixCol = lastContentCursorCol
+
+            // Inject CUP escape sequence to move cursor (1-indexed)
+            let cup = "\u{1b}[\(fixRow + 1);\(fixCol + 1)H"
+            tv.feed(text: cup)
+        } else {
+            // Cursor is in the content area — remember this position.
+            lastContentCursorRow = cursorY
+            lastContentCursorCol = cursorX
+        }
+    }
+
+    /// Heuristic: checks if a given row looks like a tmux status bar.
+    /// tmux status bars typically have colored backgrounds (non-default bg attribute)
+    /// across most of the row.
+    private func isStatusBarRow(buffer: Buffer, row: Int, cols: Int) -> Bool {
+        // Use the public getChar(at:) API with screen coordinates.
+        var coloredCells = 0
+        let checkCols = min(cols, 20)  // check first 20 columns
+        for col in 0..<checkCols {
+            let cell = buffer.getChar(at: Position(col: col, row: row))
+            let attr = cell.attribute
+            // Check for non-default background or inverse/reverse attribute.
+            let hasColoredBg: Bool
+            switch attr.bg {
+            case .defaultColor, .defaultInvertedColor:
+                hasColoredBg = false
+            default:
+                hasColoredBg = true
+            }
+            if hasColoredBg || attr.style.contains(CharacterStyle.inverse) {
+                coloredCells += 1
+            }
+        }
+        // If more than half the checked cells have colored backgrounds, it's likely a status bar
+        return coloredCells > checkCols / 2
     }
 
     /// Reconnect the SSH session and restart reading. Only works for SSH transport.

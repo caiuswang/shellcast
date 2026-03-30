@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0324D23344C318E49D749844 /* BackgroundSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71ADD980E8F01B1CCE2B626E /* BackgroundSessionTests.swift */; };
+		A1B2C3D4E5F60718A9B0C1D2 /* TerminalCursorLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6071829A0B1C2 /* TerminalCursorLayoutTests.swift */; };
 		077428F7CF8D6557B70C1C6A /* JetBrainsMonoNerdFont-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A7764FF4377D60000A6D5B61 /* JetBrainsMonoNerdFont-Regular.ttf */; };
 		0B6941701BCFCBA7DD665F6E /* normalizer.json in Resources */ = {isa = PBXBuildFile; fileRef = 934D46518265B5BF6A5DEDBF /* normalizer.json */; };
 		1728B69915976FB516D2F266 /* generation_config.json in Resources */ = {isa = PBXBuildFile; fileRef = 32382F16DCDC62F522C6AEAF /* generation_config.json */; };
@@ -101,6 +102,7 @@
 		61579C0F481E05873DEEB3A2 /* special_tokens_map.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = special_tokens_map.json; sourceTree = "<group>"; };
 		6726B66D9CC86DDD8EA70798 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		71ADD980E8F01B1CCE2B626E /* BackgroundSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSessionTests.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C6071829A0B1C2 /* TerminalCursorLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalCursorLayoutTests.swift; sourceTree = "<group>"; };
 		76DF3B39727ABA9F4C4327A3 /* vocab.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = vocab.json; sourceTree = "<group>"; };
 		7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
 		86A413C952647072F83FE1F3 /* SSHService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHService.swift; sourceTree = "<group>"; };
@@ -229,6 +231,7 @@
 			isa = PBXGroup;
 			children = (
 				71ADD980E8F01B1CCE2B626E /* BackgroundSessionTests.swift */,
+				D1E2F3A4B5C6071829A0B1C2 /* TerminalCursorLayoutTests.swift */,
 			);
 			path = ShellCastTests;
 			sourceTree = "<group>";
@@ -451,6 +454,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0324D23344C318E49D749844 /* BackgroundSessionTests.swift in Sources */,
+				A1B2C3D4E5F60718A9B0C1D2 /* TerminalCursorLayoutTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
