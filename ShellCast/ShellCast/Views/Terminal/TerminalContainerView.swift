@@ -370,6 +370,9 @@ class TerminalViewController: UIViewController {
     }
 
     private var cellSize: CGSize = .zero
+    private var lastServerCols: Int = 0
+    private var lastServerRows: Int = 0
+    private var resizeWorkItem: DispatchWorkItem?
 
     private func computeCellSize() {
         let terminal = terminalView.getTerminal()
@@ -388,13 +391,22 @@ class TerminalViewController: UIViewController {
         let newRows = max(1, Int(availableHeight / cellSize.height))
         let terminal = terminalView.getTerminal()
 
-        print("[RESIZE] availableHeight=\(availableHeight) cellSize=\(cellSize) newCols=\(newCols) newRows=\(newRows) currentCols=\(terminal.cols) currentRows=\(terminal.rows)")
+        print("[RESIZE] availableHeight=\(availableHeight) cellSize=\(cellSize) newCols=\(newCols) newRows=\(newRows) currentCols=\(terminal.cols) currentRows=\(terminal.rows) lastServer=\(lastServerCols)x\(lastServerRows)")
         print("[RESIZE] view.bounds=\(view.bounds) terminalView.frame=\(terminalView.frame) safeArea.top=\(view.safeAreaInsets.top)")
         print("[RESIZE] terminalView.contentSize=\(terminalView.contentSize) contentOffset=\(terminalView.contentOffset) bounds=\(terminalView.bounds)")
 
-        if newCols != terminal.cols || newRows != terminal.rows {
-            print("[RESIZE] Resizing terminal: \(terminal.cols)x\(terminal.rows) → \(newCols)x\(newRows)")
+        let terminalNeedsResize = newCols != terminal.cols || newRows != terminal.rows
+        let serverNeedsResize = newCols != lastServerCols || newRows != lastServerRows
+
+        if terminalNeedsResize {
+            print("[RESIZE] Resizing terminal view: \(terminal.cols)x\(terminal.rows) → \(newCols)x\(newRows)")
             terminalView.resize(cols: newCols, rows: newRows)
+        }
+
+        if serverNeedsResize {
+            print("[RESIZE] Resizing server: \(lastServerCols)x\(lastServerRows) → \(newCols)x\(newRows)")
+            lastServerCols = newCols
+            lastServerRows = newRows
             Task {
                 do {
                     try await bridge.transport.resize(cols: newCols, rows: newRows)
@@ -419,18 +431,17 @@ class TerminalViewController: UIViewController {
         toolbar.applyLayout(keyboardVisible: keyboardVisible)
         toolbarBottomConstraint.constant = -kbHeight
 
-        // Use terminalView.frame.height after layout — this is the actual visible
-        // terminal area, already accounting for safe area via Auto Layout constraints.
-        // Don't compute from view.bounds because safeAreaInsets.top is 0 in this
-        // embedded UIKit VC (SwiftUI handles safe area at a higher level).
-        let availableHeight = view.bounds.height - kbHeight - 44
-
-        print("[KB] kbHeight=\(kbHeight) keyboardVisible=\(keyboardVisible) availableHeight=\(availableHeight) viewHeight=\(view.bounds.height)")
+        print("[KB] kbHeight=\(kbHeight) keyboardVisible=\(keyboardVisible) toolbarConstant=\(toolbarBottomConstraint.constant) viewHeight=\(view.bounds.height) safeTop=\(view.safeAreaInsets.top)")
 
         UIView.animate(withDuration: duration) {
             self.view.layoutIfNeeded()
         } completion: { _ in
-            self.resizeTerminal(availableHeight: availableHeight)
+            // Use the actual terminal view frame after layout — Auto Layout
+            // already accounts for safe area, toolbar position, and keyboard.
+            let actualHeight = self.terminalView.frame.height
+            print("[KB] post-layout terminalFrame=\(self.terminalView.frame) toolbarFrame=\(self.toolbar.frame) actualHeight=\(actualHeight)")
+
+            self.resizeTerminal(availableHeight: actualHeight)
             self.startSessionIfNeeded()
         }
     }

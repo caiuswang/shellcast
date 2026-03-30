@@ -24,10 +24,9 @@ class TerminalKeyboardToolbar: UIView {
     private var escTabGroup: [UIView] = []
     private var arrowGroup: [UIView] = []
     private var symbolGroup: [UIView] = []
-    private var kbGroup: [UIView] = []
-    private var micGroup: [UIView] = []
     private var stack: UIStackView!
     private var scrollView: UIScrollView!
+    private var fixedRightStack: UIStackView!
 
     // Voice input
     private var micButton: UIButton!
@@ -52,6 +51,20 @@ class TerminalKeyboardToolbar: UIView {
     private func setupUI() {
         backgroundColor = UIColor(white: 0.1, alpha: 1.0)
 
+        // Fixed right buttons (mic + keyboard) — always visible
+        fixedRightStack = UIStackView()
+        fixedRightStack.axis = .horizontal
+        fixedRightStack.spacing = 4
+        fixedRightStack.alignment = .center
+        fixedRightStack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(fixedRightStack)
+
+        NSLayoutConstraint.activate([
+            fixedRightStack.topAnchor.constraint(equalTo: topAnchor, constant: 4),
+            fixedRightStack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
+            fixedRightStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+        ])
+
         scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsHorizontalScrollIndicator = false
@@ -62,7 +75,7 @@ class TerminalKeyboardToolbar: UIView {
             scrollView.topAnchor.constraint(equalTo: topAnchor),
             scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
             scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: fixedRightStack.leadingAnchor, constant: -4),
         ])
 
         stack = UIStackView()
@@ -124,10 +137,6 @@ class TerminalKeyboardToolbar: UIView {
         }
         symbolGroup = symbols
 
-        let kbButton = makeButton("⌨", action: #selector(tapKeyboard))
-        kbButton.titleLabel?.font = .systemFont(ofSize: 18)
-        kbGroup = [kbButton]
-
         micButton = UIButton(type: .system)
         micButton.setImage(UIImage(systemName: "mic"), for: .normal)
         micButton.tintColor = .white
@@ -135,7 +144,15 @@ class TerminalKeyboardToolbar: UIView {
         micButton.layer.cornerRadius = 6
         micButton.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
         micButton.addTarget(self, action: #selector(tapMic), for: .touchUpInside)
-        micGroup = [micButton]
+
+        let kbButton = makeButton("⌨", action: #selector(tapKeyboard))
+        kbButton.titleLabel?.font = .systemFont(ofSize: 18)
+
+        // Add separator + mic + keyboard to fixed right area
+        let fixedSep = makeSeparator()
+        fixedRightStack.addArrangedSubview(fixedSep)
+        fixedRightStack.addArrangedSubview(micButton)
+        fixedRightStack.addArrangedSubview(kbButton)
 
         // Preview bar (hidden by default, shown after speech recognition)
         previewBar = UIView()
@@ -217,9 +234,9 @@ class TerminalKeyboardToolbar: UIView {
 
         let groups: [[UIView]]
         if keyboardVisible {
-            groups = [tmuxGroup, modifierGroup, escTabGroup, arrowGroup, pageGroup, symbolGroup, micGroup, kbGroup]
+            groups = [tmuxGroup, modifierGroup, escTabGroup, arrowGroup, pageGroup, symbolGroup]
         } else {
-            groups = [tmuxGroup, pageGroup, modifierGroup, escTabGroup, arrowGroup, symbolGroup, micGroup, kbGroup]
+            groups = [tmuxGroup, pageGroup, modifierGroup, escTabGroup, arrowGroup, symbolGroup]
         }
 
         for (i, group) in groups.enumerated() {
@@ -473,6 +490,7 @@ class TerminalKeyboardToolbar: UIView {
         previewTextView.text = text
         previewBar.isHidden = false
         scrollView.isHidden = true
+        fixedRightStack.isHidden = true
         invalidateIntrinsicContentSize()
         superview?.setNeedsLayout()
         superview?.layoutIfNeeded()
@@ -482,6 +500,7 @@ class TerminalKeyboardToolbar: UIView {
     private func hidePreview() {
         previewBar.isHidden = true
         scrollView.isHidden = false
+        fixedRightStack.isHidden = false
         previewTextView.text = ""
         previewTextView.resignFirstResponder()
         invalidateIntrinsicContentSize()
