@@ -6,6 +6,7 @@ enum MoshError: Error, LocalizedError {
     case sessionFailed(String)
     case serverNotInstalled
     case frameworkNotAvailable
+    case resumeFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -14,6 +15,7 @@ enum MoshError: Error, LocalizedError {
         case .sessionFailed(let reason): return "Mosh session failed: \(reason)"
         case .serverNotInstalled: return "mosh-server is not installed on the remote host"
         case .frameworkNotAvailable: return "Mosh support is not available in this build"
+        case .resumeFailed(let reason): return "Mosh resume failed: \(reason)"
         }
     }
 }
@@ -245,6 +247,73 @@ struct MoshService {
         #else
         throw MoshError.frameworkNotAvailable
         #endif
+    }
+
+    // MARK: - State Persistence
+
+    /// Directory for Mosh session state files.
+    private static var stateDirectory: URL {
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("MoshState", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+
+    /// Persisted Mosh session info for resuming after background suspension.
+    struct PersistedSession: Codable {
+        let host: String
+        let port: String
+        let key: String
+        let serializedState: Data?
+        let savedAt: Date
+    }
+
+    /// Save a Mosh session's state to disk for later resumption.
+    static func saveSessionState(sessionId: UUID, host: String, port: String, key: String, state: Data?) {
+        let persisted = PersistedSession(
+            host: host, port: port, key: key,
+            serializedState: state, savedAt: Date()
+        )
+        let url = stateDirectory.appendingPathComponent("\(sessionId.uuidString).json")
+        if let data = try? JSONEncoder().encode(persisted) {
+            try? data.write(to: url, options: .atomic)
+            print("[MOSH] Saved session state for \(sessionId) (\(state?.count ?? 0) bytes)")
+        }
+    }
+
+    /// Load a previously saved Mosh session state.
+    static func loadSessionState(sessionId: UUID) -> PersistedSession? {
+        let url = stateDirectory.appendingPathComponent("\(sessionId.uuidString).json")
+        guard let data = try? Data(contentsOf: url),
+              let persisted = try? JSONDecoder().decode(PersistedSession.self, from: data) else {
+            return nil
+        }
+        // Discard state older than 10 minutes — server may have timed out
+        if Date().timeIntervalSince(persisted.savedAt) > 600 {
+            print("[MOSH] Discarding stale state for \(sessionId) (saved \(persisted.savedAt))")
+            removeSessionState(sessionId: sessionId)
+            return nil
+        }
+        return persisted
+    }
+
+    /// Remove saved state file.
+    static func removeSessionState(sessionId: UUID) {
+        let url = stateDirectory.appendingPathComponent("\(sessionId.uuidString).json")
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    /// Clean up all stale state files (older than 10 minutes).
+    static func cleanupStaleStates() {
+        guard let files = try? FileManager.default.contentsOfDirectory(at: stateDirectory, includingPropertiesForKeys: nil) else { return }
+        let cutoff = Date().addingTimeInterval(-600)
+        for file in files where file.pathExtension == "json" {
+            if let attrs = try? FileManager.default.attributesOfItem(atPath: file.path),
+               let modified = attrs[.modificationDate] as? Date,
+               modified < cutoff {
+                try? FileManager.default.removeItem(at: file)
+            }
+        }
     }
 
     /// Parse "MOSH CONNECT <port> <key>" from mosh-server output.
