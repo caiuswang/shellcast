@@ -1,4 +1,11 @@
 import Foundation
+import SwiftUI
+
+extension View {
+    func iPadContentWidth(_ maxWidth: CGFloat = 600) -> some View {
+        frame(maxWidth: maxWidth).frame(maxWidth: .infinity)
+    }
+}
 
 extension Date {
     var relativeDescription: String {

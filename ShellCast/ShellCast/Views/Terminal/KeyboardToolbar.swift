@@ -235,14 +235,21 @@ class TerminalKeyboardToolbar: UIView {
 
     // MARK: - Button Factory
 
+    private var isRegularWidth: Bool {
+        traitCollection.horizontalSizeClass == .regular
+    }
+
     private func makeButton(_ title: String, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle(title, for: .normal)
-        button.titleLabel?.font = .monospacedSystemFont(ofSize: 14, weight: .medium)
+        let fontSize: CGFloat = isRegularWidth ? 15 : 14
+        button.titleLabel?.font = .monospacedSystemFont(ofSize: fontSize, weight: .medium)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
         button.layer.cornerRadius = 6
-        button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
+        let inset: CGFloat = isRegularWidth ? 16 : 12
+        let vInset: CGFloat = isRegularWidth ? 8 : 6
+        button.contentEdgeInsets = UIEdgeInsets(top: vInset, left: inset, bottom: vInset, right: inset)
         button.addTarget(self, action: action, for: .touchUpInside)
         return button
     }

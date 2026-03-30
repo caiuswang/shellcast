@@ -5,6 +5,7 @@ struct TmuxSwitcherOverlay: View {
     let transport: SSHSession
     @Binding var isPresented: Bool
 
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var sessions: [TmuxSession] = []
     @State private var selectedSession: TmuxSession?
     @State private var windows: [TmuxWindow] = []
@@ -68,8 +69,8 @@ struct TmuxSwitcherOverlay: View {
                     sessionList
                 }
             }
-            .frame(maxWidth: 360)
-            .frame(maxHeight: 400)
+            .frame(maxWidth: sizeClass == .regular ? 480 : 360)
+            .frame(maxHeight: sizeClass == .regular ? 500 : 400)
             .background(Color(white: 0.08))
             .cornerRadius(16)
             .shadow(color: .black.opacity(0.5), radius: 20)

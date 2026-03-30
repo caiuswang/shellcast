@@ -118,6 +118,7 @@ struct EditConnectionView: View {
                     .padding(.top, 8)
                 }
                 .padding(20)
+                .iPadContentWidth(600)
             }
             .background(Color.black)
             .navigationTitle(isEditing ? "Edit Connection" : "New Connection")

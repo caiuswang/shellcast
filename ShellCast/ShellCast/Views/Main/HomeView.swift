@@ -17,6 +17,7 @@ enum ActiveSheet: Identifiable {
 
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(ConnectionManager.self) private var connectionManager
     @Query(sort: \Connection.sortOrder) private var connections: [Connection]
     @Query(sort: \SessionRecord.lastActiveAt, order: .reverse)
@@ -121,32 +122,18 @@ struct HomeView: View {
                                     .fontWeight(.semibold)
                                     .foregroundStyle(.gray)
 
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 12) {
+                                if sizeClass == .regular {
+                                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 200))], spacing: 12) {
                                         ForEach(group.sessions) { session in
-                                            ActiveSessionCard(session: session)
-                                                .contentShape(Rectangle())
-                                                .onTapGesture {
-                                                    resumeSession(session)
-                                                }
-                                                .contextMenu {
-                                                    if session.isActive {
-                                                        Button("Deactivate") {
-                                                            session.isActive = false
-                                                            try? modelContext.save()
-                                                            // Disconnect if this is the active transport
-                                                            if session.connectionId == activeConnectionId,
-                                                               let transport = activeTransport {
-                                                                Task { await transport.disconnect() }
-                                                                activeTransport = nil
-                                                                activeConnectionId = nil
-                                                            }
-                                                        }
-                                                    }
-                                                    Button("Delete", role: .destructive) {
-                                                        modelContext.delete(session)
-                                                    }
-                                                }
+                                            sessionCard(session)
+                                        }
+                                    }
+                                } else {
+                                    ScrollView(.horizontal, showsIndicators: false) {
+                                        HStack(spacing: 12) {
+                                            ForEach(group.sessions) { session in
+                                                sessionCard(session)
+                                            }
                                         }
                                     }
                                 }
@@ -160,6 +147,32 @@ struct HomeView: View {
             .navigationTitle("History")
             .navigationBarTitleDisplayMode(.inline)
         }
+    }
+
+    @ViewBuilder
+    private func sessionCard(_ session: SessionRecord) -> some View {
+        ActiveSessionCard(session: session)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                resumeSession(session)
+            }
+            .contextMenu {
+                if session.isActive {
+                    Button("Deactivate") {
+                        session.isActive = false
+                        try? modelContext.save()
+                        if session.connectionId == activeConnectionId,
+                           let transport = activeTransport {
+                            Task { await transport.disconnect() }
+                            activeTransport = nil
+                            activeConnectionId = nil
+                        }
+                    }
+                }
+                Button("Delete", role: .destructive) {
+                    modelContext.delete(session)
+                }
+            }
     }
 
     // MARK: - Connections Tab
@@ -187,6 +200,7 @@ struct HomeView: View {
                     }
                 }
                 .padding()
+                .iPadContentWidth(700)
             }
             .background(Color.black)
             .navigationTitle("Connections")

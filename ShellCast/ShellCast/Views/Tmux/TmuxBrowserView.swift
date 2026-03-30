@@ -109,6 +109,7 @@ struct TmuxBrowserView: View {
                     }
                 }
                 .padding(20)
+                .iPadContentWidth(600)
             }
             .background(Color.black)
             .navigationBarTitleDisplayMode(.inline)
@@ -280,6 +281,7 @@ struct TmuxWindowBrowserView: View {
                 }
             }
             .padding(20)
+            .iPadContentWidth(600)
         }
         .background(Color.black)
         .navigationBarTitleDisplayMode(.inline)

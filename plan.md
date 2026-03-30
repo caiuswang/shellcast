@@ -176,7 +176,14 @@ HomeView (root)
   - History tab shows all sessions (active + inactive), not just active
   - Context menu "Deactivate" marks session inactive and disconnects transport
 - [ ] Background session persistence (`beginBackgroundTask`)
-- [ ] iPad layout optimization
+- [x] iPad layout optimization
+  - `iPadContentWidth()` view modifier for centering content with max width on iPad
+  - HomeView: `LazyVGrid` for session cards on regular width, constrained connections list
+  - ActiveSessionCard: responsive thumbnail (240x160 on iPad, 180x120 on iPhone)
+  - KeyboardToolbar: larger buttons (15pt font, wider insets) on regular width
+  - TmuxSwitcherOverlay: larger frame (480x500) on iPad
+  - EditConnectionView, TmuxBrowserView, SettingsView: constrained content width
+  - All adaptations use `horizontalSizeClass` (works with Split View, Stage Manager)
 
 **Milestone: Comfortable daily-driver terminal experience.** (keyboard ✅, polish TODO)
 
@@ -196,7 +203,7 @@ HomeView (root)
 - [x] Settings view — theme, font, font size, cursor mode/blink, scrollback
 - [x] Settings applied to SwiftTerm TerminalView (colors, font, cursor style, scrollback)
 - [x] Visible edit button on connection rows in main menu
-- [ ] iPad layout optimization (larger terminal, sidebar option)
+- [x] iPad layout optimization (larger terminal, sidebar option)
 - [ ] App icon and launch screen
 - [ ] Error handling, edge cases, empty states
 - [ ] TestFlight beta

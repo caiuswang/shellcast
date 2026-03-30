@@ -5,11 +5,16 @@ struct ActiveSessionCard: View {
     let session: SessionRecord
     var connectionName: String?
 
+    @Environment(\.horizontalSizeClass) private var sizeClass
+
+    private var thumbWidth: CGFloat { sizeClass == .regular ? 240 : 180 }
+    private var thumbHeight: CGFloat { sizeClass == .regular ? 160 : 120 }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Terminal preview with live indicator
             ZStack(alignment: .topTrailing) {
-                SnapshotThumbnail(imageData: session.snapshotImageData)
+                SnapshotThumbnail(imageData: session.snapshotImageData, width: thumbWidth, height: thumbHeight)
 
                 // Live dot — isolated so its animation doesn't re-render the thumbnail
                 if session.isActive {
@@ -46,11 +51,13 @@ struct ActiveSessionCard: View {
 /// Separate view so UIImage decoding only happens when imageData actually changes.
 private struct SnapshotThumbnail: View {
     let imageData: Data?
+    var width: CGFloat = 180
+    var height: CGFloat = 120
 
     var body: some View {
         RoundedRectangle(cornerRadius: 8)
             .fill(Color(white: 0.1))
-            .frame(width: 180, height: 120)
+            .frame(width: width, height: height)
             .overlay {
                 if let imageData, let uiImage = UIImage(data: imageData) {
                     Image(uiImage: uiImage)

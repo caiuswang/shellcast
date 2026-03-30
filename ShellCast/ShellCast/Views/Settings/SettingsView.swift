@@ -49,6 +49,7 @@ struct SettingsView: View {
                     .cornerRadius(12)
                 }
                 .padding()
+                .iPadContentWidth(600)
             }
             .background(Color.black)
             .navigationTitle("Settings")
