@@ -18,6 +18,8 @@ struct ShellCastApp: App {
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
+        // Start network monitoring for WiFi↔cellular handoff detection
+        NetworkMonitor.shared.start()
     }
 
     var body: some Scene {
@@ -57,9 +59,10 @@ struct ShellCastApp: App {
             endBackgroundTaskIfNeeded()
         }
 
-        // Capture snapshots for all active terminal bridges
+        // Capture snapshots and save Mosh state for all active terminal bridges
         Task { @MainActor in
             captureAllSnapshots()
+            saveMoshSessionStates()
         }
     }
 
@@ -102,6 +105,24 @@ struct ShellCastApp: App {
             }
         }
         try? context.save()
+    }
+
+    /// Save Mosh session serialized state to disk so sessions can resume after iOS suspension.
+    @MainActor
+    private func saveMoshSessionStates() {
+        #if canImport(mosh)
+        for (sessionId, bridge) in connectionManager.activeBridges {
+            guard let moshSession = bridge.transport as? MoshSession,
+                  moshSession.isConnected else { continue }
+            MoshService.saveSessionState(
+                sessionId: sessionId,
+                host: moshSession.host,
+                port: moshSession.port,
+                key: moshSession.key,
+                state: moshSession.getSerializedState()
+            )
+        }
+        #endif
     }
 
     private func endBackgroundTaskIfNeeded() {

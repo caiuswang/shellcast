@@ -15,6 +15,7 @@ struct TerminalContainerView: View {
 
     @State private var wasBackgrounded = false
     @State private var reconnectError: String?
+    @State private var networkMonitorToken: UUID?
 
     private var isSSH: Bool { transport is SSHSession }
 
@@ -140,10 +141,25 @@ struct TerminalContainerView: View {
             if let sessionRecord {
                 connectionManager.registerBridge(bridge, for: sessionRecord.id)
             }
+            // Listen for network changes to trigger proactive SSH reconnection
+            if isSSH {
+                NetworkMonitor.shared.onNetworkChange = { [weak bridge] isConnected in
+                    guard let bridge, isConnected else { return }
+                    // Network restored or interface changed — check if SSH is still alive
+                    Task { @MainActor in
+                        guard !bridge.isDisconnected, !bridge.isReconnecting else { return }
+                        print("[NET] Network change detected, checking SSH connection...")
+                        checkConnectionOnForeground()
+                    }
+                }
+            }
         }
         .onDisappear {
             if let sessionRecord {
                 connectionManager.unregisterBridge(for: sessionRecord.id)
+            }
+            if isSSH {
+                NetworkMonitor.shared.onNetworkChange = nil
             }
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
@@ -171,9 +187,14 @@ struct TerminalContainerView: View {
     }
 
     private func checkConnectionOnForeground() {
-        // Mosh handles reconnection internally via UDP — no manual check needed
-        guard isSSH else { return }
+        if isSSH {
+            checkSSHConnectionOnForeground()
+        } else {
+            checkMoshConnectionOnForeground()
+        }
+    }
 
+    private func checkSSHConnectionOnForeground() {
         Task {
             // Show "Reconnecting..." immediately so user knows what's happening
             bridge.isReconnecting = true
@@ -200,6 +221,24 @@ struct TerminalContainerView: View {
                 }
             }
         }
+    }
+
+    private func checkMoshConnectionOnForeground() {
+        // Mosh uses UDP and handles reconnection internally.
+        // After iOS suspension, the client may have been killed.
+        // Check if transport is still connected; if not, show status.
+        #if canImport(mosh)
+        guard let moshSession = transport as? MoshSession else { return }
+        if !moshSession.isConnected {
+            // Mosh was killed during background — show disconnected state.
+            // The user can tap "Reconnect" which will re-bootstrap via SSH.
+            bridge.isDisconnected = true
+            bridge.terminalView?.feed(text: "\r\n[Session suspended by iOS — tap Reconnect to resume]\r\n")
+        } else {
+            // Mosh survived — it will resync automatically via UDP
+            bridge.terminalView?.feed(text: "\r\n[Resumed]\r\n")
+        }
+        #endif
     }
 
     private func attemptReconnect() {
