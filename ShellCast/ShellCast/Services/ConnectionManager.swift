@@ -7,6 +7,9 @@ final class ConnectionManager {
     var connectionError: String?
     var isConnecting = false
 
+    /// The outer connect task — cancelling this aborts the entire connection flow.
+    var connectingTask: Task<Void, Never>?
+
     /// Registered bridges for active terminal views — used for snapshot capture on background
     var activeBridges: [UUID: TerminalBridge] = [:]
 
@@ -33,14 +36,24 @@ final class ConnectionManager {
 
         do {
             let transport = try await connectSSH(connection)
+            try Task.checkCancellation()
             let session = ActiveSession(connection: connection, transport: transport)
             activeSessions.append(session)
             connection.lastConnectedAt = Date()
             return transport
         } catch {
-            connectionError = error.localizedDescription
+            if !Task.isCancelled {
+                connectionError = error.localizedDescription
+            }
             throw error
         }
+    }
+
+    /// Cancel an in-progress connection attempt.
+    func cancelConnect() {
+        connectingTask?.cancel()
+        connectingTask = nil
+        isConnecting = false
     }
 
     func disconnect(_ session: ActiveSession) async {

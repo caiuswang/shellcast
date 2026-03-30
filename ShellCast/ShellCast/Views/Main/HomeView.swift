@@ -62,9 +62,15 @@ struct HomeView: View {
             if connectionManager.isConnecting {
                 Color.black.opacity(0.6)
                     .ignoresSafeArea()
-                ProgressView("Connecting...")
-                    .tint(.green)
-                    .foregroundStyle(.white)
+                VStack(spacing: 16) {
+                    ProgressView("Connecting...")
+                        .tint(.green)
+                        .foregroundStyle(.white)
+                    Button("Cancel") {
+                        connectionManager.cancelConnect()
+                    }
+                    .foregroundStyle(.gray)
+                }
             }
         }
         .sheet(item: $activeSheet) { sheet in
@@ -243,9 +249,10 @@ struct HomeView: View {
 
     @MainActor
     private func connectTo(_ connection: Connection) {
-        Task { @MainActor in
+        connectionManager.connectingTask = Task { @MainActor in
             do {
                 let transport = try await connectionManager.connect(connection)
+                try Task.checkCancellation()
                 self.activeTransport = transport
                 self.activeConnectionId = connection.id
 
@@ -253,18 +260,19 @@ struct HomeView: View {
                 var sessions: [TmuxSession] = []
                 do {
                     sessions = try await TmuxParser.listSessions(over: transport)
+                } catch {}
 
-                } catch {
-
-                }
+                try Task.checkCancellation()
 
                 // Small delay to ensure any previous sheet has fully dismissed
                 try? await Task.sleep(for: .milliseconds(500))
 
                 self.activeSheet = .tmuxBrowser(sessions)
             } catch {
-                errorMessage = error.localizedDescription
-                showError = true
+                if !Task.isCancelled {
+                    errorMessage = error.localizedDescription
+                    showError = true
+                }
             }
         }
     }
@@ -324,9 +332,10 @@ struct HomeView: View {
             return
         }
 
-        Task { @MainActor in
+        connectionManager.connectingTask = Task { @MainActor in
             do {
                 let transport = try await connectionManager.connect(connection)
+                try Task.checkCancellation()
                 self.activeTransport = transport
                 self.activeConnectionId = connection.id
 
@@ -343,8 +352,10 @@ struct HomeView: View {
                 try await transport.openShell(tmuxCommand: tmuxCommand)
                 showTerminal = true
             } catch {
-                errorMessage = error.localizedDescription
-                showError = true
+                if !Task.isCancelled {
+                    errorMessage = error.localizedDescription
+                    showError = true
+                }
             }
         }
     }
