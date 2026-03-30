@@ -170,6 +170,11 @@ HomeView (root)
   - Close button (X) disconnects and marks session inactive
   - Tapping a history card reconnects SSH and re-attaches to tmux session
 - [x] `ActiveSessionCard` with live thumbnail preview
+  - Pulsing green dot and green border on active session cards (isolated views to avoid re-render flicker)
+  - `snapshotCapturedAt` timestamp on `SessionRecord`; "just now" for <60s in `TimeFormatting`
+  - Snapshot capture guarded against disconnected/reconnecting overlay states
+  - History tab shows all sessions (active + inactive), not just active
+  - Context menu "Deactivate" marks session inactive and disconnects transport
 - [ ] Background session persistence (`beginBackgroundTask`)
 - [ ] iPad layout optimization
 
