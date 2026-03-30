@@ -19,8 +19,8 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ConnectionManager.self) private var connectionManager
     @Query(sort: \Connection.sortOrder) private var connections: [Connection]
-    @Query(filter: #Predicate<SessionRecord> { $0.isActive }, sort: \SessionRecord.lastActiveAt, order: .reverse)
-    private var activeSessions: [SessionRecord]
+    @Query(sort: \SessionRecord.lastActiveAt, order: .reverse)
+    private var allSessions: [SessionRecord]
 
     @State private var selectedTab = 0
     @State private var activeSheet: ActiveSheet?
@@ -101,7 +101,7 @@ struct HomeView: View {
     private var historyTab: some View {
         NavigationStack {
             ScrollView {
-                if activeSessions.isEmpty {
+                if allSessions.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "clock")
                             .font(.system(size: 40))
@@ -130,6 +130,19 @@ struct HomeView: View {
                                                     resumeSession(session)
                                                 }
                                                 .contextMenu {
+                                                    if session.isActive {
+                                                        Button("Deactivate") {
+                                                            session.isActive = false
+                                                            try? modelContext.save()
+                                                            // Disconnect if this is the active transport
+                                                            if session.connectionId == activeConnectionId,
+                                                               let transport = activeTransport {
+                                                                Task { await transport.disconnect() }
+                                                                activeTransport = nil
+                                                                activeConnectionId = nil
+                                                            }
+                                                        }
+                                                    }
                                                     Button("Delete", role: .destructive) {
                                                         modelContext.delete(session)
                                                     }
@@ -204,7 +217,7 @@ struct HomeView: View {
     }
 
     private var groupedSessions: [SessionGroup] {
-        let grouped = Dictionary(grouping: activeSessions) { $0.connectionId }
+        let grouped = Dictionary(grouping: allSessions) { $0.connectionId }
         return grouped.map { (connectionId, sessions) in
             let name = connections.first(where: { $0.id == connectionId })?.name ?? "Unknown"
             return SessionGroup(connectionId: connectionId, connectionName: name, sessions: sessions)
@@ -276,7 +289,7 @@ struct HomeView: View {
 
     private func findOrCreateSessionRecord(connectionId: UUID, tmuxSessionName: String?) -> SessionRecord {
         // Look for an existing active session with the same connection and tmux session
-        if let existing = activeSessions.first(where: {
+        if let existing = allSessions.first(where: {
             $0.connectionId == connectionId && $0.tmuxSessionName == tmuxSessionName
         }) {
             existing.lastActiveAt = Date()

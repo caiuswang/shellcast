@@ -139,8 +139,11 @@ struct TerminalContainerView: View {
 
     private func saveSnapshot() {
         guard let sessionRecord,
+              !bridge.isDisconnected,
+              !bridge.isReconnecting,
               let data = bridge.captureSnapshot() else { return }
         sessionRecord.snapshotImageData = data
+        sessionRecord.snapshotCapturedAt = Date()
         sessionRecord.lastActiveAt = Date()
         try? modelContext.save()
     }

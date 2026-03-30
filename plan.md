@@ -169,7 +169,7 @@ HomeView (root)
   - Minimize button (chevron down) dismisses terminal without disconnecting
   - Close button (X) disconnects and marks session inactive
   - Tapping a history card reconnects SSH and re-attaches to tmux session
-- [ ] `ActiveSessionCard` with live thumbnail preview
+- [x] `ActiveSessionCard` with live thumbnail preview
 - [ ] Background session persistence (`beginBackgroundTask`)
 - [ ] iPad layout optimization
 

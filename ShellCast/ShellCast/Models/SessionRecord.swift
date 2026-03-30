@@ -9,6 +9,7 @@ final class SessionRecord {
     var startedAt: Date
     var lastActiveAt: Date
     var snapshotImageData: Data?
+    var snapshotCapturedAt: Date?
     var isActive: Bool
 
     init(connectionId: UUID, tmuxSessionName: String? = nil) {
