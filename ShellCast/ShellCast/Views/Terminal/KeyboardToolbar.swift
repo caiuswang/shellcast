@@ -32,7 +32,8 @@ class TerminalKeyboardToolbar: UIView {
 
     // Preview bar
     private var previewBar: UIView!
-    private var previewTextField: UITextField!
+    private var previewTextView: UITextView!
+    private var previewHeightConstraint: NSLayoutConstraint?
     var onPreviewVisibilityChanged: ((Bool) -> Void)?
 
     override init(frame: CGRect) {
@@ -131,11 +132,13 @@ class TerminalKeyboardToolbar: UIView {
         previewBar.isHidden = true
         addSubview(previewBar)
 
+        previewHeightConstraint = previewBar.heightAnchor.constraint(equalToConstant: 120)
+
         NSLayoutConstraint.activate([
-            previewBar.topAnchor.constraint(equalTo: topAnchor),
             previewBar.bottomAnchor.constraint(equalTo: bottomAnchor),
             previewBar.leadingAnchor.constraint(equalTo: leadingAnchor),
             previewBar.trailingAnchor.constraint(equalTo: trailingAnchor),
+            previewHeightConstraint!,
         ])
 
         let cancelBtn = UIButton(type: .system)
@@ -150,40 +153,37 @@ class TerminalKeyboardToolbar: UIView {
         sendBtn.addTarget(self, action: #selector(confirmPreview), for: .touchUpInside)
         sendBtn.translatesAutoresizingMaskIntoConstraints = false
 
-        previewTextField = UITextField()
-        previewTextField.translatesAutoresizingMaskIntoConstraints = false
-        previewTextField.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
-        previewTextField.textColor = .white
-        previewTextField.tintColor = .green
-        previewTextField.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
-        previewTextField.layer.cornerRadius = 6
-        previewTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 0))
-        previewTextField.leftViewMode = .always
-        previewTextField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 0))
-        previewTextField.rightViewMode = .always
-        previewTextField.autocorrectionType = .no
-        previewTextField.autocapitalizationType = .none
-        previewTextField.spellCheckingType = .no
-        previewTextField.returnKeyType = .send
-        previewTextField.addTarget(self, action: #selector(confirmPreview), for: .editingDidEndOnExit)
+        previewTextView = UITextView()
+        previewTextView.translatesAutoresizingMaskIntoConstraints = false
+        previewTextView.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
+        previewTextView.textColor = .white
+        previewTextView.tintColor = .green
+        previewTextView.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
+        previewTextView.layer.cornerRadius = 6
+        previewTextView.textContainerInset = UIEdgeInsets(top: 6, left: 4, bottom: 6, right: 4)
+        previewTextView.autocorrectionType = .no
+        previewTextView.autocapitalizationType = .none
+        previewTextView.spellCheckingType = .no
+        previewTextView.isScrollEnabled = true
+        previewTextView.returnKeyType = .send
 
         previewBar.addSubview(cancelBtn)
-        previewBar.addSubview(previewTextField)
+        previewBar.addSubview(previewTextView)
         previewBar.addSubview(sendBtn)
 
         NSLayoutConstraint.activate([
             cancelBtn.leadingAnchor.constraint(equalTo: previewBar.leadingAnchor, constant: 8),
-            cancelBtn.centerYAnchor.constraint(equalTo: previewBar.centerYAnchor),
+            cancelBtn.topAnchor.constraint(equalTo: previewBar.topAnchor, constant: 7),
             cancelBtn.widthAnchor.constraint(equalToConstant: 30),
             cancelBtn.heightAnchor.constraint(equalToConstant: 30),
 
-            previewTextField.leadingAnchor.constraint(equalTo: cancelBtn.trailingAnchor, constant: 8),
-            previewTextField.trailingAnchor.constraint(equalTo: sendBtn.leadingAnchor, constant: -8),
-            previewTextField.centerYAnchor.constraint(equalTo: previewBar.centerYAnchor),
-            previewTextField.heightAnchor.constraint(equalToConstant: 32),
+            previewTextView.leadingAnchor.constraint(equalTo: cancelBtn.trailingAnchor, constant: 8),
+            previewTextView.trailingAnchor.constraint(equalTo: sendBtn.leadingAnchor, constant: -8),
+            previewTextView.topAnchor.constraint(equalTo: previewBar.topAnchor, constant: 4),
+            previewTextView.bottomAnchor.constraint(equalTo: previewBar.bottomAnchor, constant: -4),
 
             sendBtn.trailingAnchor.constraint(equalTo: previewBar.trailingAnchor, constant: -8),
-            sendBtn.centerYAnchor.constraint(equalTo: previewBar.centerYAnchor),
+            sendBtn.topAnchor.constraint(equalTo: previewBar.topAnchor, constant: 7),
             sendBtn.widthAnchor.constraint(equalToConstant: 30),
             sendBtn.heightAnchor.constraint(equalToConstant: 30),
         ])
@@ -373,7 +373,7 @@ class TerminalKeyboardToolbar: UIView {
             if !whisper.isModelLoaded {
                 showPreview(text: "Loading model...")
                 whisper.onStatusUpdate = { [weak self] status in
-                    self?.previewTextField.text = status
+                    self?.previewTextView.text = status
                 }
                 Task { @MainActor in
                     do {
@@ -427,7 +427,7 @@ class TerminalKeyboardToolbar: UIView {
             } else {
                 text = await AppleSpeechService.shared.stopAndTranscribe()
             }
-            self.previewTextField.text = text.isEmpty ? "(no speech detected)" : text
+            self.previewTextView.text = text.isEmpty ? "(no speech detected)" : text
         }
     }
 
@@ -447,18 +447,31 @@ class TerminalKeyboardToolbar: UIView {
     // MARK: - Preview Bar
 
     private func showPreview(text: String) {
-        previewTextField.text = text
+        previewTextView.text = text
         previewBar.isHidden = false
         scrollView.isHidden = true
+        invalidateIntrinsicContentSize()
+        superview?.setNeedsLayout()
+        superview?.layoutIfNeeded()
         onPreviewVisibilityChanged?(true)
     }
 
     private func hidePreview() {
         previewBar.isHidden = true
         scrollView.isHidden = false
-        previewTextField.text = ""
-        previewTextField.resignFirstResponder()
+        previewTextView.text = ""
+        previewTextView.resignFirstResponder()
+        invalidateIntrinsicContentSize()
+        superview?.setNeedsLayout()
+        superview?.layoutIfNeeded()
         onPreviewVisibilityChanged?(false)
+    }
+
+    override var intrinsicContentSize: CGSize {
+        if !previewBar.isHidden {
+            return CGSize(width: UIView.noIntrinsicMetric, height: 120)
+        }
+        return CGSize(width: UIView.noIntrinsicMetric, height: 44)
     }
 
     @objc private func confirmPreview() {
@@ -470,7 +483,7 @@ class TerminalKeyboardToolbar: UIView {
             return
         }
 
-        if let text = previewTextField.text, !text.isEmpty,
+        if let text = previewTextView.text, !text.isEmpty,
            text != "Listening... tap mic to stop",
            text != "Transcribing...",
            text != "(no speech detected)" {

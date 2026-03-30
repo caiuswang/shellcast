@@ -84,6 +84,7 @@ class TerminalViewController: UIViewController {
 
     private var terminalBottomConstraint: NSLayoutConstraint!
     private var toolbarBottomConstraint: NSLayoutConstraint!
+    private var toolbarHeightConstraint: NSLayoutConstraint!
     private var toolbar: TerminalKeyboardToolbar!
 
     override func viewDidLoad() {
@@ -97,13 +98,22 @@ class TerminalViewController: UIViewController {
         view.addSubview(toolbar)
 
         toolbarBottomConstraint = toolbar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        toolbarHeightConstraint = toolbar.heightAnchor.constraint(equalToConstant: 44)
 
         NSLayoutConstraint.activate([
             toolbar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             toolbar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             toolbarBottomConstraint,
-            toolbar.heightAnchor.constraint(equalToConstant: 44),
+            toolbarHeightConstraint,
         ])
+
+        toolbar.onPreviewVisibilityChanged = { [weak self] visible in
+            guard let self = self else { return }
+            self.toolbarHeightConstraint.constant = visible ? 120 : 44
+            UIView.animate(withDuration: 0.2) {
+                self.view.layoutIfNeeded()
+            }
+        }
 
         // Create SwiftTerm TerminalView
         let settings = TerminalSettings.shared
