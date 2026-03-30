@@ -38,6 +38,7 @@
 		CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */; };
 		D1697AFEF68A9BC9D6B098CE /* ConnectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */; };
 		D8E0106A70EA257C8160A171 /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */; };
+		DC781359A20E8E2128EEC1F9 /* TmuxSwitcherOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C23234FBB9E4B647294C2F4 /* TmuxSwitcherOverlay.swift */; };
 		E16D2496E935F03D5D4DE84E /* config.json in Resources */ = {isa = PBXBuildFile; fileRef = B3BD57C2918A942D29425698 /* config.json */; };
 		E667F6D8BA692FFA54926FD5 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A6BDCA94266B0457F457D2 /* SettingsView.swift */; };
 		E7BF50AE512C431EBC34DABF /* merges.txt in Resources */ = {isa = PBXBuildFile; fileRef = 25786352B6CFFDAC177133C9 /* merges.txt */; };
@@ -81,10 +82,11 @@
 		929BB1504B1393CB658133E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		934D46518265B5BF6A5DEDBF /* normalizer.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = normalizer.json; sourceTree = "<group>"; };
 		9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFontMono-Light.ttf"; sourceTree = "<group>"; };
+		9C23234FBB9E4B647294C2F4 /* TmuxSwitcherOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSwitcherOverlay.swift; sourceTree = "<group>"; };
 		A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCard.swift; sourceTree = "<group>"; };
 		A7764FF4377D60000A6D5B61 /* JetBrainsMonoNerdFont-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFont-Regular.ttf"; sourceTree = "<group>"; };
 		AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSession.swift; sourceTree = "<group>"; };
-		AA4F2160E25985C381E065CE /* ShellCast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShellCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA4F2160E25985C381E065CE /* ShellCast.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ShellCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD78C13923FD491B76957AD7 /* TransportSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportSession.swift; sourceTree = "<group>"; };
 		B3BD57C2918A942D29425698 /* config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = config.json; sourceTree = "<group>"; };
 		B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionRow.swift; sourceTree = "<group>"; };
@@ -174,6 +176,7 @@
 			children = (
 				E2EA76447CCB1F4716C33090 /* KeyboardToolbar.swift */,
 				23317A00D128D5D060821218 /* TerminalContainerView.swift */,
+				9C23234FBB9E4B647294C2F4 /* TmuxSwitcherOverlay.swift */,
 			);
 			path = Terminal;
 			sourceTree = "<group>";
@@ -346,6 +349,11 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					2DB9E1E934CFCED0689F5211 = {
+						DevelopmentTeam = "";
+					};
+				};
 			};
 			buildConfigurationList = 8D26705189B5FE5C872C9531 /* Build configuration list for PBXProject "ShellCast" */;
 			developmentRegion = en;
@@ -428,6 +436,7 @@
 				CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */,
 				FF1B49821455A2ABFF7F6468 /* TmuxParser.swift in Sources */,
 				9BD757064C4FFB8E27A55496 /* TmuxSession.swift in Sources */,
+				DC781359A20E8E2128EEC1F9 /* TmuxSwitcherOverlay.swift in Sources */,
 				41CE7E2EBD800643D19F03EE /* TransportSession.swift in Sources */,
 				B8F0A8D4D5C8C4745A87846F /* WhisperService.swift in Sources */,
 			);
@@ -545,7 +554,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = RR3B8A7J66;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ShellCast/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ShellCast needs local network access to connect to your servers via SSH.";
@@ -630,7 +639,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = RR3B8A7J66;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ShellCast/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ShellCast needs local network access to connect to your servers via SSH.";

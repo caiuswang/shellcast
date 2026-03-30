@@ -9,6 +9,8 @@ class TerminalKeyboardToolbar: UIView {
     weak var terminalView: TerminalView?
     /// Direct send callback — sends bytes over SSH regardless of first responder state.
     var onSend: (([UInt8]) -> Void)?
+    /// Callback to show the tmux session/window switcher overlay.
+    var onTmuxSwitcher: (() -> Void)?
 
     private(set) var ctrlActive = false
     private(set) var altActive = false
@@ -16,6 +18,7 @@ class TerminalKeyboardToolbar: UIView {
     private var altButton: UIButton!
 
     // Button groups for reordering
+    private var tmuxGroup: [UIView] = []
     private var pageGroup: [UIView] = []
     private var modifierGroup: [UIView] = []
     private var escTabGroup: [UIView] = []
@@ -78,6 +81,15 @@ class TerminalKeyboardToolbar: UIView {
         ])
 
         // Create button groups (no separators — those are added fresh each time)
+        let tmuxButton = UIButton(type: .system)
+        tmuxButton.setImage(UIImage(systemName: "rectangle.split.3x1"), for: .normal)
+        tmuxButton.tintColor = .green
+        tmuxButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
+        tmuxButton.layer.cornerRadius = 6
+        tmuxButton.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
+        tmuxButton.addTarget(self, action: #selector(tapTmuxSwitcher), for: .touchUpInside)
+        tmuxGroup = [tmuxButton]
+
         pageGroup = [
             makeButton("PgUp", action: #selector(tapPageUp)),
             makeButton("PgDn", action: #selector(tapPageDown)),
@@ -205,9 +217,9 @@ class TerminalKeyboardToolbar: UIView {
 
         let groups: [[UIView]]
         if keyboardVisible {
-            groups = [modifierGroup, escTabGroup, arrowGroup, pageGroup, symbolGroup, micGroup, kbGroup]
+            groups = [tmuxGroup, modifierGroup, escTabGroup, arrowGroup, pageGroup, symbolGroup, micGroup, kbGroup]
         } else {
-            groups = [pageGroup, modifierGroup, escTabGroup, arrowGroup, symbolGroup, micGroup, kbGroup]
+            groups = [tmuxGroup, pageGroup, modifierGroup, escTabGroup, arrowGroup, symbolGroup, micGroup, kbGroup]
         }
 
         for (i, group) in groups.enumerated() {
@@ -337,6 +349,10 @@ class TerminalKeyboardToolbar: UIView {
     @objc private func tapTilde()      { sendChar("~") }
     @objc private func tapDash()       { sendChar("-") }
     @objc private func tapUnderscore() { sendChar("_") }
+
+    @objc private func tapTmuxSwitcher() {
+        onTmuxSwitcher?()
+    }
 
     @objc private func tapKeyboard() {
         if terminalView?.isFirstResponder == true {

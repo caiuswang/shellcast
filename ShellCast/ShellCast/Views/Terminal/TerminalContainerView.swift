@@ -55,6 +55,16 @@ struct TerminalContainerView: View {
                 }
             }
 
+            // Tmux switcher overlay
+            if bridge.showTmuxSwitcher {
+                TmuxSwitcherOverlay(
+                    transport: transport,
+                    isPresented: $bridge.showTmuxSwitcher
+                )
+                .transition(.opacity)
+                .zIndex(10)
+            }
+
             // Disconnected overlay
             if bridge.isDisconnected && !bridge.isReconnecting {
                 Color.black.opacity(0.7)
@@ -280,6 +290,10 @@ class TerminalViewController: UIViewController {
             Task {
                 try? await self.bridge.transport.send(Data(bytes))
             }
+        }
+        toolbar.onTmuxSwitcher = { [weak self] in
+            guard let self else { return }
+            self.bridge.showTmuxSwitcher = true
         }
         bridge.terminalView = terminalView
         bridge.keyboardToolbar = toolbar

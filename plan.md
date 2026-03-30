@@ -144,9 +144,13 @@ HomeView (root)
   - Add `TmuxParser` commands: renameSession, killSession, renameWindow, killWindow
   - Context menus on session/window rows with rename (text alert) and delete (confirmation)
   - Auto-refresh list after each action
-- [ ] In-terminal tmux session/window switcher overlay
+- [x] In-terminal tmux session/window switcher overlay
+  - Tmux button (green icon) on keyboard toolbar triggers overlay
+  - `TmuxSwitcherOverlay` shows sessions → drill into windows
+  - Highlights current session; switch via `tmux switch-client` / `tmux select-window`
+  - `TmuxParser`: added `switchClient`, `selectWindow`, `currentSessionName`
 
-**Milestone: Full flow from home → tmux session → terminal.** (core flow ✅, window-level switching TODO)
+**Milestone: Full flow from home → tmux session → terminal.** ✅
 
 ### Phase 3: Keyboard Toolbar + UX Polish — IN PROGRESS
 - [x] Custom `KeyboardToolbar` — persistent toolbar with Ctrl/Alt modifiers, Esc, Tab, arrows, PgUp/PgDn, symbols

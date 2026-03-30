@@ -11,6 +11,7 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
 
     @Published var isReconnecting = false
     @Published var isDisconnected = false
+    @Published var showTmuxSwitcher = false
 
     private var readTask: Task<Void, Never>?
 

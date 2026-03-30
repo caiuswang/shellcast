@@ -52,6 +52,23 @@ struct TmuxParser {
         _ = try await session.exec(command)
     }
 
+    static func switchClient(over session: SSHSession, targetSession: String) async throws {
+        let command = "/opt/homebrew/bin/tmux switch-client -t \(targetSession)"
+        _ = try await session.exec(command)
+    }
+
+    static func selectWindow(over session: SSHSession, sessionName: String, windowIndex: Int) async throws {
+        let command = "/opt/homebrew/bin/tmux select-window -t \(sessionName):\(windowIndex)"
+        _ = try await session.exec(command)
+    }
+
+    static func currentSessionName(over session: SSHSession) async throws -> String? {
+        let command = "/opt/homebrew/bin/tmux display-message -p '#{session_name}'"
+        let output = try await session.exec(command)
+        let name = output.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? nil : name
+    }
+
     static func listWindows(over session: SSHSession, sessionName: String) async throws -> [TmuxWindow] {
         let format = "#{window_index}\(separator)#{window_name}\(separator)#{window_active}\(separator)#{window_panes}"
         let command = "/opt/homebrew/bin/tmux list-windows -t \(sessionName) -F '\(format)'"
