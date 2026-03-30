@@ -126,7 +126,7 @@ final class MoshSession: TransportSession {
                         },
                         selfPtr,
                         self.host, self.port, self.key, "adaptive",
-                        ptr, stateData.count, nil
+                        ptr, stateData.count, "yes"
                     )
                 }
             } else {
@@ -139,7 +139,7 @@ final class MoshSession: TransportSession {
                     },
                     selfPtr,
                     self.host, self.port, self.key, "adaptive",
-                    nil, 0, nil
+                    nil, 0, "yes"
                 )
             }
 
