@@ -26,3 +26,7 @@ ShellCast/ShellCast.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 
 # Claude
 .claude/
+CLAUDE.md
+
+# Doc images
+doc/
