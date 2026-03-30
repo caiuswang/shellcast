@@ -32,6 +32,26 @@ struct TmuxParser {
         }
     }
 
+    static func renameSession(over session: SSHSession, oldName: String, newName: String) async throws {
+        let command = "/opt/homebrew/bin/tmux rename-session -t \(oldName) \(newName)"
+        _ = try await session.exec(command)
+    }
+
+    static func killSession(over session: SSHSession, sessionName: String) async throws {
+        let command = "/opt/homebrew/bin/tmux kill-session -t \(sessionName)"
+        _ = try await session.exec(command)
+    }
+
+    static func renameWindow(over session: SSHSession, sessionName: String, windowIndex: Int, newName: String) async throws {
+        let command = "/opt/homebrew/bin/tmux rename-window -t \(sessionName):\(windowIndex) \(newName)"
+        _ = try await session.exec(command)
+    }
+
+    static func killWindow(over session: SSHSession, sessionName: String, windowIndex: Int) async throws {
+        let command = "/opt/homebrew/bin/tmux kill-window -t \(sessionName):\(windowIndex)"
+        _ = try await session.exec(command)
+    }
+
     static func listWindows(over session: SSHSession, sessionName: String) async throws -> [TmuxWindow] {
         let format = "#{window_index}\(separator)#{window_name}\(separator)#{window_active}\(separator)#{window_panes}"
         let command = "/opt/homebrew/bin/tmux list-windows -t \(sessionName) -F '\(format)'"

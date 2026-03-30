@@ -1,12 +1,16 @@
 import SwiftUI
 
 struct TmuxBrowserView: View {
-    let sessions: [TmuxSession]
+    let initialSessions: [TmuxSession]
     let transport: SSHSession
     let onSelect: (TmuxSession?, Int?) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var navigationPath = NavigationPath()
+    @State private var sessions: [TmuxSession] = []
+    @State private var renameTarget: TmuxSession?
+    @State private var renameText = ""
+    @State private var deleteTarget: TmuxSession?
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -36,6 +40,19 @@ struct TmuxBrowserView: View {
                                     navigationPath.append(session)
                                 } label: {
                                     TmuxSessionRow(session: session)
+                                }
+                                .contextMenu {
+                                    Button {
+                                        renameText = session.name
+                                        renameTarget = session
+                                    } label: {
+                                        Label("Rename", systemImage: "pencil")
+                                    }
+                                    Button(role: .destructive) {
+                                        deleteTarget = session
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
                                 }
 
                                 if session.id != sessions.last?.id {
@@ -112,9 +129,55 @@ struct TmuxBrowserView: View {
                     onSelect: onSelect
                 )
             }
+            .alert("Rename Session", isPresented: .init(
+                get: { renameTarget != nil },
+                set: { if !$0 { renameTarget = nil } }
+            )) {
+                TextField("Session name", text: $renameText)
+                Button("Cancel", role: .cancel) { renameTarget = nil }
+                Button("Rename") {
+                    if let target = renameTarget {
+                        renameSession(target)
+                    }
+                }
+            }
+            .alert("Delete Session", isPresented: .init(
+                get: { deleteTarget != nil },
+                set: { if !$0 { deleteTarget = nil } }
+            )) {
+                Button("Cancel", role: .cancel) { deleteTarget = nil }
+                Button("Delete", role: .destructive) {
+                    if let target = deleteTarget {
+                        deleteSession(target)
+                    }
+                }
+            } message: {
+                if let target = deleteTarget {
+                    Text("Delete session \"\(target.name)\"? This will kill all windows and processes in it.")
+                }
+            }
         }
         .presentationDetents([.medium, .large])
         .preferredColorScheme(.dark)
+        .onAppear {
+            sessions = initialSessions
+        }
+    }
+
+    private func renameSession(_ session: TmuxSession) {
+        let newName = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !newName.isEmpty, newName != session.name else { return }
+        Task {
+            try? await TmuxParser.renameSession(over: transport, oldName: session.name, newName: newName)
+            sessions = (try? await TmuxParser.listSessions(over: transport)) ?? []
+        }
+    }
+
+    private func deleteSession(_ session: TmuxSession) {
+        Task {
+            try? await TmuxParser.killSession(over: transport, sessionName: session.name)
+            sessions = (try? await TmuxParser.listSessions(over: transport)) ?? []
+        }
     }
 }
 
@@ -128,6 +191,9 @@ struct TmuxWindowBrowserView: View {
     @State private var windows: [TmuxWindow] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var renameTarget: TmuxWindow?
+    @State private var renameText = ""
+    @State private var deleteTarget: TmuxWindow?
 
     var body: some View {
         ScrollView {
@@ -173,6 +239,19 @@ struct TmuxWindowBrowserView: View {
                             } label: {
                                 TmuxWindowRow(window: window)
                             }
+                            .contextMenu {
+                                Button {
+                                    renameText = window.name
+                                    renameTarget = window
+                                } label: {
+                                    Label("Rename", systemImage: "pencil")
+                                }
+                                Button(role: .destructive) {
+                                    deleteTarget = window
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
 
                             if window.id != windows.last?.id {
                                 Divider()
@@ -207,6 +286,33 @@ struct TmuxWindowBrowserView: View {
         .task {
             await loadWindows()
         }
+        .alert("Rename Window", isPresented: .init(
+            get: { renameTarget != nil },
+            set: { if !$0 { renameTarget = nil } }
+        )) {
+            TextField("Window name", text: $renameText)
+            Button("Cancel", role: .cancel) { renameTarget = nil }
+            Button("Rename") {
+                if let target = renameTarget {
+                    renameWindow(target)
+                }
+            }
+        }
+        .alert("Delete Window", isPresented: .init(
+            get: { deleteTarget != nil },
+            set: { if !$0 { deleteTarget = nil } }
+        )) {
+            Button("Cancel", role: .cancel) { deleteTarget = nil }
+            Button("Delete", role: .destructive) {
+                if let target = deleteTarget {
+                    deleteWindow(target)
+                }
+            }
+        } message: {
+            if let target = deleteTarget {
+                Text("Delete window \"\(target.index): \(target.name)\"? This will kill all processes in it.")
+            }
+        }
     }
 
     private func loadWindows() async {
@@ -216,6 +322,22 @@ struct TmuxWindowBrowserView: View {
             errorMessage = "Failed to list windows"
         }
         isLoading = false
+    }
+
+    private func renameWindow(_ window: TmuxWindow) {
+        let newName = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !newName.isEmpty, newName != window.name else { return }
+        Task {
+            try? await TmuxParser.renameWindow(over: transport, sessionName: session.name, windowIndex: window.index, newName: newName)
+            windows = (try? await TmuxParser.listWindows(over: transport, sessionName: session.name)) ?? []
+        }
+    }
+
+    private func deleteWindow(_ window: TmuxWindow) {
+        Task {
+            try? await TmuxParser.killWindow(over: transport, sessionName: session.name, windowIndex: window.index)
+            windows = (try? await TmuxParser.listWindows(over: transport, sessionName: session.name)) ?? []
+        }
     }
 }
 

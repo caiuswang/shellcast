@@ -90,7 +90,7 @@ struct HomeView: View {
                 case .editConnection(let connection):
                     EditConnectionView(mode: .edit(connection))
                 case .tmuxBrowser(let sessions):
-                    TmuxBrowserView(sessions: sessions, transport: activeTransport!) { tmuxSession, windowIndex in
+                    TmuxBrowserView(initialSessions: sessions, transport: activeTransport!) { tmuxSession, windowIndex in
                         activeSheet = nil
                         if let transport = activeTransport {
                             openShell(transport: transport, tmuxSession: tmuxSession, windowIndex: windowIndex)
