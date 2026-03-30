@@ -158,6 +158,17 @@ HomeView (root)
   - Sends correct ANSI escape sequences and control characters
 - [x] iPhone keyboard testing and layout
 - [x] Terminal snapshot rendering for active session cards
+  - `TerminalBridge.captureSnapshot()` renders terminal view to 360x240 JPEG thumbnail
+  - Snapshots captured on minimize, close, and app background
+  - `ActiveSessionCard` displays snapshot when available, falls back to terminal icon
+- [x] Tab-based navigation (History, Connections, Settings)
+  - History tab: sessions grouped by connection name, tap to resume, long-press to delete
+  - Connections tab: saved connections with FAB add button
+  - Settings tab: moved from modal sheet to dedicated tab
+- [x] Terminal minimize and session resume
+  - Minimize button (chevron down) dismisses terminal without disconnecting
+  - Close button (X) disconnects and marks session inactive
+  - Tapping a history card reconnects SSH and re-attaches to tmux session
 - [ ] `ActiveSessionCard` with live thumbnail preview
 - [ ] Background session persistence (`beginBackgroundTask`)
 - [ ] iPad layout optimization
