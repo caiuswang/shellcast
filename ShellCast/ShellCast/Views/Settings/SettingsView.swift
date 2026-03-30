@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @Environment(\.dismiss) private var dismiss
     @State private var settings = TerminalSettings.shared
 
     var body: some View {
@@ -54,21 +53,6 @@ struct SettingsView: View {
             .background(Color.black)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(.white)
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .frame(width: 40, height: 40)
-                            .background(Color(white: 0.15))
-                            .clipShape(Circle())
-                    }
-                }
-            }
         }
         .preferredColorScheme(.dark)
     }

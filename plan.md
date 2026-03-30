@@ -157,7 +157,7 @@ HomeView (root)
   - Layout adapts based on keyboard visibility
   - Sends correct ANSI escape sequences and control characters
 - [x] iPhone keyboard testing and layout
-- [ ] Terminal snapshot rendering for active session cards
+- [x] Terminal snapshot rendering for active session cards
 - [ ] `ActiveSessionCard` with live thumbnail preview
 - [ ] Background session persistence (`beginBackgroundTask`)
 - [ ] iPad layout optimization

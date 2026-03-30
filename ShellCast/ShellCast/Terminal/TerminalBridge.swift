@@ -59,6 +59,22 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
         readTask?.cancel()
     }
 
+    /// Capture a thumbnail snapshot of the terminal view as JPEG data.
+    func captureSnapshot() -> Data? {
+        guard let tv = terminalView, tv.bounds.width > 0, tv.bounds.height > 0 else { return nil }
+        let renderer = UIGraphicsImageRenderer(bounds: tv.bounds)
+        let fullImage = renderer.image { _ in
+            tv.drawHierarchy(in: tv.bounds, afterScreenUpdates: false)
+        }
+        // Scale down to thumbnail (2x for retina)
+        let targetSize = CGSize(width: 360, height: 240)
+        let thumbRenderer = UIGraphicsImageRenderer(size: targetSize)
+        let thumb = thumbRenderer.image { _ in
+            fullImage.draw(in: CGRect(origin: .zero, size: targetSize))
+        }
+        return thumb.jpegData(compressionQuality: 0.5)
+    }
+
     // MARK: - TerminalViewDelegate
 
     /// User typed something — send it over SSH, applying toolbar modifiers if active.

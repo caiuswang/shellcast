@@ -1,19 +1,23 @@
 import SwiftUI
 import SwiftTerm
+import SwiftData
 
 struct TerminalContainerView: View {
     let transport: SSHSession
     let tmuxCommand: String?
+    let sessionRecord: SessionRecord?
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var bridge: TerminalBridge
 
     @State private var wasBackgrounded = false
 
-    init(transport: SSHSession, tmuxCommand: String? = nil) {
+    init(transport: SSHSession, tmuxCommand: String? = nil, sessionRecord: SessionRecord? = nil) {
         self.transport = transport
         self.tmuxCommand = tmuxCommand
+        self.sessionRecord = sessionRecord
         self._bridge = StateObject(wrappedValue: TerminalBridge(transport: transport))
     }
 
@@ -22,13 +26,30 @@ struct TerminalContainerView: View {
             SwiftTermView(bridge: bridge)
                 .ignoresSafeArea(.container, edges: .bottom)
 
-            // Close button
+            // Top-right buttons: minimize + close
             VStack {
                 HStack {
                     Spacer()
+                    // Minimize — return to HomeView, keep session alive
                     Button {
+                        saveSnapshot()
+                        bridge.stop()
+                        dismiss()
+                    } label: {
+                        Image(systemName: "chevron.down.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, .gray.opacity(0.5))
+                    }
+                    // Close — disconnect and dismiss
+                    Button {
+                        saveSnapshot()
                         bridge.stop()
                         Task { await transport.disconnect() }
+                        if let sessionRecord {
+                            sessionRecord.isActive = false
+                            try? modelContext.save()
+                        }
                         dismiss()
                     } label: {
                         Image(systemName: "xmark.circle.fill")
@@ -36,8 +57,9 @@ struct TerminalContainerView: View {
                             .symbolRenderingMode(.palette)
                             .foregroundStyle(.white, .gray.opacity(0.5))
                     }
-                    .padding(12)
+                    .padding(.trailing, 12)
                 }
+                .padding(.top, 12)
                 Spacer()
             }
 
@@ -88,6 +110,7 @@ struct TerminalContainerView: View {
                             .cornerRadius(8)
                     }
                     Button {
+                        saveSnapshot()
                         bridge.stop()
                         Task { await transport.disconnect() }
                         dismiss()
@@ -103,12 +126,23 @@ struct TerminalContainerView: View {
         .preferredColorScheme(.dark)
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .background || newPhase == .inactive {
+                if !wasBackgrounded {
+                    saveSnapshot()
+                }
                 wasBackgrounded = true
             } else if newPhase == .active && wasBackgrounded {
                 wasBackgrounded = false
                 checkConnectionOnForeground()
             }
         }
+    }
+
+    private func saveSnapshot() {
+        guard let sessionRecord,
+              let data = bridge.captureSnapshot() else { return }
+        sessionRecord.snapshotImageData = data
+        sessionRecord.lastActiveAt = Date()
+        try? modelContext.save()
     }
 
     private func checkConnectionOnForeground() {

@@ -3,6 +3,7 @@ import SwiftData
 
 struct ActiveSessionCard: View {
     let session: SessionRecord
+    var connectionName: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -28,6 +29,12 @@ struct ActiveSessionCard: View {
                 .font(.caption)
                 .fontWeight(.medium)
                 .foregroundStyle(.white)
+
+            if let connectionName {
+                Text(connectionName)
+                    .font(.caption2)
+                    .foregroundStyle(.green.opacity(0.7))
+            }
 
             Text(session.lastActiveAt.relativeDescription)
                 .font(.caption2)
