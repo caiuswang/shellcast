@@ -7,6 +7,10 @@ final class ConnectionManager {
     var connectionError: String?
     var isConnecting = false
 
+    /// Terminal transport for the current session (SSH or Mosh). Stored here because
+    /// @State doesn't work reliably with existential protocol types (any TransportSession).
+    var activeTerminalTransport: (any TransportSession)?
+
     /// The outer connect task — cancelling this aborts the entire connection flow.
     var connectingTask: Task<Void, Never>?
 
@@ -16,7 +20,7 @@ final class ConnectionManager {
     struct ActiveSession: Identifiable {
         let id = UUID()
         let connection: Connection
-        let transport: SSHSession
+        let transport: any TransportSession
     }
 
     /// Register a bridge so the app can capture its snapshot when entering background.

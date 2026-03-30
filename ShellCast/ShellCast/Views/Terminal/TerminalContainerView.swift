@@ -3,7 +3,7 @@ import SwiftTerm
 import SwiftData
 
 struct TerminalContainerView: View {
-    let transport: SSHSession
+    let transport: any TransportSession
     let tmuxCommand: String?
     let sessionRecord: SessionRecord?
 
@@ -16,7 +16,9 @@ struct TerminalContainerView: View {
     @State private var wasBackgrounded = false
     @State private var reconnectError: String?
 
-    init(transport: SSHSession, tmuxCommand: String? = nil, sessionRecord: SessionRecord? = nil) {
+    private var isSSH: Bool { transport is SSHSession }
+
+    init(transport: any TransportSession, tmuxCommand: String? = nil, sessionRecord: SessionRecord? = nil) {
         self.transport = transport
         self.tmuxCommand = tmuxCommand
         self.sessionRecord = sessionRecord
@@ -79,10 +81,10 @@ struct TerminalContainerView: View {
                 }
             }
 
-            // Tmux switcher overlay
-            if bridge.showTmuxSwitcher {
+            // Tmux switcher overlay (SSH only — over Mosh use keyboard shortcuts)
+            if bridge.showTmuxSwitcher, isSSH, let sshTransport = transport as? SSHSession {
                 TmuxSwitcherOverlay(
-                    transport: transport,
+                    transport: sshTransport,
                     isPresented: $bridge.showTmuxSwitcher
                 )
                 .transition(.opacity)
@@ -169,6 +171,9 @@ struct TerminalContainerView: View {
     }
 
     private func checkConnectionOnForeground() {
+        // Mosh handles reconnection internally via UDP — no manual check needed
+        guard isSSH else { return }
+
         Task {
             // Show "Reconnecting..." immediately so user knows what's happening
             bridge.isReconnecting = true
@@ -176,7 +181,7 @@ struct TerminalContainerView: View {
             // Give the system a moment to restore networking
             try? await Task.sleep(for: .milliseconds(500))
 
-            let alive = await transport.checkAlive()
+            let alive = await (transport as? SSHSession)?.checkAlive() ?? false
             if alive {
                 // Connection survived — clear the overlay
                 bridge.isReconnecting = false
@@ -421,8 +426,22 @@ class TerminalViewController: UIViewController {
         resizeTerminal(availableHeight: view.bounds.height - 44)
 
         terminalView.becomeFirstResponder()
-        // Start reading SSH output
+
+        print("[TERM] viewDidAppear: bounds=\(view.bounds) cellSize=\(cellSize)")
+        let terminal = terminalView.getTerminal()
+        print("[TERM] terminal: cols=\(terminal.cols) rows=\(terminal.rows)")
+        print("[TERM] needsDeferredStart=\(bridge.transport.needsDeferredStart) isSSH=\(bridge.transport is SSHSession)")
+
+        // Start reading FIRST so the consumer is ready before any data arrives
         bridge.startReading()
+
+        // For Mosh: start the session NOW with exact terminal dimensions.
+        // MoshSession is bootstrapped but not started — we deferred start until
+        // the terminal view is sized so mosh uses the correct cols/rows from the start.
+        if bridge.transport.needsDeferredStart {
+            print("[TERM] Starting deferred mosh session: cols=\(terminal.cols) rows=\(terminal.rows)")
+            bridge.transport.startWithDimensions(cols: terminal.cols, rows: terminal.rows)
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {

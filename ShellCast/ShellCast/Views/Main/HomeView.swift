@@ -27,6 +27,7 @@ struct HomeView: View {
     @State private var activeSheet: ActiveSheet?
     @State private var activeTransport: SSHSession?
     @State private var activeConnectionId: UUID?
+    @State private var activeConnectionType: ConnectionType = .ssh
     @State private var showTerminal = false
     @State private var activeTmuxCommand: String?
     @State private var activeSessionRecord: SessionRecord?
@@ -34,6 +35,7 @@ struct HomeView: View {
     @State private var errorMessage: String?
     @State private var showError = false
     @State private var deleteConnectionTarget: Connection?
+    @State private var showMoshFallbackNotice = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -92,8 +94,12 @@ struct HomeView: View {
             }
         }
         .fullScreenCover(isPresented: $showTerminal) {
-            if let transport = activeTransport {
+            if let transport = connectionManager.activeTerminalTransport {
+                let _ = print("[COVER] Rendering TerminalContainerView, transport=\(type(of: transport)), needsDeferredStart=\(transport.needsDeferredStart)")
                 TerminalContainerView(transport: transport, tmuxCommand: activeTmuxCommand, sessionRecord: activeSessionRecord)
+            } else {
+                let _ = print("[COVER] ERROR: connectionManager.activeTerminalTransport is nil!")
+                Color.black
             }
         }
         .alert("Connection Error", isPresented: $showError) {
@@ -120,6 +126,11 @@ struct HomeView: View {
                     Text("Delete \"\(connection.name)\"?")
                 }
             }
+        }
+        .alert("Mosh Unavailable", isPresented: $showMoshFallbackNotice) {
+            Button("OK") {}
+        } message: {
+            Text("mosh-server is not available on this host. Falling back to SSH.")
         }
         .preferredColorScheme(.dark)
     }
@@ -288,10 +299,12 @@ struct HomeView: View {
     private func connectTo(_ connection: Connection) {
         connectionManager.connectingTask = Task { @MainActor in
             do {
+                // Always SSH first (for tmux browsing and exec)
                 let transport = try await connectionManager.connect(connection)
                 try Task.checkCancellation()
                 self.activeTransport = transport
                 self.activeConnectionId = connection.id
+                self.activeConnectionType = connection.connectionType
 
                 // Try to list tmux sessions
                 var sessions: [TmuxSession] = []
@@ -337,9 +350,41 @@ struct HomeView: View {
                 let record = findOrCreateSessionRecord(connectionId: connectionId, tmuxSessionName: sessionName)
                 self.activeSessionRecord = record
 
+                // Choose transport based on connection type
+                let useMosh = activeConnectionType == .mosh || activeConnectionType == .auto
+                if useMosh {
+                    do {
+                        print("[MOSH] Starting bootstrap, host=\(transport.host)")
+                        let moshTransport = try await MoshService.bootstrap(
+                            sshSession: transport,
+                            host: transport.host,
+                            shellCommand: tmuxCommand
+                        )
+                        print("[MOSH] Bootstrap complete, waiting for sheet dismiss")
+                        self.connectionManager.activeTerminalTransport = moshTransport
+                        self.activeTmuxCommand = nil
+                        // Wait for tmux browser sheet dismissal to complete
+                        try? await Task.sleep(for: .milliseconds(600))
+                        print("[MOSH] Showing terminal now")
+                        showTerminal = true
+                        return
+                    } catch {
+                        print("[MOSH] Bootstrap failed: \(error)")
+                        if activeConnectionType == .mosh {
+                            throw error
+                        }
+                        // Auto mode: fall back to SSH with notice
+                        showMoshFallbackNotice = true
+                    }
+                }
+
+                // SSH path
+                print("[SSH] Opening shell")
+                self.connectionManager.activeTerminalTransport = transport
                 try await transport.openShell(tmuxCommand: tmuxCommand)
                 showTerminal = true
             } catch {
+                print("[CONNECT] Error: \(error)")
                 errorMessage = error.localizedDescription
                 showError = true
             }
@@ -388,6 +433,7 @@ struct HomeView: View {
                 try Task.checkCancellation()
                 self.activeTransport = transport
                 self.activeConnectionId = connection.id
+                self.activeConnectionType = connection.connectionType
 
                 // Build the tmux attach command
                 let tmuxCommand: String?
@@ -399,6 +445,27 @@ struct HomeView: View {
                 self.activeTmuxCommand = tmuxCommand
                 self.activeSessionRecord = session
 
+                // Choose transport based on connection type
+                let useMosh = connection.connectionType == .mosh || connection.connectionType == .auto
+                if useMosh {
+                    do {
+                        let moshTransport = try await MoshService.bootstrap(
+                            sshSession: transport,
+                            host: transport.host,
+                            shellCommand: tmuxCommand
+                        )
+                        self.connectionManager.activeTerminalTransport = moshTransport
+                        self.activeTmuxCommand = nil
+                        showTerminal = true
+                        return
+                    } catch {
+                        if connection.connectionType == .mosh { throw error }
+                        showMoshFallbackNotice = true
+                    }
+                }
+
+                // SSH fallback
+                self.connectionManager.activeTerminalTransport = transport
                 try await transport.openShell(tmuxCommand: tmuxCommand)
                 showTerminal = true
             } catch {

@@ -30,3 +30,7 @@ CLAUDE.md
 
 # Doc images
 doc/
+
+# Frameworks (downloaded via setup script)
+ShellCast/Frameworks/*.xcframework/
+ShellCast/Frameworks/*.zip

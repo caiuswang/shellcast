@@ -18,20 +18,26 @@
 		3D2DA54CB589249F06E03E24 /* special_tokens_map.json in Resources */ = {isa = PBXBuildFile; fileRef = 61579C0F481E05873DEEB3A2 /* special_tokens_map.json */; };
 		3EDF88602F7E0DE722E8174D /* vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = 76DF3B39727ABA9F4C4327A3 /* vocab.json */; };
 		3F092D55A30EA060E5CC9281 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6726B66D9CC86DDD8EA70798 /* KeychainService.swift */; };
+		3F8CFE6AB3CC4EB6922780FA /* MoshService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C698034D08F700820A025B61 /* MoshService.swift */; };
 		41CE7E2EBD800643D19F03EE /* TransportSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD78C13923FD491B76957AD7 /* TransportSession.swift */; };
 		5149F292471846A0B2B70560 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 90386C1F71AF752095B7FB33 /* WhisperKit */; };
 		54330C917B154E3D36EEF18D /* tokenizer.json in Resources */ = {isa = PBXBuildFile; fileRef = FA207C1E249CDFC75F5AAB75 /* tokenizer.json */; };
 		67E85238EDBA27838AA7DF29 /* JetBrainsMonoNerdFontMono-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */; };
+		70886C2D14CBE46C2E1BD205 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 948725C96493D209B2DA8A26 /* libz.tbd */; };
+		73916BA10CBACBBCFC7A17AE /* Protobuf_C_.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E2EA0D3D584A9D1B14B122FB /* Protobuf_C_.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7563E1D7A8085874F68DA607 /* AuthMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = D886DD705902431727A8D5CE /* AuthMethod.swift */; };
 		7CF08706B830298A77DFE525 /* Citadel in Frameworks */ = {isa = PBXBuildFile; productRef = 3688871340D57647A29D2743 /* Citadel */; };
 		82118C48FF254F1FD174CF61 /* EditConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D70BAEA3CD12FEADCFA387B /* EditConnectionView.swift */; };
+		8F056A1D8350A397A7F53E7D /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CC941FEE664D2431303055E /* libresolv.tbd */; };
 		95A11B7D19067799A640C7C4 /* tokenizer_config.json in Resources */ = {isa = PBXBuildFile; fileRef = D5124CDBF147AA4F8371D642 /* tokenizer_config.json */; };
 		977FC8F659DBF5F4FBD5F883 /* TerminalBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88ACE22C2518FC93E029EE41 /* TerminalBridge.swift */; };
 		97A5F4A101629D6161484D69 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472560D9CFD337796D28D1D3 /* HomeView.swift */; };
 		9BD757064C4FFB8E27A55496 /* TmuxSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */; };
 		9C1817F8A540EAB7E91E2F49 /* TerminalContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23317A00D128D5D060821218 /* TerminalContainerView.swift */; };
 		A9C02678D8863EC499917960 /* KeyboardToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2EA76447CCB1F4716C33090 /* KeyboardToolbar.swift */; };
+		AA4C312A6AF355D5068E9629 /* mosh.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1409313AD4E6449B02295511 /* mosh.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		AC7233A415BF3267D4EA4F06 /* TimeFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */; };
+		AC862C2227B11220F7858017 /* Protobuf_C_.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2EA0D3D584A9D1B14B122FB /* Protobuf_C_.xcframework */; };
 		B454F67039C8678AC55B49F8 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = BAF34F9CC9AA10B8DB178F33 /* SwiftTerm */; };
 		B8F0A8D4D5C8C4745A87846F /* WhisperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FFFC26F812935ACB1AE1A9 /* WhisperService.swift */; };
 		B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */; };
@@ -46,6 +52,7 @@
 		EADE230217D5A26870FD16C4 /* Connection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B824D527DCAF8B7F84AA2C /* Connection.swift */; };
 		EBDEDB9BE8D7E51EC0B98FEF /* SSHService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A413C952647072F83FE1F3 /* SSHService.swift */; };
 		ECB884667B094C35447F9977 /* added_tokens.json in Resources */ = {isa = PBXBuildFile; fileRef = 1CF9CE4693072E56B9DFA92B /* added_tokens.json */; };
+		F00C5292A8487E233DDEA8B5 /* mosh.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1409313AD4E6449B02295511 /* mosh.xcframework */; };
 		F1E997558F10B1D67AEC348E /* WhisperModels in Resources */ = {isa = PBXBuildFile; fileRef = F992B3B0F836D3D8CDF50AB8 /* WhisperModels */; };
 		FF1B49821455A2ABFF7F6468 /* TmuxParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037CB0AA879D4E4E6496F4D7 /* TmuxParser.swift */; };
 /* End PBXBuildFile section */
@@ -60,8 +67,24 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		20D0ED8484DFFCC576D28CF6 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				AA4C312A6AF355D5068E9629 /* mosh.xcframework in Embed Frameworks */,
+				73916BA10CBACBBCFC7A17AE /* Protobuf_C_.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		037CB0AA879D4E4E6496F4D7 /* TmuxParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxParser.swift; sourceTree = "<group>"; };
+		1409313AD4E6449B02295511 /* mosh.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = mosh.xcframework; path = Frameworks/mosh.xcframework; sourceTree = "<group>"; };
 		18ED85687617B1A5C79A9437 /* ShellCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellCastApp.swift; sourceTree = "<group>"; };
 		1CF9CE4693072E56B9DFA92B /* added_tokens.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = added_tokens.json; sourceTree = "<group>"; };
 		23317A00D128D5D060821218 /* TerminalContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalContainerView.swift; sourceTree = "<group>"; };
@@ -74,6 +97,7 @@
 		472560D9CFD337796D28D1D3 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		4800BD4740F6F26923B912F2 /* TerminalSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSettings.swift; sourceTree = "<group>"; };
 		4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormatting.swift; sourceTree = "<group>"; };
+		5CC941FEE664D2431303055E /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
 		61579C0F481E05873DEEB3A2 /* special_tokens_map.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = special_tokens_map.json; sourceTree = "<group>"; };
 		6726B66D9CC86DDD8EA70798 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		71ADD980E8F01B1CCE2B626E /* BackgroundSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSessionTests.swift; sourceTree = "<group>"; };
@@ -83,6 +107,7 @@
 		88ACE22C2518FC93E029EE41 /* TerminalBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalBridge.swift; sourceTree = "<group>"; };
 		929BB1504B1393CB658133E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		934D46518265B5BF6A5DEDBF /* normalizer.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = normalizer.json; sourceTree = "<group>"; };
+		948725C96493D209B2DA8A26 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFontMono-Light.ttf"; sourceTree = "<group>"; };
 		9C23234FBB9E4B647294C2F4 /* TmuxSwitcherOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSwitcherOverlay.swift; sourceTree = "<group>"; };
 		A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCard.swift; sourceTree = "<group>"; };
@@ -93,12 +118,14 @@
 		B3BD57C2918A942D29425698 /* config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = config.json; sourceTree = "<group>"; };
 		B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionRow.swift; sourceTree = "<group>"; };
 		C2A6BDCA94266B0457F457D2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		C698034D08F700820A025B61 /* MoshService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoshService.swift; sourceTree = "<group>"; };
 		D5124CDBF147AA4F8371D642 /* tokenizer_config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokenizer_config.json; sourceTree = "<group>"; };
 		D886DD705902431727A8D5CE /* AuthMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethod.swift; sourceTree = "<group>"; };
 		D941806241DCF9F5A72299C8 /* ConnectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionType.swift; sourceTree = "<group>"; };
 		E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecord.swift; sourceTree = "<group>"; };
+		E2EA0D3D584A9D1B14B122FB /* Protobuf_C_.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Protobuf_C_.xcframework; path = Frameworks/Protobuf_C_.xcframework; sourceTree = "<group>"; };
 		E2EA76447CCB1F4716C33090 /* KeyboardToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardToolbar.swift; sourceTree = "<group>"; };
-		F844CA2ECE9A070493D67508 /* ShellCastTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ShellCastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F844CA2ECE9A070493D67508 /* ShellCastTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ShellCastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F992B3B0F836D3D8CDF50AB8 /* WhisperModels */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WhisperModels; path = ShellCast/Resources/WhisperModels; sourceTree = SOURCE_ROOT; };
 		FA207C1E249CDFC75F5AAB75 /* tokenizer.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokenizer.json; sourceTree = "<group>"; };
 		FC0361E85DF9B8851B5F4B10 /* AppleSpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSpeechService.swift; sourceTree = "<group>"; };
@@ -112,12 +139,27 @@
 				B454F67039C8678AC55B49F8 /* SwiftTerm in Frameworks */,
 				7CF08706B830298A77DFE525 /* Citadel in Frameworks */,
 				5149F292471846A0B2B70560 /* WhisperKit in Frameworks */,
+				F00C5292A8487E233DDEA8B5 /* mosh.xcframework in Frameworks */,
+				AC862C2227B11220F7858017 /* Protobuf_C_.xcframework in Frameworks */,
+				70886C2D14CBE46C2E1BD205 /* libz.tbd in Frameworks */,
+				8F056A1D8350A397A7F53E7D /* libresolv.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0CA3B80DB6B45130C60A2E1E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5CC941FEE664D2431303055E /* libresolv.tbd */,
+				948725C96493D209B2DA8A26 /* libz.tbd */,
+				1409313AD4E6449B02295511 /* mosh.xcframework */,
+				E2EA0D3D584A9D1B14B122FB /* Protobuf_C_.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		10C6E78D1FC2627FAFABAC12 /* Tmux */ = {
 			isa = PBXGroup;
 			children = (
@@ -205,6 +247,7 @@
 				FC0361E85DF9B8851B5F4B10 /* AppleSpeechService.swift */,
 				7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */,
 				6726B66D9CC86DDD8EA70798 /* KeychainService.swift */,
+				C698034D08F700820A025B61 /* MoshService.swift */,
 				86A413C952647072F83FE1F3 /* SSHService.swift */,
 				037CB0AA879D4E4E6496F4D7 /* TmuxParser.swift */,
 				AD78C13923FD491B76957AD7 /* TransportSession.swift */,
@@ -219,6 +262,7 @@
 				F992B3B0F836D3D8CDF50AB8 /* WhisperModels */,
 				DC51846B66FDE36A491D73B6 /* ShellCast */,
 				6CB46C42112EF084E206405B /* ShellCastTests */,
+				0CA3B80DB6B45130C60A2E1E /* Frameworks */,
 				21B25A86D6C9101E8E95FFF9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -311,6 +355,7 @@
 				30F4CC6AE0C17BF57FE1785B /* Sources */,
 				E496A617ED3AE9C20BF2BE83 /* Resources */,
 				1BCB6796CEA3AF0DD949F3AE /* Frameworks */,
+				20D0ED8484DFFCC576D28CF6 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -424,6 +469,7 @@
 				97A5F4A101629D6161484D69 /* HomeView.swift in Sources */,
 				A9C02678D8863EC499917960 /* KeyboardToolbar.swift in Sources */,
 				3F092D55A30EA060E5CC9281 /* KeychainService.swift in Sources */,
+				3F8CFE6AB3CC4EB6922780FA /* MoshService.swift in Sources */,
 				EBDEDB9BE8D7E51EC0B98FEF /* SSHService.swift in Sources */,
 				B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */,
 				E667F6D8BA692FFA54926FD5 /* SettingsView.swift in Sources */,
@@ -456,7 +502,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = RR3B8A7J66;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -537,7 +582,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = RR3B8A7J66;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -558,6 +602,10 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = RR3B8A7J66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"Frameworks\"",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ShellCast/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ShellCast needs local network access to connect to your servers via SSH.";
@@ -643,6 +691,10 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = RR3B8A7J66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"Frameworks\"",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ShellCast/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ShellCast needs local network access to connect to your servers via SSH.";

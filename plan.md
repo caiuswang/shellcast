@@ -193,10 +193,12 @@ HomeView (root)
 **Milestone: Comfortable daily-driver terminal experience.** (keyboard ✅, polish TODO)
 
 ### Phase 4: Mosh Integration
-- [ ] Clone and build `blinksh/build-mosh` → produce `libmoshios.xcframework`
-- [ ] `MoshService` — SSH bootstrap → run `mosh-server` → parse MOSH_KEY + UDP port → init mosh-client
-- [ ] `MoshSession` conforming to `TransportSession`
-- [ ] "Auto" connection type logic (try Mosh first, fallback SSH)
+- [x] Pre-built `mosh.xcframework` + `Protobuf_C_.xcframework` from blinksh releases (download script)
+- [x] `MoshSession` conforming to `TransportSession` — wraps `mosh_main()` with pipe I/O
+- [x] `MoshService` — SSH bootstrap → run `mosh-server` → parse MOSH_KEY + UDP port → init mosh-client
+- [x] "Auto" connection type logic (try Mosh first, fallback SSH)
+- [x] State serialization callback for background persistence
+- [x] Generalized `TerminalBridge` and `TerminalContainerView` to `TransportSession` protocol
 - [ ] Test WiFi↔cellular handoff, sleep/wake reconnection
 - [ ] Handle iOS background execution limits (Mosh UDP keeps state server-side)
 

@@ -53,6 +53,10 @@ targets:
       - package: SwiftTerm
       - package: Citadel
       - package: WhisperKit
+      - framework: Frameworks/mosh.xcframework
+      - framework: Frameworks/Protobuf_C_.xcframework
+      - sdk: libz.tbd
+      - sdk: libresolv.tbd
 
   ShellCastTests:
     type: bundle.unit-test

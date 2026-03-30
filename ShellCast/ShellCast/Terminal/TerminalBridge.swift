@@ -1,11 +1,11 @@
 import UIKit
 import SwiftTerm
 
-/// Bridges an SSHSession (TransportSession) with a SwiftTerm TerminalView.
-/// Handles piping SSH output → terminal display and terminal keystrokes → SSH input.
+/// Bridges a TransportSession (SSH or Mosh) with a SwiftTerm TerminalView.
+/// Handles piping transport output → terminal display and terminal keystrokes → transport input.
 @MainActor
 final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
-    var transport: SSHSession
+    var transport: any TransportSession
     weak var terminalView: TerminalView?
     weak var keyboardToolbar: TerminalKeyboardToolbar?
 
@@ -15,21 +15,32 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
 
     private var readTask: Task<Void, Never>?
 
-    init(transport: SSHSession) {
+    init(transport: any TransportSession) {
         self.transport = transport
         super.init()
     }
 
-    /// Start reading from the SSH output stream and feeding into the terminal view.
+    /// Start reading from the transport output stream and feeding into the terminal view.
+    private var dataReceivedCount = 0
+
     func startReading() {
         readTask?.cancel()
+        dataReceivedCount = 0
+        print("[BRIDGE] startReading() called, transport type: \(type(of: transport))")
         readTask = Task { [weak self] in
             guard let self else { return }
+            print("[BRIDGE] for-await loop starting")
             for await data in self.transport.outputStream {
                 guard !Task.isCancelled else { break }
+                self.dataReceivedCount += 1
+                if self.dataReceivedCount <= 5 {
+                    print("[BRIDGE] data received #\(self.dataReceivedCount): \(data.count) bytes, terminalView=\(self.terminalView != nil)")
+                }
                 let bytes = Array(data)
                 self.terminalView?.feed(byteArray: bytes[...])
+                self.terminalView?.setNeedsDisplay()
             }
+            print("[BRIDGE] stream ended, isCancelled=\(Task.isCancelled)")
             // Stream ended — connection likely dropped
             if !Task.isCancelled {
                 self.isDisconnected = true
@@ -37,15 +48,19 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
         }
     }
 
-    /// Reconnect the SSH session and restart reading.
+    /// Reconnect the SSH session and restart reading. Only works for SSH transport.
     func reconnect(cols: Int, rows: Int, tmuxCommand: String?) async -> Bool {
+        guard let sshTransport = transport as? SSHSession else {
+            // Mosh handles reconnection internally — no manual reconnect needed
+            return false
+        }
         isReconnecting = true
         isDisconnected = false
         defer { isReconnecting = false }
 
         do {
             readTask?.cancel()
-            try await transport.reconnect(cols: cols, rows: rows, tmuxCommand: tmuxCommand)
+            try await sshTransport.reconnect(cols: cols, rows: rows, tmuxCommand: tmuxCommand)
             isDisconnected = false
             startReading()
             return true
