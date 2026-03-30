@@ -7,10 +7,23 @@ final class ConnectionManager {
     var connectionError: String?
     var isConnecting = false
 
+    /// Registered bridges for active terminal views — used for snapshot capture on background
+    var activeBridges: [UUID: TerminalBridge] = [:]
+
     struct ActiveSession: Identifiable {
         let id = UUID()
         let connection: Connection
         let transport: SSHSession
+    }
+
+    /// Register a bridge so the app can capture its snapshot when entering background.
+    func registerBridge(_ bridge: TerminalBridge, for sessionId: UUID) {
+        activeBridges[sessionId] = bridge
+    }
+
+    /// Remove a bridge registration.
+    func unregisterBridge(for sessionId: UUID) {
+        activeBridges.removeValue(forKey: sessionId)
     }
 
     func connect(_ connection: Connection) async throws -> SSHSession {

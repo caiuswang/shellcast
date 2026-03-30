@@ -175,7 +175,12 @@ HomeView (root)
   - Snapshot capture guarded against disconnected/reconnecting overlay states
   - History tab shows all sessions (active + inactive), not just active
   - Context menu "Deactivate" marks session inactive and disconnects transport
-- [ ] Background session persistence (`beginBackgroundTask`)
+- [x] Background session persistence (`beginBackgroundTask`)
+  - `ShellCastApp` requests background time with named task `ShellCast.KeepSSHAlive`
+  - On background: captures terminal snapshots for all registered bridges via `ConnectionManager.activeBridges`
+  - On expiration: marks sessions inactive if transport is no longer connected
+  - `TerminalContainerView` registers/unregisters bridge with `ConnectionManager` on appear/disappear
+  - Foreground auto-reconnect already handled by `TerminalContainerView.checkConnectionOnForeground()`
 - [x] iPad layout optimization
   - `iPadContentWidth()` view modifier for centering content with max width on iPad
   - HomeView: `LazyVGrid` for session cards on regular width, constrained connections list

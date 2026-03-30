@@ -10,6 +10,7 @@ struct TerminalContainerView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.modelContext) private var modelContext
+    @Environment(ConnectionManager.self) private var connectionManager
     @StateObject private var bridge: TerminalBridge
 
     @State private var wasBackgrounded = false
@@ -124,6 +125,16 @@ struct TerminalContainerView: View {
         .statusBarHidden()
         .toolbar(.hidden, for: .navigationBar)
         .preferredColorScheme(.dark)
+        .onAppear {
+            if let sessionRecord {
+                connectionManager.registerBridge(bridge, for: sessionRecord.id)
+            }
+        }
+        .onDisappear {
+            if let sessionRecord {
+                connectionManager.unregisterBridge(for: sessionRecord.id)
+            }
+        }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .background || newPhase == .inactive {
                 if !wasBackgrounded {

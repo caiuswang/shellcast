@@ -58,5 +58,8 @@ targets:
     type: bundle.unit-test
     platform: iOS
     sources: [ShellCastTests]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
     dependencies:
       - target: ShellCast
