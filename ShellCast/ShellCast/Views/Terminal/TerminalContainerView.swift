@@ -388,10 +388,20 @@ class TerminalViewController: UIViewController {
         let newRows = max(1, Int(availableHeight / cellSize.height))
         let terminal = terminalView.getTerminal()
 
+        print("[RESIZE] availableHeight=\(availableHeight) cellSize=\(cellSize) newCols=\(newCols) newRows=\(newRows) currentCols=\(terminal.cols) currentRows=\(terminal.rows)")
+        print("[RESIZE] view.bounds=\(view.bounds) terminalView.frame=\(terminalView.frame) safeArea.top=\(view.safeAreaInsets.top)")
+        print("[RESIZE] terminalView.contentSize=\(terminalView.contentSize) contentOffset=\(terminalView.contentOffset) bounds=\(terminalView.bounds)")
+
         if newCols != terminal.cols || newRows != terminal.rows {
+            print("[RESIZE] Resizing terminal: \(terminal.cols)x\(terminal.rows) → \(newCols)x\(newRows)")
             terminalView.resize(cols: newCols, rows: newRows)
             Task {
-                try? await bridge.transport.resize(cols: newCols, rows: newRows)
+                do {
+                    try await bridge.transport.resize(cols: newCols, rows: newRows)
+                    print("[RESIZE] Server resize SUCCESS: \(newCols)x\(newRows)")
+                } catch {
+                    print("[RESIZE] Server resize FAILED: \(error)")
+                }
             }
         }
     }
@@ -409,38 +419,71 @@ class TerminalViewController: UIViewController {
         toolbar.applyLayout(keyboardVisible: keyboardVisible)
         toolbarBottomConstraint.constant = -kbHeight
 
-        let availableHeight = view.bounds.height - kbHeight - 44 - view.safeAreaInsets.top
+        // Use terminalView.frame.height after layout — this is the actual visible
+        // terminal area, already accounting for safe area via Auto Layout constraints.
+        // Don't compute from view.bounds because safeAreaInsets.top is 0 in this
+        // embedded UIKit VC (SwiftUI handles safe area at a higher level).
+        let availableHeight = view.bounds.height - kbHeight - 44
+
+        print("[KB] kbHeight=\(kbHeight) keyboardVisible=\(keyboardVisible) availableHeight=\(availableHeight) viewHeight=\(view.bounds.height)")
 
         UIView.animate(withDuration: duration) {
             self.view.layoutIfNeeded()
         } completion: { _ in
             self.resizeTerminal(availableHeight: availableHeight)
+            self.startSessionIfNeeded()
         }
     }
+
+    private var hasStartedSession = false
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        // Compute cell dimensions and resize for toolbar
+        // Compute cell dimensions for later use
         computeCellSize()
-        resizeTerminal(availableHeight: view.bounds.height - 44 - view.safeAreaInsets.top)
 
+        // Show keyboard — this triggers keyboardWillChangeFrame which gives us
+        // the correct terminal dimensions (viewDidAppear fires before SwiftUI
+        // finishes layout, so view.bounds is wrong here).
         terminalView.becomeFirstResponder()
 
         print("[TERM] viewDidAppear: bounds=\(view.bounds) cellSize=\(cellSize)")
-        let terminal = terminalView.getTerminal()
-        print("[TERM] terminal: cols=\(terminal.cols) rows=\(terminal.rows)")
         print("[TERM] needsDeferredStart=\(bridge.transport.needsDeferredStart) isSSH=\(bridge.transport is SSHSession)")
 
         // Start reading FIRST so the consumer is ready before any data arrives
         bridge.startReading()
 
-        // For Mosh: start the session NOW with exact terminal dimensions.
-        // MoshSession is bootstrapped but not started — we deferred start until
-        // the terminal view is sized so mosh uses the correct cols/rows from the start.
+        // DON'T resize or start mosh here — view.bounds is not yet correct.
+        // The first keyboardWillChangeFrame will provide correct dimensions
+        // and start the session there.
+    }
+
+    /// Called after layout changes settle. Starts the session with correct dimensions.
+    private func startSessionIfNeeded() {
+        guard !hasStartedSession else { return }
+        hasStartedSession = true
+
+        let terminal = terminalView.getTerminal()
+        print("[TERM] Starting session with correct dims: cols=\(terminal.cols) rows=\(terminal.rows)")
+
         if bridge.transport.needsDeferredStart {
-            print("[TERM] Starting deferred mosh session: cols=\(terminal.cols) rows=\(terminal.rows)")
             bridge.transport.startWithDimensions(cols: terminal.cols, rows: terminal.rows)
+        }
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        // Fallback: if keyboard notification hasn't fired yet (e.g., external keyboard),
+        // start the session once the layout stabilizes.
+        if !hasStartedSession && terminalView != nil && cellSize != .zero {
+            let availableHeight = terminalView.frame.height
+            if availableHeight > 0 {
+                computeCellSize()
+                resizeTerminal(availableHeight: availableHeight)
+                startSessionIfNeeded()
+            }
         }
     }
 
