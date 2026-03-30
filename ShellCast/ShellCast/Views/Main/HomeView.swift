@@ -33,6 +33,7 @@ struct HomeView: View {
     @State private var tmuxSessions: [TmuxSession] = []
     @State private var errorMessage: String?
     @State private var showError = false
+    @State private var deleteConnectionTarget: Connection?
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -99,6 +100,26 @@ struct HomeView: View {
             Button("OK") {}
         } message: {
             Text(errorMessage ?? "Unknown error")
+        }
+        .alert("Delete Connection", isPresented: .init(
+            get: { deleteConnectionTarget != nil },
+            set: { if !$0 { deleteConnectionTarget = nil } }
+        )) {
+            Button("Cancel", role: .cancel) { deleteConnectionTarget = nil }
+            Button("Delete", role: .destructive) {
+                if let connection = deleteConnectionTarget {
+                    deleteConnectionWithHistory(connection)
+                }
+            }
+        } message: {
+            if let connection = deleteConnectionTarget {
+                let count = allSessions.filter { $0.connectionId == connection.id }.count
+                if count > 0 {
+                    Text("This will also delete \(count) session\(count == 1 ? "" : "s") from history.")
+                } else {
+                    Text("Delete \"\(connection.name)\"?")
+                }
+            }
         }
         .preferredColorScheme(.dark)
     }
@@ -186,27 +207,43 @@ struct HomeView: View {
     private var connectionsTab: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(connections) { connection in
-                        ConnectionRow(connection: connection) {
-                            activeSheet = .editConnection(connection)
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            connectTo(connection)
-                        }
-                        .contextMenu {
-                            Button("Edit") {
+                if connections.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "server.rack")
+                            .font(.system(size: 40))
+                            .foregroundStyle(.gray.opacity(0.5))
+                        Text("No saved connections")
+                            .font(.subheadline)
+                            .foregroundStyle(.gray)
+                        Text("Tap + to add your first server")
+                            .font(.caption)
+                            .foregroundStyle(.gray.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 80)
+                } else {
+                    VStack(alignment: .leading, spacing: 12) {
+                        ForEach(connections) { connection in
+                            ConnectionRow(connection: connection) {
                                 activeSheet = .editConnection(connection)
                             }
-                            Button("Delete", role: .destructive) {
-                                modelContext.delete(connection)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                connectTo(connection)
+                            }
+                            .contextMenu {
+                                Button("Edit") {
+                                    activeSheet = .editConnection(connection)
+                                }
+                                Button("Delete", role: .destructive) {
+                                    deleteConnectionTarget = connection
+                                }
                             }
                         }
                     }
+                    .padding()
+                    .iPadContentWidth(700)
                 }
-                .padding()
-                .iPadContentWidth(700)
             }
             .background(Color.black)
             .navigationTitle("Connections")
@@ -320,6 +357,19 @@ struct HomeView: View {
         let record = SessionRecord(connectionId: connectionId, tmuxSessionName: tmuxSessionName)
         modelContext.insert(record)
         return record
+    }
+
+    // MARK: - Delete Connection
+
+    private func deleteConnectionWithHistory(_ connection: Connection) {
+        let relatedSessions = allSessions.filter { $0.connectionId == connection.id }
+        for session in relatedSessions {
+            modelContext.delete(session)
+        }
+        try? KeychainService.deletePassword(for: connection.id)
+        try? KeychainService.deletePrivateKey(for: connection.id)
+        try? KeychainService.deleteKeyPassphrase(for: connection.id)
+        modelContext.delete(connection)
     }
 
     // MARK: - Resume Session

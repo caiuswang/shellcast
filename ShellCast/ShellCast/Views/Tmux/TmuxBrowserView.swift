@@ -11,6 +11,8 @@ struct TmuxBrowserView: View {
     @State private var renameTarget: TmuxSession?
     @State private var renameText = ""
     @State private var deleteTarget: TmuxSession?
+    @State private var operationError: String?
+    @State private var showOperationError = false
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -158,6 +160,11 @@ struct TmuxBrowserView: View {
                 }
             }
         }
+        .alert("Error", isPresented: $showOperationError) {
+            Button("OK") {}
+        } message: {
+            Text(operationError ?? "Unknown error")
+        }
         .presentationDetents([.medium, .large])
         .preferredColorScheme(.dark)
         .onAppear {
@@ -169,15 +176,25 @@ struct TmuxBrowserView: View {
         let newName = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !newName.isEmpty, newName != session.name else { return }
         Task {
-            try? await TmuxParser.renameSession(over: transport, oldName: session.name, newName: newName)
-            sessions = (try? await TmuxParser.listSessions(over: transport)) ?? []
+            do {
+                try await TmuxParser.renameSession(over: transport, oldName: session.name, newName: newName)
+            } catch {
+                operationError = "Failed to rename session: \(error.localizedDescription)"
+                showOperationError = true
+            }
+            sessions = (try? await TmuxParser.listSessions(over: transport)) ?? sessions
         }
     }
 
     private func deleteSession(_ session: TmuxSession) {
         Task {
-            try? await TmuxParser.killSession(over: transport, sessionName: session.name)
-            sessions = (try? await TmuxParser.listSessions(over: transport)) ?? []
+            do {
+                try await TmuxParser.killSession(over: transport, sessionName: session.name)
+            } catch {
+                operationError = "Failed to delete session: \(error.localizedDescription)"
+                showOperationError = true
+            }
+            sessions = (try? await TmuxParser.listSessions(over: transport)) ?? sessions
         }
     }
 }
@@ -195,6 +212,8 @@ struct TmuxWindowBrowserView: View {
     @State private var renameTarget: TmuxWindow?
     @State private var renameText = ""
     @State private var deleteTarget: TmuxWindow?
+    @State private var operationError: String?
+    @State private var showOperationError = false
 
     var body: some View {
         ScrollView {
@@ -285,6 +304,11 @@ struct TmuxWindowBrowserView: View {
         }
         .background(Color.black)
         .navigationBarTitleDisplayMode(.inline)
+        .alert("Error", isPresented: $showOperationError) {
+            Button("OK") {}
+        } message: {
+            Text(operationError ?? "Unknown error")
+        }
         .task {
             await loadWindows()
         }
@@ -321,7 +345,7 @@ struct TmuxWindowBrowserView: View {
         do {
             windows = try await TmuxParser.listWindows(over: transport, sessionName: session.name)
         } catch {
-            errorMessage = "Failed to list windows"
+            errorMessage = "Failed to list windows: \(error.localizedDescription)"
         }
         isLoading = false
     }
@@ -330,15 +354,25 @@ struct TmuxWindowBrowserView: View {
         let newName = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !newName.isEmpty, newName != window.name else { return }
         Task {
-            try? await TmuxParser.renameWindow(over: transport, sessionName: session.name, windowIndex: window.index, newName: newName)
-            windows = (try? await TmuxParser.listWindows(over: transport, sessionName: session.name)) ?? []
+            do {
+                try await TmuxParser.renameWindow(over: transport, sessionName: session.name, windowIndex: window.index, newName: newName)
+            } catch {
+                operationError = "Failed to rename window: \(error.localizedDescription)"
+                showOperationError = true
+            }
+            windows = (try? await TmuxParser.listWindows(over: transport, sessionName: session.name)) ?? windows
         }
     }
 
     private func deleteWindow(_ window: TmuxWindow) {
         Task {
-            try? await TmuxParser.killWindow(over: transport, sessionName: session.name, windowIndex: window.index)
-            windows = (try? await TmuxParser.listWindows(over: transport, sessionName: session.name)) ?? []
+            do {
+                try await TmuxParser.killWindow(over: transport, sessionName: session.name, windowIndex: window.index)
+            } catch {
+                operationError = "Failed to delete window: \(error.localizedDescription)"
+                showOperationError = true
+            }
+            windows = (try? await TmuxParser.listWindows(over: transport, sessionName: session.name)) ?? windows
         }
     }
 }

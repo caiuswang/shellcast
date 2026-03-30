@@ -210,7 +210,7 @@ HomeView (root)
 - [x] Visible edit button on connection rows in main menu
 - [x] iPad layout optimization (larger terminal, sidebar option)
 - [ ] App icon and launch screen
-- [ ] Error handling, edge cases, empty states
+- [x] Error handling, edge cases, empty states
 - [ ] TestFlight beta
 
 ## Risks

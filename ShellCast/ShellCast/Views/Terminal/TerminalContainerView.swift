@@ -14,6 +14,7 @@ struct TerminalContainerView: View {
     @StateObject private var bridge: TerminalBridge
 
     @State private var wasBackgrounded = false
+    @State private var reconnectError: String?
 
     init(transport: SSHSession, tmuxCommand: String? = nil, sessionRecord: SessionRecord? = nil) {
         self.transport = transport
@@ -99,7 +100,15 @@ struct TerminalContainerView: View {
                     Text("Connection Lost")
                         .font(.headline)
                         .foregroundStyle(.white)
+                    if let reconnectError {
+                        Text(reconnectError)
+                            .font(.caption)
+                            .foregroundStyle(.red.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                    }
                     Button {
+                        self.reconnectError = nil
                         attemptReconnect()
                     } label: {
                         Text("Reconnect")
@@ -173,14 +182,16 @@ struct TerminalContainerView: View {
                 bridge.isReconnecting = false
             } else {
                 // Connection dead — reconnect seamlessly
-                // bridge.reconnect() will keep isReconnecting = true
                 let terminal = bridge.terminalView?.getTerminal()
                 let cols = terminal?.cols ?? 80
                 let rows = terminal?.rows ?? 24
                 let success = await bridge.reconnect(cols: cols, rows: rows, tmuxCommand: tmuxCommand)
                 if success {
+                    reconnectError = nil
                     let msg = "\r\n[Reconnected]\r\n"
                     bridge.terminalView?.feed(text: msg)
+                } else {
+                    reconnectError = "Reconnection failed. Check your network and try again."
                 }
             }
         }
@@ -193,9 +204,11 @@ struct TerminalContainerView: View {
             let rows = terminal?.rows ?? 24
             let success = await bridge.reconnect(cols: cols, rows: rows, tmuxCommand: tmuxCommand)
             if success {
-                // Feed a visual indicator that reconnection happened
+                reconnectError = nil
                 let msg = "\r\n[Reconnected]\r\n"
                 bridge.terminalView?.feed(text: msg)
+            } else {
+                reconnectError = "Reconnection failed. Check your network and try again."
             }
         }
     }
