@@ -3,12 +3,17 @@ import SwiftTerm
 
 struct TerminalContainerView: View {
     let transport: SSHSession
+    let tmuxCommand: String?
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var bridge: TerminalBridge
 
-    init(transport: SSHSession) {
+    @State private var wasBackgrounded = false
+
+    init(transport: SSHSession, tmuxCommand: String? = nil) {
         self.transport = transport
+        self.tmuxCommand = tmuxCommand
         self._bridge = StateObject(wrappedValue: TerminalBridge(transport: transport))
     }
 
@@ -35,10 +40,106 @@ struct TerminalContainerView: View {
                 }
                 Spacer()
             }
+
+            // Reconnecting overlay
+            if bridge.isReconnecting {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .tint(.green)
+                        .scaleEffect(1.5)
+                    Text("Reconnecting...")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                }
+            }
+
+            // Disconnected overlay
+            if bridge.isDisconnected && !bridge.isReconnecting {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                VStack(spacing: 16) {
+                    Image(systemName: "wifi.slash")
+                        .font(.system(size: 40))
+                        .foregroundStyle(.red)
+                    Text("Connection Lost")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    Button {
+                        attemptReconnect()
+                    } label: {
+                        Text("Reconnect")
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 10)
+                            .background(Color.green)
+                            .cornerRadius(8)
+                    }
+                    Button {
+                        bridge.stop()
+                        Task { await transport.disconnect() }
+                        dismiss()
+                    } label: {
+                        Text("Close")
+                            .foregroundStyle(.gray)
+                    }
+                }
+            }
         }
         .statusBarHidden()
         .toolbar(.hidden, for: .navigationBar)
         .preferredColorScheme(.dark)
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .background || newPhase == .inactive {
+                wasBackgrounded = true
+            } else if newPhase == .active && wasBackgrounded {
+                wasBackgrounded = false
+                checkConnectionOnForeground()
+            }
+        }
+    }
+
+    private func checkConnectionOnForeground() {
+        Task {
+            // Show "Reconnecting..." immediately so user knows what's happening
+            bridge.isReconnecting = true
+
+            // Give the system a moment to restore networking
+            try? await Task.sleep(for: .milliseconds(500))
+
+            let alive = await transport.checkAlive()
+            if alive {
+                // Connection survived — clear the overlay
+                bridge.isReconnecting = false
+            } else {
+                // Connection dead — reconnect seamlessly
+                // bridge.reconnect() will keep isReconnecting = true
+                let terminal = bridge.terminalView?.getTerminal()
+                let cols = terminal?.cols ?? 80
+                let rows = terminal?.rows ?? 24
+                let success = await bridge.reconnect(cols: cols, rows: rows, tmuxCommand: tmuxCommand)
+                if success {
+                    let msg = "\r\n[Reconnected]\r\n"
+                    bridge.terminalView?.feed(text: msg)
+                }
+            }
+        }
+    }
+
+    private func attemptReconnect() {
+        Task {
+            let terminal = bridge.terminalView?.getTerminal()
+            let cols = terminal?.cols ?? 80
+            let rows = terminal?.rows ?? 24
+            let success = await bridge.reconnect(cols: cols, rows: rows, tmuxCommand: tmuxCommand)
+            if success {
+                // Feed a visual indicator that reconnection happened
+                let msg = "\r\n[Reconnected]\r\n"
+                bridge.terminalView?.feed(text: msg)
+            }
+        }
     }
 }
 

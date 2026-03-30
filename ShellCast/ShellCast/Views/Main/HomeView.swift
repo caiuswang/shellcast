@@ -25,6 +25,7 @@ struct HomeView: View {
     @State private var activeSheet: ActiveSheet?
     @State private var activeTransport: SSHSession?
     @State private var showTerminal = false
+    @State private var activeTmuxCommand: String?
     @State private var tmuxSessions: [TmuxSession] = []
     @State private var errorMessage: String?
     @State private var showError = false
@@ -99,7 +100,7 @@ struct HomeView: View {
             }
             .fullScreenCover(isPresented: $showTerminal) {
                 if let transport = activeTransport {
-                    TerminalContainerView(transport: transport)
+                    TerminalContainerView(transport: transport, tmuxCommand: activeTmuxCommand)
                 }
             }
             .sheet(isPresented: $showSettings) {
@@ -156,6 +157,7 @@ struct HomeView: View {
                 } else {
                     tmuxCommand = nil
                 }
+                self.activeTmuxCommand = tmuxCommand
                 try await transport.openShell(tmuxCommand: tmuxCommand)
                 showTerminal = true
             } catch {

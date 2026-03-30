@@ -32,6 +32,13 @@ final class SSHSession: TransportSession {
     private var stdinWriter: TTYStdinWriter?
     private(set) var isConnected = false
 
+    /// Stored credentials for reconnection
+    private var storedPassword: String?
+    private var storedPrivateKey: String?
+
+    /// Called when connection is lost unexpectedly (not from explicit disconnect)
+    var onDisconnect: (() -> Void)?
+
     lazy var outputStream: AsyncStream<Data> = {
         AsyncStream { [weak self] continuation in
             self?.continuation = continuation
@@ -45,6 +52,7 @@ final class SSHSession: TransportSession {
     }
 
     func connect(password: String) async throws {
+        self.storedPassword = password
         do {
             let client = try await SSHClient.connect(
                 host: host,
@@ -61,6 +69,7 @@ final class SSHSession: TransportSession {
     }
 
     func connect(privateKey: String) async throws {
+        self.storedPrivateKey = privateKey
         do {
             let client = try await SSHClient.connect(
                 host: host,
@@ -77,6 +86,44 @@ final class SSHSession: TransportSession {
         } catch {
             throw SSHError.connectionFailed(error.localizedDescription)
         }
+    }
+
+    /// Check if the SSH connection is still alive by attempting a lightweight operation.
+    func checkAlive() async -> Bool {
+        guard isConnected, client != nil else { return false }
+        do {
+            _ = try await exec("echo 1")
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Reconnect the SSH session using stored credentials, then reopen a shell.
+    func reconnect(cols: Int = 80, rows: Int = 24, tmuxCommand: String? = nil) async throws {
+        // Clean up old state
+        ptyTask?.cancel()
+        stdinWriter = nil
+        try? await client?.close()
+        client = nil
+
+        // Create a fresh output stream and continuation
+        continuation = nil
+        outputStream = AsyncStream { [weak self] continuation in
+            self?.continuation = continuation
+        }
+
+        // Reconnect using stored credentials
+        if let privateKey = storedPrivateKey {
+            try await connect(privateKey: privateKey)
+        } else if let password = storedPassword {
+            try await connect(password: password)
+        } else {
+            throw SSHError.connectionFailed("No stored credentials for reconnection")
+        }
+
+        // Reopen the shell
+        try await openShell(cols: cols, rows: rows, tmuxCommand: tmuxCommand)
     }
 
     /// Open an interactive PTY shell session and start streaming output.
@@ -128,10 +175,12 @@ final class SSHSession: TransportSession {
 
                     self?.isConnected = false
                     continuation.finish()
+                    self?.onDisconnect?()
                 }
             } catch {
                 self?.isConnected = false
                 continuation.finish()
+                self?.onDisconnect?()
             }
         }
     }

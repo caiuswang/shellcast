@@ -5,9 +5,12 @@ import SwiftTerm
 /// Handles piping SSH output → terminal display and terminal keystrokes → SSH input.
 @MainActor
 final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
-    let transport: SSHSession
+    var transport: SSHSession
     weak var terminalView: TerminalView?
     weak var keyboardToolbar: TerminalKeyboardToolbar?
+
+    @Published var isReconnecting = false
+    @Published var isDisconnected = false
 
     private var readTask: Task<Void, Never>?
 
@@ -18,13 +21,36 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
 
     /// Start reading from the SSH output stream and feeding into the terminal view.
     func startReading() {
+        readTask?.cancel()
         readTask = Task { [weak self] in
-            guard let self, let transport = self.transport as SSHSession? else { return }
-            for await data in transport.outputStream {
+            guard let self else { return }
+            for await data in self.transport.outputStream {
                 guard !Task.isCancelled else { break }
                 let bytes = Array(data)
                 self.terminalView?.feed(byteArray: bytes[...])
             }
+            // Stream ended — connection likely dropped
+            if !Task.isCancelled {
+                self.isDisconnected = true
+            }
+        }
+    }
+
+    /// Reconnect the SSH session and restart reading.
+    func reconnect(cols: Int, rows: Int, tmuxCommand: String?) async -> Bool {
+        isReconnecting = true
+        isDisconnected = false
+        defer { isReconnecting = false }
+
+        do {
+            readTask?.cancel()
+            try await transport.reconnect(cols: cols, rows: rows, tmuxCommand: tmuxCommand)
+            isDisconnected = false
+            startReading()
+            return true
+        } catch {
+            isDisconnected = true
+            return false
         }
     }
 
