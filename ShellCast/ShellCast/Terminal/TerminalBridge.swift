@@ -46,6 +46,12 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
                     print("[BRIDGE] data received #\(self.dataReceivedCount): \(data.count) bytes, terminalView=\(self.terminalView != nil)")
                 }
                 let bytes = Array(data)
+
+                // Track scroll position before feed to implement auto-scroll.
+                // SwiftTerm (UIScrollView) doesn't always update contentOffset
+                // after content changes (e.g., erase operations from fish pager).
+                let wasAtBottom = self.isScrolledToBottom()
+
                 self.terminalView?.feed(byteArray: bytes[...])
 
                 // Mosh cursor fix: mosh's Display::new_frame may not send
@@ -56,12 +62,52 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
                 }
 
                 self.terminalView?.setNeedsDisplay()
+
+                // Snap scroll to bottom if user was already following output.
+                // This fixes the blank gap after fish's tab completion pager
+                // is dismissed — SwiftTerm's updateScroller isn't called after
+                // erase operations, leaving the scroll position stale.
+                if wasAtBottom {
+                    self.scrollToBottom()
+                }
             }
             print("[BRIDGE] stream ended, isCancelled=\(Task.isCancelled)")
             // Stream ended — connection likely dropped
             if !Task.isCancelled {
                 self.isDisconnected = true
             }
+        }
+    }
+
+    // MARK: - Auto-Scroll
+
+    /// Returns true if the terminal scroll view is at (or very near) the bottom.
+    private func isScrolledToBottom() -> Bool {
+        guard let sv = terminalView else { return true }
+        let bottomEdge = sv.contentSize.height - sv.bounds.height
+        // Tolerate being within one row of the bottom
+        return sv.contentOffset.y >= bottomEdge - 20
+    }
+
+    /// Scrolls the terminal to show the latest content (bottom of buffer).
+    private func scrollToBottom() {
+        guard let sv = terminalView else { return }
+        let terminal = sv.getTerminal()
+        let rows = terminal.rows
+        let optimalSize = sv.getOptimalFrameSize()
+        guard rows > 0 else { return }
+        let cellHeight = optimalSize.height / CGFloat(rows)
+
+        // Recompute contentSize from the buffer to ensure it's fresh.
+        let buffer = terminal.buffer
+        // yDisp is the first visible line. For a non-scrolled view, yDisp = yBase.
+        // The total line count = yDisp + rows (when at the bottom, yDisp = lines.count - rows).
+        // So contentSize.height = (yDisp + rows) * cellHeight is a lower bound.
+        // But if there's scrollback above yDisp, the actual line count is larger.
+        // Use the existing contentSize (set by SwiftTerm) and just scroll to bottom.
+        let bottomOffset = max(0, sv.contentSize.height - sv.bounds.height)
+        if abs(sv.contentOffset.y - bottomOffset) > 1 {
+            sv.contentOffset = CGPoint(x: 0, y: bottomOffset)
         }
     }
 
