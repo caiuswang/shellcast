@@ -25,11 +25,19 @@ struct EditConnectionView: View {
     @State private var keyFileData: Data?
     @State private var showKeyFilePicker = false
     @State private var keyPassphrase: String = ""
+    @State private var validationError: String?
 
     init(mode: Mode, onConnect: ((Connection) -> Void)? = nil) {
         self.mode = mode
         self.onConnect = onConnect
     }
+
+    private var portNumber: Int? { Int(port) }
+    private var isPortValid: Bool { portNumber.map { (1...65535).contains($0) } ?? false }
+    private var isHostValid: Bool {
+        !host.isEmpty && !host.contains(" ") && !host.contains("\\")
+    }
+    private var canSave: Bool { isHostValid && !username.isEmpty && (port.isEmpty || isPortValid) }
 
     var body: some View {
         NavigationStack {
@@ -46,11 +54,21 @@ struct EditConnectionView: View {
                                 .textFieldStyle(DarkFieldStyle())
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
+                            if !host.isEmpty && !isHostValid {
+                                Text("Invalid hostname")
+                                    .font(.caption2)
+                                    .foregroundStyle(.red)
+                            }
                         }
                         field("Port", width: 80) {
                             TextField("22", text: $port)
                                 .textFieldStyle(DarkFieldStyle())
                                 .keyboardType(.numberPad)
+                            if !port.isEmpty && !isPortValid {
+                                Text("1-65535")
+                                    .font(.caption2)
+                                    .foregroundStyle(.red)
+                            }
                         }
                     }
 
@@ -153,7 +171,7 @@ struct EditConnectionView: View {
                             .background(Color.green)
                             .cornerRadius(12)
                     }
-                    .disabled(host.isEmpty || username.isEmpty)
+                    .disabled(!canSave)
                     .padding(.top, 8)
                 }
                 .padding(20)
