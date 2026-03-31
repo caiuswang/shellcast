@@ -17,8 +17,16 @@ struct TerminalContainerView: View {
     @State private var reconnectError: String?
     @State private var networkMonitorToken: UUID?
     @State private var toastMessage: String?
+    /// Lightweight SSH session for tmux exec commands when using Mosh transport
+    @State private var moshExecSession: SSHSession?
 
     private var isSSH: Bool { transport is SSHSession }
+
+    /// SSH transport for exec commands — direct for SSH, lazy-created for Mosh
+    private var sshTransportForExec: SSHSession? {
+        if let ssh = transport as? SSHSession { return ssh }
+        return moshExecSession
+    }
 
     init(transport: any TransportSession, tmuxCommand: String? = nil, sessionRecord: SessionRecord? = nil) {
         self.transport = transport
@@ -83,8 +91,8 @@ struct TerminalContainerView: View {
                 }
             }
 
-            // Tmux switcher overlay (SSH only — over Mosh use keyboard shortcuts)
-            if bridge.showTmuxSwitcher, isSSH, let sshTransport = transport as? SSHSession {
+            // Tmux switcher overlay — works for both SSH and Mosh
+            if bridge.showTmuxSwitcher, let sshTransport = sshTransportForExec {
                 TmuxSwitcherOverlay(
                     transport: sshTransport,
                     sendToPTY: { data in
@@ -183,6 +191,17 @@ struct TerminalContainerView: View {
             if isSSH {
                 NetworkMonitor.shared.onNetworkChange = nil
             }
+            // Clean up Mosh exec session
+            if let exec = moshExecSession {
+                Task { await exec.disconnect() }
+                moshExecSession = nil
+            }
+        }
+        .onChange(of: bridge.showTmuxSwitcher) { _, show in
+            if show && !isSSH && moshExecSession == nil {
+                // Mosh needs a separate SSH connection for tmux exec commands
+                connectExecSessionForMosh()
+            }
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .background || newPhase == .inactive {
@@ -258,6 +277,30 @@ struct TerminalContainerView: View {
             showToast("Resumed")
         }
         #endif
+    }
+
+    /// Create a lightweight SSH session for tmux exec commands when using Mosh.
+    private func connectExecSessionForMosh() {
+        guard let sessionRecord else {
+            bridge.showTmuxSwitcher = false
+            return
+        }
+        Task {
+            do {
+                let connectionId = sessionRecord.connectionId
+                let descriptor = FetchDescriptor<Connection>(predicate: #Predicate { $0.id == connectionId })
+                guard let connection = try? modelContext.fetch(descriptor).first else {
+                    debugLog("[TMUX] Cannot find connection for Mosh exec session")
+                    bridge.showTmuxSwitcher = false
+                    return
+                }
+                let session = try await connectionManager.connectExecSession(connection)
+                moshExecSession = session
+            } catch {
+                debugLog("[TMUX] Failed to create exec session for Mosh: \(error)")
+                bridge.showTmuxSwitcher = false
+            }
+        }
     }
 
     private func showToast(_ message: String) {

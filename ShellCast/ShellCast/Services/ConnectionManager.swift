@@ -65,6 +65,12 @@ final class ConnectionManager {
         activeSessions.removeAll { $0.id == session.id }
     }
 
+    /// Create a lightweight SSH session for exec-only commands (e.g., tmux control).
+    /// Not tracked as an active session — caller is responsible for disconnecting.
+    func connectExecSession(_ connection: Connection) async throws -> SSHSession {
+        return try await connectSSH(connection)
+    }
+
     private func connectSSH(_ connection: Connection) async throws -> SSHSession {
         switch connection.authMethod {
         case .password:
