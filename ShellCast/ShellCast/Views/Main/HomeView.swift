@@ -77,21 +77,24 @@ struct HomeView: View {
             }
         }
         .sheet(item: $activeSheet) { sheet in
-            switch sheet {
-            case .addConnection:
-                EditConnectionView(mode: .add) { connection in
-                    connectTo(connection)
-                }
-            case .editConnection(let connection):
-                EditConnectionView(mode: .edit(connection))
-            case .tmuxBrowser(let sessions):
-                TmuxBrowserView(initialSessions: sessions, transport: activeTransport!) { tmuxSession, windowIndex in
-                    activeSheet = nil
+            Group {
+                switch sheet {
+                case .addConnection:
+                    EditConnectionView(mode: .add) { connection in
+                        connectTo(connection)
+                    }
+                case .editConnection(let connection):
+                    EditConnectionView(mode: .edit(connection))
+                case .tmuxBrowser(let sessions):
                     if let transport = activeTransport {
-                        openShell(transport: transport, tmuxSession: tmuxSession, windowIndex: windowIndex)
+                        TmuxBrowserView(initialSessions: sessions, transport: transport) { tmuxSession, windowIndex in
+                            activeSheet = nil
+                            openShell(transport: transport, tmuxSession: tmuxSession, windowIndex: windowIndex)
+                        }
                     }
                 }
             }
+            .environment(connectionManager)
         }
         .fullScreenCover(isPresented: $showTerminal) {
             if let transport = connectionManager.activeTerminalTransport {
@@ -291,7 +294,7 @@ struct HomeView: View {
             let name = connections.first(where: { $0.id == connectionId })?.name ?? "Unknown"
             return SessionGroup(connectionId: connectionId, connectionName: name, sessions: sessions)
         }
-        .sorted { $0.sessions.first!.lastActiveAt > $1.sessions.first!.lastActiveAt }
+        .sorted { ($0.sessions.first?.lastActiveAt ?? .distantPast) > ($1.sessions.first?.lastActiveAt ?? .distantPast) }
     }
 
     // MARK: - Connect
@@ -307,11 +310,13 @@ struct HomeView: View {
                 self.activeConnectionId = connection.id
                 self.activeConnectionType = connection.connectionType
 
-                // Try to list tmux sessions
+                // Try to list tmux sessions (non-fatal — tmux may not be installed)
                 var sessions: [TmuxSession] = []
                 do {
                     sessions = try await TmuxParser.listSessions(over: transport)
-                } catch {}
+                } catch {
+                    debugLog("[TMUX] list-sessions failed (tmux may not be installed): \(error)")
+                }
 
                 try Task.checkCancellation()
 
