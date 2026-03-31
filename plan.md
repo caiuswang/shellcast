@@ -27,7 +27,8 @@ ShellCast/
 │   │   ├── TmuxSession.swift            # Parsed tmux session struct
 │   │   ├── TerminalSettings.swift       # @Observable: theme, font, cursor, scrollback (UserDefaults)
 │   │   ├── AuthMethod.swift             # Enum: password, keyFile, tailscaleSSH
-│   │   └── ConnectionType.swift         # Enum: auto, ssh, mosh
+│   │   ├── ConnectionType.swift         # Enum: auto, ssh, mosh
+│   │   └── ClaudeCodeSession.swift      # Claude Code session model (id, project, summary)
 │   ├── Views/
 │   │   ├── Main/
 │   │   │   ├── HomeView.swift           # Active sessions + saved connections
@@ -35,8 +36,10 @@ ShellCast/
 │   │   │   └── ConnectionRow.swift      # Saved connection list item
 │   │   ├── Connection/
 │   │   │   └── EditConnectionView.swift # Add/edit connection form (modal sheet)
+│   │   ├── AITools/
+│   │   │   └── ClaudeCodeBrowserView.swift  # Claude Code session browser (grouped by project)
 │   │   ├── Tmux/
-│   │   │   └── TmuxBrowserView.swift    # Tmux session list + session row
+│   │   │   └── TmuxBrowserView.swift    # Tabbed browser: Tmux | Claude Tmux | Sessions
 │   │   ├── Terminal/
 │   │   │   ├── TerminalContainerView.swift  # Hosts SwiftTerm TerminalView
 │   │   │   └── KeyboardToolbar.swift        # Custom key bar: Ctrl Alt Esc Tab arrows symbols
@@ -47,6 +50,7 @@ ShellCast/
 │   │   ├── TransportSession.swift       # Protocol: outputStream, send, resize, disconnect
 │   │   ├── ConnectionManager.swift      # Orchestrator: manages active sessions
 │   │   ├── TmuxParser.swift             # Parse `tmux list-sessions` output
+│   │   ├── ClaudeCodeParser.swift       # Detect, list, resume Claude Code sessions
 │   │   └── KeychainService.swift        # iOS Keychain CRUD for passwords & SSH keys
 │   ├── Terminal/
 │   │   └── TerminalBridge.swift         # Pipes TransportSession ↔ SwiftTerm TerminalView
@@ -234,6 +238,26 @@ HomeView (root)
   - All debug prints wrapped in `#if DEBUG` via `debugLog()` utility
   - Input validation on connection form (host format, port range 1-65535)
 
+### Phase 6: AI Agent CLI Tool Support ✅ COMPLETE
+- [x] Claude Code detection over SSH (checks `/opt/homebrew/bin/claude`, `/usr/local/bin/claude`)
+- [x] Claude Code session listing by scanning `~/.claude/projects/` directory
+  - Extracts first user message as session summary
+  - Groups sessions by project path
+  - Sorted by last modified time
+- [x] Tabbed browser in TmuxBrowserView (Tmux | Claude Tmux | Sessions)
+  - **Tmux**: all tmux sessions with Claude Code badges on running ones
+  - **Claude Tmux**: filtered view showing only sessions/windows running Claude
+  - **Sessions**: browse and resume Claude Code conversations grouped by project
+- [x] Claude Code process detection via process tree walk (`pgrep -P <pane_pid> -f claude`)
+  - `#{pane_current_command}` shows `node` not `claude`, so child process inspection is required
+- [x] Launch Claude Code inside new tmux sessions (`tmux new-session -s claude-<ts> 'claude --resume <id>'`)
+- [x] SessionRecord enhanced with `aiToolType` and `aiSessionId` fields
+- [x] ActiveSessionCard shows sparkles icon for Claude Code sessions in history
+- [x] `WindowNavigation` wrapper for correct claude-only filtering when navigating into windows
+- [x] New files: `ClaudeCodeSession.swift`, `ClaudeCodeParser.swift`, `ClaudeCodeBrowserView.swift`
+
+**Milestone: First-class Claude Code session management from phone.** ✅
+
 ## Risks
 
 | Risk | Impact | Mitigation |
@@ -250,6 +274,7 @@ HomeView (root)
 - **Phase 3**: Test all toolbar keys send correct escape sequences in tmux
 - **Phase 4**: Connect via Mosh, toggle airplane mode, verify auto-reconnection
 - **Phase 5**: TestFlight on iPhone + iPad, full end-to-end workflow
+- **Phase 6**: Connect to server with claude installed, verify tabbed browser, resume/new Claude sessions
 
 ## Reference
 - [SwiftTerm](https://github.com/migueldeicaza/SwiftTerm) — terminal emulator
