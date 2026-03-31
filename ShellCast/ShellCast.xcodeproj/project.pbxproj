@@ -22,6 +22,7 @@
 		3F8CFE6AB3CC4EB6922780FA /* MoshService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C698034D08F700820A025B61 /* MoshService.swift */; };
 		41CE7E2EBD800643D19F03EE /* TransportSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD78C13923FD491B76957AD7 /* TransportSession.swift */; };
 		4C1A2BB48ABB6BEA56C0ED72 /* DebugLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C95DA1DB825ACD9831A6C /* DebugLog.swift */; };
+		50EDBE5339E7B20F0AF162EE /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC8D9CA8FFF23021EB510289 /* ScreenshotTests.swift */; };
 		5149F292471846A0B2B70560 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 90386C1F71AF752095B7FB33 /* WhisperKit */; };
 		54330C917B154E3D36EEF18D /* tokenizer.json in Resources */ = {isa = PBXBuildFile; fileRef = FA207C1E249CDFC75F5AAB75 /* tokenizer.json */; };
 		67E85238EDBA27838AA7DF29 /* JetBrainsMonoNerdFontMono-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */; };
@@ -62,6 +63,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0D054E5D2F5531D6203EC358 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 254D68674B0B636BD8FB8E94 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2DB9E1E934CFCED0689F5211;
+			remoteInfo = ShellCast;
+		};
 		ED58B6C1D99E93C842EEA6FA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 254D68674B0B636BD8FB8E94 /* Project object */;
@@ -89,6 +97,7 @@
 /* Begin PBXFileReference section */
 		037CB0AA879D4E4E6496F4D7 /* TmuxParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxParser.swift; sourceTree = "<group>"; };
 		1409313AD4E6449B02295511 /* mosh.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = mosh.xcframework; path = Frameworks/mosh.xcframework; sourceTree = "<group>"; };
+		181D6D7FB964ADB23B8ABEB2 /* ShellCastUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ShellCastUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		18ED85687617B1A5C79A9437 /* ShellCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellCastApp.swift; sourceTree = "<group>"; };
 		1CF9CE4693072E56B9DFA92B /* added_tokens.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = added_tokens.json; sourceTree = "<group>"; };
 		23317A00D128D5D060821218 /* TerminalContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalContainerView.swift; sourceTree = "<group>"; };
@@ -123,6 +132,7 @@
 		AD78C13923FD491B76957AD7 /* TransportSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportSession.swift; sourceTree = "<group>"; };
 		B3BD57C2918A942D29425698 /* config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = config.json; sourceTree = "<group>"; };
 		B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionRow.swift; sourceTree = "<group>"; };
+		BC8D9CA8FFF23021EB510289 /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		C2A6BDCA94266B0457F457D2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C698034D08F700820A025B61 /* MoshService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoshService.swift; sourceTree = "<group>"; };
 		D35C95DA1DB825ACD9831A6C /* DebugLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLog.swift; sourceTree = "<group>"; };
@@ -181,6 +191,7 @@
 			children = (
 				AA4F2160E25985C381E065CE /* ShellCast.app */,
 				F844CA2ECE9A070493D67508 /* ShellCastTests.xctest */,
+				181D6D7FB964ADB23B8ABEB2 /* ShellCastUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -273,6 +284,7 @@
 				F992B3B0F836D3D8CDF50AB8 /* WhisperModels */,
 				DC51846B66FDE36A491D73B6 /* ShellCast */,
 				6CB46C42112EF084E206405B /* ShellCastTests */,
+				FD8B63AFBDCC8BAAC27009AA /* ShellCastUITests */,
 				0CA3B80DB6B45130C60A2E1E /* Frameworks */,
 				21B25A86D6C9101E8E95FFF9 /* Products */,
 			);
@@ -357,9 +369,35 @@
 			path = Terminal;
 			sourceTree = "<group>";
 		};
+		FD8B63AFBDCC8BAAC27009AA /* ShellCastUITests */ = {
+			isa = PBXGroup;
+			children = (
+				BC8D9CA8FFF23021EB510289 /* ScreenshotTests.swift */,
+			);
+			path = ShellCastUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		12DA4D0499E76E0F9E1B0BE8 /* ShellCastUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DBFF6214B3EC3EC6BDBF2F61 /* Build configuration list for PBXNativeTarget "ShellCastUITests" */;
+			buildPhases = (
+				F0C03573C98F49D0A3F7F723 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4C2CC7A1335805E60E0C4C51 /* PBXTargetDependency */,
+			);
+			name = ShellCastUITests;
+			packageProductDependencies = (
+			);
+			productName = ShellCastUITests;
+			productReference = 181D6D7FB964ADB23B8ABEB2 /* ShellCastUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		2DB9E1E934CFCED0689F5211 /* ShellCast */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BDDE505BEC7EB7240E34176E /* Build configuration list for PBXNativeTarget "ShellCast" */;
@@ -409,6 +447,11 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					12DA4D0499E76E0F9E1B0BE8 = {
+						TestTargetID = 2DB9E1E934CFCED0689F5211;
+					};
+				};
 			};
 			buildConfigurationList = 8D26705189B5FE5C872C9531 /* Build configuration list for PBXProject "ShellCast" */;
 			developmentRegion = en;
@@ -431,6 +474,7 @@
 			targets = (
 				2DB9E1E934CFCED0689F5211 /* ShellCast */,
 				C96B90D5038EE8BB35079F2E /* ShellCastTests */,
+				12DA4D0499E76E0F9E1B0BE8 /* ShellCastUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -503,9 +547,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F0C03573C98F49D0A3F7F723 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				50EDBE5339E7B20F0AF162EE /* ScreenshotTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4C2CC7A1335805E60E0C4C51 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2DB9E1E934CFCED0689F5211 /* ShellCast */;
+			targetProxy = 0D054E5D2F5531D6203EC358 /* PBXContainerItemProxy */;
+		};
 		85CB1E21AADF6B277682D0CC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 2DB9E1E934CFCED0689F5211 /* ShellCast */;
@@ -700,6 +757,40 @@
 			};
 			name = Release;
 		};
+		CBC5694C04E898000A0917D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shellcast.ShellCastUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ShellCast;
+			};
+			name = Debug;
+		};
+		F7A2DA1AC525BF2E8699B8E1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shellcast.ShellCastUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ShellCast;
+			};
+			name = Release;
+		};
 		FF1DDC9454EC74277722DAE1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -759,6 +850,15 @@
 			buildConfigurations = (
 				7222679893743420288B35F8 /* Debug */,
 				FF1DDC9454EC74277722DAE1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DBFF6214B3EC3EC6BDBF2F61 /* Build configuration list for PBXNativeTarget "ShellCastUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CBC5694C04E898000A0917D8 /* Debug */,
+				F7A2DA1AC525BF2E8699B8E1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

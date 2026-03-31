@@ -68,3 +68,13 @@ targets:
         GENERATE_INFOPLIST_FILE: true
     dependencies:
       - target: ShellCast
+
+  ShellCastUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [ShellCastUITests]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+    dependencies:
+      - target: ShellCast
