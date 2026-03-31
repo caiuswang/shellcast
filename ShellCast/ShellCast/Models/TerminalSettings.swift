@@ -268,6 +268,13 @@ enum WhisperModel: String, CaseIterable {
         }
     }
 
+    /// The variant name used by WhisperKit for downloading from HuggingFace
+    var whisperKitVariant: String {
+        switch self {
+        case .base: "base"
+        }
+    }
+
     /// Check if this model is bundled with the app
     var isBundled: Bool {
         Bundle.main.path(forResource: rawValue, ofType: nil, inDirectory: "WhisperModels") != nil

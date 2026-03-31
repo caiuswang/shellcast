@@ -24,7 +24,7 @@ final class WhisperService {
 
     private init() {}
 
-    /// Load a model. Uses bundled model from app resources, no network needed.
+    /// Load a model. Downloads on first use, then caches locally.
     func loadModel(_ model: WhisperModel? = nil) async throws {
         let target = model ?? TerminalSettings.shared.whisperModel
 
@@ -35,30 +35,35 @@ final class WhisperService {
         isModelLoaded = false
         defer { isLoadingModel = false }
 
-        onStatusUpdate?("Loading \(target.displayName)...")
+        // Check if model was previously downloaded to our cache
+        let cacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("WhisperModels")
+        let cachedModelPath = cacheDir.appendingPathComponent(target.rawValue)
 
-        // Look for bundled model in app resources
-        guard let bundleURL = Bundle.main.resourceURL else {
-            throw WhisperError.modelsUnavailable("Cannot access app bundle resources")
-        }
-
-        let modelURL = bundleURL.appendingPathComponent("WhisperModels").appendingPathComponent(target.rawValue)
-        let modelPath = modelURL.path
-
-        guard FileManager.default.fileExists(atPath: modelPath) else {
-            // List what's actually in the bundle for debugging
-            let contents = (try? FileManager.default.contentsOfDirectory(atPath: bundleURL.path)) ?? []
-            let whisperContents = (try? FileManager.default.contentsOfDirectory(atPath: bundleURL.appendingPathComponent("WhisperModels").path)) ?? []
-            throw WhisperError.modelsUnavailable(
-                "Model not found at \(modelPath). Bundle: \(contents.filter { $0.contains("hisper") || $0.contains("odel") }). WhisperModels: \(whisperContents)"
+        if FileManager.default.fileExists(atPath: cachedModelPath.path) {
+            // Use cached model
+            onStatusUpdate?("Loading \(target.displayName)...")
+            let kit = try await WhisperKit(
+                modelFolder: cachedModelPath.path,
+                verbose: false,
+                load: true,
+                download: false
             )
+            whisperKit = kit
+            loadedModelName = target.rawValue
+            isModelLoaded = true
+            onStatusUpdate?("Ready")
+            return
         }
+
+        // Download model from HuggingFace (WhisperKit handles caching)
+        onStatusUpdate?("Downloading \(target.displayName)...")
 
         let kit = try await WhisperKit(
-            modelFolder: modelPath,
+            model: target.whisperKitVariant,
             verbose: false,
             load: true,
-            download: false
+            download: true
         )
 
         whisperKit = kit

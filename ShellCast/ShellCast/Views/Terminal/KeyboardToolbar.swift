@@ -31,6 +31,7 @@ class TerminalKeyboardToolbar: UIView {
     // Voice input
     private var micButton: UIButton!
     private var isListening = false
+    private var isLoadingWhisperModel = false
 
     // Preview bar
     private var previewBar: UIView!
@@ -417,6 +418,8 @@ class TerminalKeyboardToolbar: UIView {
         if engine == .whisper {
             let whisper = WhisperService.shared
             if !whisper.isModelLoaded {
+                guard !isLoadingWhisperModel else { return }
+                isLoadingWhisperModel = true
                 showPreview(text: "Loading model...")
                 whisper.onStatusUpdate = { [weak self] status in
                     self?.previewTextView.text = status
@@ -425,9 +428,11 @@ class TerminalKeyboardToolbar: UIView {
                     do {
                         try await whisper.loadModel()
                         whisper.onStatusUpdate = nil
+                        self.isLoadingWhisperModel = false
                         self.doStartRecording()
                     } catch {
                         whisper.onStatusUpdate = nil
+                        self.isLoadingWhisperModel = false
                         self.showPreview(text: "Load failed: \(error.localizedDescription)")
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                             self.hidePreview()
@@ -478,7 +483,11 @@ class TerminalKeyboardToolbar: UIView {
             } else {
                 text = await AppleSpeechService.shared.stopAndTranscribe()
             }
-            self.previewTextView.text = text.isEmpty ? "(no speech detected)" : text
+            if text.isEmpty || text.hasPrefix("[debug]") {
+                self.previewTextView.text = "(no speech detected)"
+            } else {
+                self.previewTextView.text = text
+            }
         }
     }
 
@@ -531,15 +540,18 @@ class TerminalKeyboardToolbar: UIView {
     @objc private func confirmPreview() {
         guard !previewBar.isHidden else { return }
 
+        // Don't send while model is downloading
+        if isLoadingWhisperModel { return }
+
         // If still recording, stop and transcribe first
         if isListening {
             stopAndTranscribe()
             return
         }
 
+        // Only send actual transcription text, not status/debug messages
         if let text = previewTextView.text, !text.isEmpty,
-           text != "Listening... tap mic to stop",
-           text != "Transcribing...",
+           !text.hasPrefix("[debug]"),
            text != "(no speech detected)" {
             sendKey(Array(text.utf8))
         }
@@ -547,6 +559,7 @@ class TerminalKeyboardToolbar: UIView {
     }
 
     @objc private func cancelPreview() {
+        isLoadingWhisperModel = false
         stopListening()
         hidePreview()
     }
