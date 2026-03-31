@@ -219,6 +219,7 @@ struct HomeView: View {
                     .padding()
                 }
             }
+            .scrollIndicators(.never)
             .background(palette.screenBackground)
             .navigationTitle("History")
             .navigationBarTitleDisplayMode(.inline)

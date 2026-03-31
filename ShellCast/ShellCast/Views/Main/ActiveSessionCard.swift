@@ -109,10 +109,7 @@ private struct LiveDot: View {
             .fill(palette.accent)
             .frame(width: 7, height: 7)
             .opacity(isPulsing ? 1.0 : 0.5)
-            .onAppear {
-                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
-                    isPulsing = true
-                }
-            }
+            .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isPulsing)
+            .onAppear { isPulsing = true }
     }
 }
