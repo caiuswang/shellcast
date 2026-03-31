@@ -16,6 +16,7 @@ struct TerminalContainerView: View {
     @State private var wasBackgrounded = false
     @State private var reconnectError: String?
     @State private var networkMonitorToken: UUID?
+    @State private var toastMessage: String?
 
     private var isSSH: Bool { transport is SSHSession }
 
@@ -90,6 +91,24 @@ struct TerminalContainerView: View {
                 )
                 .transition(.opacity)
                 .zIndex(10)
+            }
+
+            // Toast message (auto-dismiss)
+            if let toast = toastMessage {
+                VStack {
+                    Spacer()
+                    Text(toast)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.green.opacity(0.8))
+                        .cornerRadius(16)
+                        .padding(.bottom, 60)
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .zIndex(5)
             }
 
             // Disconnected overlay
@@ -214,8 +233,7 @@ struct TerminalContainerView: View {
                 let success = await bridge.reconnect(cols: cols, rows: rows, tmuxCommand: tmuxCommand)
                 if success {
                     reconnectError = nil
-                    let msg = "\r\n[Reconnected]\r\n"
-                    bridge.terminalView?.feed(text: msg)
+                    showToast("Reconnected")
                 } else {
                     reconnectError = "Reconnection failed. Check your network and try again."
                 }
@@ -230,15 +248,21 @@ struct TerminalContainerView: View {
         #if canImport(mosh)
         guard let moshSession = transport as? MoshSession else { return }
         if !moshSession.isConnected {
-            // Mosh was killed during background — show disconnected state.
-            // The user can tap "Reconnect" which will re-bootstrap via SSH.
+            // Mosh was killed during background — show disconnected overlay
             bridge.isDisconnected = true
-            bridge.terminalView?.feed(text: "\r\n[Session suspended by iOS — tap Reconnect to resume]\r\n")
         } else {
             // Mosh survived — it will resync automatically via UDP
-            bridge.terminalView?.feed(text: "\r\n[Resumed]\r\n")
+            showToast("Resumed")
         }
         #endif
+    }
+
+    private func showToast(_ message: String) {
+        withAnimation { toastMessage = message }
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            withAnimation { toastMessage = nil }
+        }
     }
 
     private func attemptReconnect() {
@@ -249,8 +273,7 @@ struct TerminalContainerView: View {
             let success = await bridge.reconnect(cols: cols, rows: rows, tmuxCommand: tmuxCommand)
             if success {
                 reconnectError = nil
-                let msg = "\r\n[Reconnected]\r\n"
-                bridge.terminalView?.feed(text: msg)
+                showToast("Reconnected")
             } else {
                 reconnectError = "Reconnection failed. Check your network and try again."
             }
