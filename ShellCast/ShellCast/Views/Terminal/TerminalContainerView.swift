@@ -148,7 +148,7 @@ struct TerminalContainerView: View {
                     // Network restored or interface changed — check if SSH is still alive
                     Task { @MainActor in
                         guard !bridge.isDisconnected, !bridge.isReconnecting else { return }
-                        print("[NET] Network change detected, checking SSH connection...")
+                        debugLog("[NET] Network change detected, checking SSH connection...")
                         checkConnectionOnForeground()
                     }
                 }
@@ -430,28 +430,28 @@ class TerminalViewController: UIViewController {
         let newRows = max(1, Int(availableHeight / cellSize.height))
         let terminal = terminalView.getTerminal()
 
-        print("[RESIZE] availableHeight=\(availableHeight) cellSize=\(cellSize) newCols=\(newCols) newRows=\(newRows) currentCols=\(terminal.cols) currentRows=\(terminal.rows) lastServer=\(lastServerCols)x\(lastServerRows)")
-        print("[RESIZE] view.bounds=\(view.bounds) terminalView.frame=\(terminalView.frame) safeArea.top=\(view.safeAreaInsets.top)")
-        print("[RESIZE] terminalView.contentSize=\(terminalView.contentSize) contentOffset=\(terminalView.contentOffset) bounds=\(terminalView.bounds)")
+        debugLog("[RESIZE] availableHeight=\(availableHeight) cellSize=\(cellSize) newCols=\(newCols) newRows=\(newRows) currentCols=\(terminal.cols) currentRows=\(terminal.rows) lastServer=\(lastServerCols)x\(lastServerRows)")
+        debugLog("[RESIZE] view.bounds=\(view.bounds) terminalView.frame=\(terminalView.frame) safeArea.top=\(view.safeAreaInsets.top)")
+        debugLog("[RESIZE] terminalView.contentSize=\(terminalView.contentSize) contentOffset=\(terminalView.contentOffset) bounds=\(terminalView.bounds)")
 
         let terminalNeedsResize = newCols != terminal.cols || newRows != terminal.rows
         let serverNeedsResize = newCols != lastServerCols || newRows != lastServerRows
 
         if terminalNeedsResize {
-            print("[RESIZE] Resizing terminal view: \(terminal.cols)x\(terminal.rows) → \(newCols)x\(newRows)")
+            debugLog("[RESIZE] Resizing terminal view: \(terminal.cols)x\(terminal.rows) → \(newCols)x\(newRows)")
             terminalView.resize(cols: newCols, rows: newRows)
         }
 
         if serverNeedsResize {
-            print("[RESIZE] Resizing server: \(lastServerCols)x\(lastServerRows) → \(newCols)x\(newRows)")
+            debugLog("[RESIZE] Resizing server: \(lastServerCols)x\(lastServerRows) → \(newCols)x\(newRows)")
             lastServerCols = newCols
             lastServerRows = newRows
             Task {
                 do {
                     try await bridge.transport.resize(cols: newCols, rows: newRows)
-                    print("[RESIZE] Server resize SUCCESS: \(newCols)x\(newRows)")
+                    debugLog("[RESIZE] Server resize SUCCESS: \(newCols)x\(newRows)")
                 } catch {
-                    print("[RESIZE] Server resize FAILED: \(error)")
+                    debugLog("[RESIZE] Server resize FAILED: \(error)")
                 }
             }
         }
@@ -470,7 +470,7 @@ class TerminalViewController: UIViewController {
         toolbar.applyLayout(keyboardVisible: keyboardVisible)
         toolbarBottomConstraint.constant = -kbHeight
 
-        print("[KB] kbHeight=\(kbHeight) keyboardVisible=\(keyboardVisible) toolbarConstant=\(toolbarBottomConstraint.constant) viewHeight=\(view.bounds.height) safeTop=\(view.safeAreaInsets.top)")
+        debugLog("[KB] kbHeight=\(kbHeight) keyboardVisible=\(keyboardVisible) toolbarConstant=\(toolbarBottomConstraint.constant) viewHeight=\(view.bounds.height) safeTop=\(view.safeAreaInsets.top)")
 
         UIView.animate(withDuration: duration) {
             self.view.layoutIfNeeded()
@@ -478,7 +478,7 @@ class TerminalViewController: UIViewController {
             // Use the actual terminal view frame after layout — Auto Layout
             // already accounts for safe area, toolbar position, and keyboard.
             let actualHeight = self.terminalView.frame.height
-            print("[KB] post-layout terminalFrame=\(self.terminalView.frame) toolbarFrame=\(self.toolbar.frame) actualHeight=\(actualHeight)")
+            debugLog("[KB] post-layout terminalFrame=\(self.terminalView.frame) toolbarFrame=\(self.toolbar.frame) actualHeight=\(actualHeight)")
 
             self.resizeTerminal(availableHeight: actualHeight)
             self.startSessionIfNeeded()
@@ -498,8 +498,8 @@ class TerminalViewController: UIViewController {
         // finishes layout, so view.bounds is wrong here).
         terminalView.becomeFirstResponder()
 
-        print("[TERM] viewDidAppear: bounds=\(view.bounds) cellSize=\(cellSize)")
-        print("[TERM] needsDeferredStart=\(bridge.transport.needsDeferredStart) isSSH=\(bridge.transport is SSHSession)")
+        debugLog("[TERM] viewDidAppear: bounds=\(view.bounds) cellSize=\(cellSize)")
+        debugLog("[TERM] needsDeferredStart=\(bridge.transport.needsDeferredStart) isSSH=\(bridge.transport is SSHSession)")
 
         // Start reading FIRST so the consumer is ready before any data arrives
         bridge.startReading()
@@ -515,7 +515,7 @@ class TerminalViewController: UIViewController {
         hasStartedSession = true
 
         let terminal = terminalView.getTerminal()
-        print("[TERM] Starting session with correct dims: cols=\(terminal.cols) rows=\(terminal.rows)")
+        debugLog("[TERM] Starting session with correct dims: cols=\(terminal.cols) rows=\(terminal.rows)")
 
         if bridge.transport.needsDeferredStart {
             bridge.transport.startWithDimensions(cols: terminal.cols, rows: terminal.rows)

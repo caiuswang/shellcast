@@ -95,10 +95,10 @@ struct HomeView: View {
         }
         .fullScreenCover(isPresented: $showTerminal) {
             if let transport = connectionManager.activeTerminalTransport {
-                let _ = print("[COVER] Rendering TerminalContainerView, transport=\(type(of: transport)), needsDeferredStart=\(transport.needsDeferredStart)")
+                let _ = debugLog("[COVER] Rendering TerminalContainerView, transport=\(type(of: transport)), needsDeferredStart=\(transport.needsDeferredStart)")
                 TerminalContainerView(transport: transport, tmuxCommand: activeTmuxCommand, sessionRecord: activeSessionRecord)
             } else {
-                let _ = print("[COVER] ERROR: connectionManager.activeTerminalTransport is nil!")
+                let _ = debugLog("[COVER] ERROR: connectionManager.activeTerminalTransport is nil!")
                 Color.black
             }
         }
@@ -354,22 +354,22 @@ struct HomeView: View {
                 let useMosh = activeConnectionType == .mosh || activeConnectionType == .auto
                 if useMosh {
                     do {
-                        print("[MOSH] Starting bootstrap, host=\(transport.host)")
+                        debugLog("[MOSH] Starting bootstrap, host=\(transport.host)")
                         let moshTransport = try await MoshService.bootstrap(
                             sshSession: transport,
                             host: transport.host,
                             shellCommand: tmuxCommand
                         )
-                        print("[MOSH] Bootstrap complete, waiting for sheet dismiss")
+                        debugLog("[MOSH] Bootstrap complete, waiting for sheet dismiss")
                         self.connectionManager.activeTerminalTransport = moshTransport
                         self.activeTmuxCommand = nil
                         // Wait for tmux browser sheet dismissal to complete
                         try? await Task.sleep(for: .milliseconds(600))
-                        print("[MOSH] Showing terminal now")
+                        debugLog("[MOSH] Showing terminal now")
                         showTerminal = true
                         return
                     } catch {
-                        print("[MOSH] Bootstrap failed: \(error)")
+                        debugLog("[MOSH] Bootstrap failed: \(error)")
                         if activeConnectionType == .mosh {
                             throw error
                         }
@@ -379,12 +379,12 @@ struct HomeView: View {
                 }
 
                 // SSH path
-                print("[SSH] Opening shell")
+                debugLog("[SSH] Opening shell")
                 self.connectionManager.activeTerminalTransport = transport
                 try await transport.openShell(tmuxCommand: tmuxCommand)
                 showTerminal = true
             } catch {
-                print("[CONNECT] Error: \(error)")
+                debugLog("[CONNECT] Error: \(error)")
                 errorMessage = error.localizedDescription
                 showError = true
             }

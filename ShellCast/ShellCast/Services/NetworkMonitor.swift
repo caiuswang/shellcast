@@ -58,18 +58,18 @@ final class NetworkMonitor {
 
                 if connectionChanged || interfaceChanged {
                     let reason = interfaceChanged ? "interface changed (\(oldInterface.debugName) → \(newInterfaceType.debugName))" : "connection \(newConnected ? "restored" : "lost")"
-                    print("[NET] Network change: \(reason), satisfied=\(newConnected)")
+                    debugLog("[NET] Network change: \(reason), satisfied=\(newConnected)")
                     self.onNetworkChange?(newConnected)
                 }
             }
         }
         monitor.start(queue: queue)
-        print("[NET] NetworkMonitor started")
+        debugLog("[NET] NetworkMonitor started")
     }
 
     func stop() {
         monitor.cancel()
-        print("[NET] NetworkMonitor stopped")
+        debugLog("[NET] NetworkMonitor stopped")
     }
 }
 

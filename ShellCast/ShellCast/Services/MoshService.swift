@@ -57,16 +57,16 @@ final class MoshSession: TransportSession {
 
     /// Start the mosh-client session. Blocks until session ends (runs on background thread).
     func start(cols: Int = 80, rows: Int = 24, encodedState: Data? = nil) {
-        print("[MOSH] start() called: cols=\(cols) rows=\(rows) needsStart=\(needsStart)")
+        debugLog("[MOSH] start() called: cols=\(cols) rows=\(rows) needsStart=\(needsStart)")
         needsStart = false
         winSize.ws_col = UInt16(cols)
         winSize.ws_row = UInt16(rows)
 
         guard let continuation = self.continuation else {
-            print("[MOSH] ERROR: continuation is nil!")
+            debugLog("[MOSH] ERROR: continuation is nil!")
             return
         }
-        print("[MOSH] continuation OK, setting up pipes")
+        debugLog("[MOSH] continuation OK, setting up pipes")
 
         let inputPipe = Pipe()
         self.inputPipe = inputPipe
@@ -219,29 +219,29 @@ struct MoshService {
         if let shellCommand {
             command += " -- \(shellCommand)"
         }
-        print("[MOSH] Exec: \(command)")
+        debugLog("[MOSH] Exec: \(command)")
         let output: String
         do {
             output = try await sshSession.exec(command)
         } catch {
-            print("[MOSH] Exec failed: \(error)")
+            debugLog("[MOSH] Exec failed: \(error)")
             throw MoshError.bootstrapFailed(error.localizedDescription)
         }
-        print("[MOSH] Server output: \(output)")
+        debugLog("[MOSH] Server output: \(output)")
 
         // Parse "MOSH CONNECT <port> <key>" from output
         guard let (port, key) = parseMoshConnect(output) else {
             if output.contains("command not found") || output.contains("No such file") {
                 throw MoshError.serverNotInstalled
             }
-            print("[MOSH] Failed to parse MOSH CONNECT from output")
+            debugLog("[MOSH] Failed to parse MOSH CONNECT from output")
             throw MoshError.parseConnectFailed
         }
-        print("[MOSH] Parsed: port=\(port) key=\(key.prefix(8))...")
+        debugLog("[MOSH] Parsed: port=\(port) key=\(key.prefix(8))...")
 
         // Close the SSH session — Mosh takes over via UDP
         await sshSession.disconnect()
-        print("[MOSH] SSH disconnected, returning MoshSession (not started)")
+        debugLog("[MOSH] SSH disconnected, returning MoshSession (not started)")
 
         return MoshSession(host: host, port: port, key: key)
         #else
@@ -277,7 +277,7 @@ struct MoshService {
         let url = stateDirectory.appendingPathComponent("\(sessionId.uuidString).json")
         if let data = try? JSONEncoder().encode(persisted) {
             try? data.write(to: url, options: .atomic)
-            print("[MOSH] Saved session state for \(sessionId) (\(state?.count ?? 0) bytes)")
+            debugLog("[MOSH] Saved session state for \(sessionId) (\(state?.count ?? 0) bytes)")
         }
     }
 
@@ -290,7 +290,7 @@ struct MoshService {
         }
         // Discard state older than 10 minutes — server may have timed out
         if Date().timeIntervalSince(persisted.savedAt) > 600 {
-            print("[MOSH] Discarding stale state for \(sessionId) (saved \(persisted.savedAt))")
+            debugLog("[MOSH] Discarding stale state for \(sessionId) (saved \(persisted.savedAt))")
             removeSessionState(sessionId: sessionId)
             return nil
         }

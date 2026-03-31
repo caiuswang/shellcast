@@ -26,22 +26,22 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
     func startReading() {
         readTask?.cancel()
         dataReceivedCount = 0
-        print("[BRIDGE] startReading() called, transport type: \(type(of: transport))")
+        debugLog("[BRIDGE] startReading() called, transport type: \(type(of: transport))")
         readTask = Task { [weak self] in
             guard let self else { return }
-            print("[BRIDGE] for-await loop starting")
+            debugLog("[BRIDGE] for-await loop starting")
             for await data in self.transport.outputStream {
                 guard !Task.isCancelled else { break }
                 self.dataReceivedCount += 1
                 if self.dataReceivedCount <= 5 {
-                    print("[BRIDGE] data received #\(self.dataReceivedCount): \(data.count) bytes, terminalView=\(self.terminalView != nil)")
+                    debugLog("[BRIDGE] data received #\(self.dataReceivedCount): \(data.count) bytes, terminalView=\(self.terminalView != nil)")
                 }
                 let bytes = Array(data)
 
                 self.terminalView?.feed(byteArray: bytes[...])
                 self.terminalView?.setNeedsDisplay()
             }
-            print("[BRIDGE] stream ended, isCancelled=\(Task.isCancelled)")
+            debugLog("[BRIDGE] stream ended, isCancelled=\(Task.isCancelled)")
             // Stream ended — connection likely dropped
             if !Task.isCancelled {
                 self.isDisconnected = true
