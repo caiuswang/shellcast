@@ -199,8 +199,15 @@ HomeView (root)
 - [x] "Auto" connection type logic (try Mosh first, fallback SSH)
 - [x] State serialization callback for background persistence
 - [x] Generalized `TerminalBridge` and `TerminalContainerView` to `TransportSession` protocol
-- [ ] Test WiFi↔cellular handoff, sleep/wake reconnection
-- [ ] Handle iOS background execution limits (Mosh UDP keeps state server-side)
+- [x] Test WiFi↔cellular handoff, sleep/wake reconnection
+  - `NetworkMonitor` service using `NWPathMonitor` for proactive handoff detection
+  - Triggers SSH reconnection check on interface change (WiFi→cellular, etc.)
+  - Mosh sessions log transitions but handle reconnection natively via UDP
+- [x] Handle iOS background execution limits (Mosh UDP keeps state server-side)
+  - `MoshService.saveSessionState()` serializes Mosh client state to disk on background
+  - Auto-expiry: saved states discarded after 10 minutes (server timeout)
+  - Foreground resume: detects if Mosh session survived iOS suspension
+  - Graceful fallback: shows reconnect prompt if session was killed
 
 **Milestone: Connections survive network changes and phone sleep.**
 
@@ -211,7 +218,10 @@ HomeView (root)
 - [x] Settings applied to SwiftTerm TerminalView (colors, font, cursor style, scrollback)
 - [x] Visible edit button on connection rows in main menu
 - [x] iPad layout optimization (larger terminal, sidebar option)
-- [ ] App icon and launch screen
+- [x] App icon and launch screen
+  - Programmatically generated 1024x1024 icon: dark terminal with green ">_" prompt
+  - Asset catalog with AppIcon.appiconset configured in project.yml
+  - Generator script at `Scripts/generate_app_icon.swift` for reproducibility
 - [x] Error handling, edge cases, empty states
 - [ ] TestFlight beta
 
