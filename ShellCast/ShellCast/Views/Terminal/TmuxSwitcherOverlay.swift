@@ -24,13 +24,21 @@ struct TmuxSwitcherOverlay: View {
 
             VStack(spacing: 0) {
                 // Header
-                HStack {
+                HStack(spacing: 10) {
                     Image(systemName: "rectangle.split.3x1")
-                        .foregroundStyle(.green)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
+                        .frame(width: 28, height: 28)
+                        .background(Color.green.gradient)
+                        .cornerRadius(7)
+
                     Text(selectedSession?.name ?? "Tmux Sessions")
                         .font(.headline)
                         .foregroundStyle(.white)
+
                     Spacer()
+
                     if selectedSession != nil {
                         Button {
                             withAnimation(.easeInOut(duration: 0.15)) {
@@ -41,23 +49,29 @@ struct TmuxSwitcherOverlay: View {
                             Image(systemName: "chevron.left")
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.green)
+                                .frame(width: 28, height: 28)
+                                .background(Color.green.opacity(0.1))
+                                .cornerRadius(7)
                         }
-                        .padding(.trailing, 8)
+                        .padding(.trailing, 4)
                     }
+
                     Button {
                         isPresented = false
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title3)
                             .symbolRenderingMode(.palette)
-                            .foregroundStyle(.white, Color(white: 0.3))
+                            .foregroundStyle(.gray.opacity(0.6), Color(white: 0.2))
                     }
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Color(white: 0.12))
+                .padding(.vertical, 14)
+                .background(Color(white: 0.1))
 
-                Divider().background(Color(white: 0.2))
+                Rectangle()
+                    .fill(Color.white.opacity(0.06))
+                    .frame(height: 0.5)
 
                 // Content
                 if isLoading {
@@ -73,9 +87,13 @@ struct TmuxSwitcherOverlay: View {
             }
             .frame(maxWidth: sizeClass == .regular ? 480 : 360)
             .frame(maxHeight: sizeClass == .regular ? 500 : 400)
-            .background(Color(white: 0.08))
-            .cornerRadius(16)
-            .shadow(color: .black.opacity(0.5), radius: 20)
+            .background(Color(white: 0.06))
+            .cornerRadius(18)
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+            )
+            .shadow(color: .black.opacity(0.6), radius: 30, y: 10)
             .padding(24)
         }
         .task {
@@ -99,7 +117,10 @@ struct TmuxSwitcherOverlay: View {
                     }
 
                     if session.id != sessions.last?.id {
-                        Divider().background(Color(white: 0.15)).padding(.leading, 16)
+                        Rectangle()
+                            .fill(Color.white.opacity(0.06))
+                            .frame(height: 0.5)
+                            .padding(.leading, 52)
                     }
                 }
             }
@@ -107,7 +128,14 @@ struct TmuxSwitcherOverlay: View {
     }
 
     private func sessionRow(_ session: TmuxSession) -> some View {
-        HStack {
+        HStack(spacing: 10) {
+            Image(systemName: "terminal")
+                .font(.caption2)
+                .foregroundStyle(.green.opacity(0.7))
+                .frame(width: 24, height: 24)
+                .background(Color.green.opacity(0.08))
+                .cornerRadius(6)
+
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(session.name)
@@ -117,24 +145,23 @@ struct TmuxSwitcherOverlay: View {
 
                     if session.name == currentSessionName {
                         Text("Current")
-                            .font(.caption2)
-                            .fontWeight(.semibold)
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
                             .foregroundStyle(.green)
                             .padding(.horizontal, 5)
-                            .padding(.vertical, 1)
-                            .background(Color.green.opacity(0.2))
+                            .padding(.vertical, 1.5)
+                            .background(Color.green.opacity(0.15))
                             .cornerRadius(3)
                     }
                 }
 
                 Text("\(session.windowCount) window\(session.windowCount == 1 ? "" : "s")")
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(.gray.opacity(0.5))
             }
             Spacer()
             Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundStyle(.gray)
+                .font(.caption2)
+                .foregroundStyle(.gray.opacity(0.3))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -159,19 +186,23 @@ struct TmuxSwitcherOverlay: View {
                             guard let session = selectedSession else { return }
                             switchToSession(session)
                         } label: {
-                            HStack {
+                            HStack(spacing: 8) {
                                 Image(systemName: "rectangle.stack")
                                     .foregroundStyle(.green)
                                 Text("Switch to session")
+                                    .fontWeight(.medium)
                                     .foregroundStyle(.white)
                                 Spacer()
                             }
                             .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
+                            .padding(.vertical, 11)
                             .contentShape(Rectangle())
                         }
 
-                        Divider().background(Color(white: 0.15)).padding(.leading, 16)
+                        Rectangle()
+                            .fill(Color.white.opacity(0.06))
+                            .frame(height: 0.5)
+                            .padding(.leading, 52)
 
                         ForEach(windows) { window in
                             Button {
@@ -182,7 +213,10 @@ struct TmuxSwitcherOverlay: View {
                             }
 
                             if window.id != windows.last?.id {
-                                Divider().background(Color(white: 0.15)).padding(.leading, 16)
+                                Rectangle()
+                                    .fill(Color.white.opacity(0.06))
+                                    .frame(height: 0.5)
+                                    .padding(.leading, 52)
                             }
                         }
                     }
@@ -192,7 +226,14 @@ struct TmuxSwitcherOverlay: View {
     }
 
     private func windowRow(_ window: TmuxWindow) -> some View {
-        HStack {
+        HStack(spacing: 10) {
+            Image(systemName: "macwindow")
+                .font(.caption2)
+                .foregroundStyle(.cyan.opacity(0.7))
+                .frame(width: 24, height: 24)
+                .background(Color.cyan.opacity(0.08))
+                .cornerRadius(6)
+
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text("\(window.index): \(window.name)")
@@ -202,19 +243,18 @@ struct TmuxSwitcherOverlay: View {
 
                     if window.isActive {
                         Text("Active")
-                            .font(.caption2)
-                            .fontWeight(.semibold)
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
                             .foregroundStyle(.green)
                             .padding(.horizontal, 5)
-                            .padding(.vertical, 1)
-                            .background(Color.green.opacity(0.2))
+                            .padding(.vertical, 1.5)
+                            .background(Color.green.opacity(0.15))
                             .cornerRadius(3)
                     }
                 }
 
                 Text("\(window.paneCount) pane\(window.paneCount == 1 ? "" : "s")")
                     .font(.caption)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(.gray.opacity(0.5))
             }
             Spacer()
         }
