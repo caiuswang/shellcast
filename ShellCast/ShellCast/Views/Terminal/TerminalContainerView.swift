@@ -624,7 +624,9 @@ class TerminalViewController: UIViewController {
         let keyboardVisible = kbHeight > 0
 
         toolbar.applyLayout(keyboardVisible: keyboardVisible)
-        toolbarBottomConstraint.constant = -kbHeight
+        // When keyboard is hidden, offset by safe area bottom so toolbar sits above the home indicator
+        let bottomOffset = keyboardVisible ? kbHeight : view.safeAreaInsets.bottom
+        toolbarBottomConstraint.constant = -bottomOffset
 
         debugLog("[KB] kbHeight=\(kbHeight) keyboardVisible=\(keyboardVisible) toolbarConstant=\(toolbarBottomConstraint.constant) viewHeight=\(view.bounds.height) safeTop=\(view.safeAreaInsets.top)")
 
@@ -683,6 +685,11 @@ class TerminalViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         guard terminalView != nil else { return }
+
+        // Ensure toolbar respects safe area bottom when keyboard is not visible
+        if toolbarBottomConstraint.constant == 0 && view.safeAreaInsets.bottom > 0 {
+            toolbarBottomConstraint.constant = -view.safeAreaInsets.bottom
+        }
 
         let availableHeight = terminalView.frame.height
         guard availableHeight > 0 else { return }
