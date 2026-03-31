@@ -135,7 +135,9 @@ final class SSHSession: TransportSession {
         // Access the outputStream to ensure continuation is created
         _ = self.outputStream
 
-        let continuation = self.continuation!
+        guard let continuation = self.continuation else {
+            throw SSHError.connectionFailed("Failed to initialize output stream")
+        }
 
         ptyTask = Task { [weak self] in
             do {

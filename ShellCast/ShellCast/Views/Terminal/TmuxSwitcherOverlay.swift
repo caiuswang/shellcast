@@ -25,7 +25,7 @@ struct TmuxSwitcherOverlay: View {
                 HStack {
                     Image(systemName: "rectangle.split.3x1")
                         .foregroundStyle(.green)
-                    Text(selectedSession == nil ? "Tmux Sessions" : selectedSession!.name)
+                    Text(selectedSession?.name ?? "Tmux Sessions")
                         .font(.headline)
                         .foregroundStyle(.white)
                     Spacer()
@@ -154,7 +154,8 @@ struct TmuxSwitcherOverlay: View {
                     LazyVStack(spacing: 0) {
                         // Switch to session (attach to active window)
                         Button {
-                            switchToSession(selectedSession!)
+                            guard let session = selectedSession else { return }
+                            switchToSession(session)
                         } label: {
                             HStack {
                                 Image(systemName: "rectangle.stack")
@@ -172,7 +173,8 @@ struct TmuxSwitcherOverlay: View {
 
                         ForEach(windows) { window in
                             Button {
-                                switchToWindow(selectedSession!, window: window)
+                                guard let session = selectedSession else { return }
+                                switchToWindow(session, window: window)
                             } label: {
                                 windowRow(window)
                             }
