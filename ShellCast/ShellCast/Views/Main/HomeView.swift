@@ -36,6 +36,9 @@ struct HomeView: View {
     @State private var showError = false
     @State private var deleteConnectionTarget: Connection?
     @State private var showMoshFallbackNotice = false
+    @State private var settings = TerminalSettings.shared
+
+    private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -60,45 +63,45 @@ struct HomeView: View {
                 }
                 .tag(2)
         }
-        .tint(.green)
+        .tint(palette.accent)
         .overlay {
             if connectionManager.isConnecting {
-                Color.black.opacity(0.7)
+                palette.overlayBackground
                     .ignoresSafeArea()
                 VStack(spacing: 20) {
                     ZStack {
                         Circle()
-                            .stroke(Color.green.opacity(0.15), lineWidth: 3)
+                            .stroke(palette.accent.opacity(0.2), lineWidth: 3)
                             .frame(width: 60, height: 60)
                         ProgressView()
                             .controlSize(.large)
-                            .tint(.green)
+                            .tint(palette.accent)
                     }
 
                     Text("Connecting...")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(palette.primaryText)
 
                     Button {
                         connectionManager.cancelConnect()
                     } label: {
                         Text("Cancel")
                             .font(.subheadline)
-                            .foregroundStyle(.gray)
+                            .foregroundStyle(palette.secondaryText)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 10)
-                            .background(Color(white: 0.15))
+                            .background(palette.controlBackground)
                             .cornerRadius(20)
                     }
                 }
                 .padding(32)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color(white: 0.08).opacity(0.95))
+                        .fill(palette.elevatedSurfaceBackground.opacity(0.96))
                         .overlay(
                             RoundedRectangle(cornerRadius: 20)
-                                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+                                .stroke(palette.border, lineWidth: 0.5)
                         )
                 )
             }
@@ -175,14 +178,14 @@ struct HomeView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "clock.fill")
                             .font(.system(size: 44))
-                            .foregroundStyle(.gray.opacity(0.25))
+                            .foregroundStyle(palette.tertiaryText.opacity(0.45))
                         Text("No Recent Sessions")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundStyle(.gray.opacity(0.6))
+                            .foregroundStyle(palette.secondaryText)
                         Text("Your terminal sessions will appear here")
                             .font(.caption)
-                            .foregroundStyle(.gray.opacity(0.35))
+                            .foregroundStyle(palette.tertiaryText)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 80)
@@ -193,7 +196,7 @@ struct HomeView: View {
                                 Text(group.connectionName.uppercased())
                                     .font(.caption)
                                     .fontWeight(.semibold)
-                                    .foregroundStyle(.gray)
+                                    .foregroundStyle(palette.secondaryText)
 
                                 if sizeClass == .regular {
                                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 200))], spacing: 12) {
@@ -216,7 +219,7 @@ struct HomeView: View {
                     .padding()
                 }
             }
-            .background(Color(white: 0.04))
+            .background(palette.screenBackground)
             .navigationTitle("History")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -257,19 +260,19 @@ struct HomeView: View {
                     VStack(spacing: 16) {
                         ZStack {
                             Circle()
-                                .fill(.green.opacity(0.08))
+                                .fill(palette.accent.opacity(0.08))
                                 .frame(width: 80, height: 80)
                             Image(systemName: "server.rack")
                                 .font(.system(size: 32))
-                                .foregroundStyle(.green.opacity(0.4))
+                                .foregroundStyle(palette.accent.opacity(0.45))
                         }
                         Text("No Connections Yet")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundStyle(.gray.opacity(0.6))
+                            .foregroundStyle(palette.secondaryText)
                         Text("Tap + to add your first server")
                             .font(.caption)
-                            .foregroundStyle(.gray.opacity(0.35))
+                            .foregroundStyle(palette.tertiaryText)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 80)
@@ -297,7 +300,7 @@ struct HomeView: View {
                     .iPadContentWidth(700)
                 }
             }
-            .background(Color(white: 0.04))
+            .background(palette.screenBackground)
             .navigationTitle("Connections")
             .navigationBarTitleDisplayMode(.inline)
             .overlay(alignment: .bottomTrailing) {
@@ -307,11 +310,11 @@ struct HomeView: View {
                     Image(systemName: "plus")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundStyle(.black)
+                        .foregroundStyle(palette.accentForeground)
                         .frame(width: 56, height: 56)
-                        .background(Color.green.gradient)
+                        .background(palette.accent.gradient)
                         .clipShape(Circle())
-                        .shadow(color: .green.opacity(0.3), radius: 12, y: 6)
+                        .shadow(color: palette.accent.opacity(0.3), radius: 12, y: 6)
                 }
                 .padding(24)
             }

@@ -215,6 +215,8 @@ HomeView (root)
 - [x] SSH key file import via Files app (`fileImporter` + Keychain storage)
 - [x] Tailscale SSH "none" auth support (added to auth picker, no credentials needed)
 - [x] Settings view — theme, font, font size, cursor mode/blink, scrollback
+  - Verified redesigned Settings header with hero card, quick theme chips, and active setting badges via screenshot UI test
+  - Split app appearance from terminal theme, defaulted app appearance to Graphite, and verified build plus screenshot UI test
 - [x] Settings applied to SwiftTerm TerminalView (colors, font, cursor style, scrollback)
 - [x] Visible edit button on connection rows in main menu
 - [x] iPad layout optimization (larger terminal, sidebar option)

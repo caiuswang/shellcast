@@ -3,6 +3,9 @@ import SwiftUI
 struct ConnectionRow: View {
     let connection: Connection
     var onEdit: (() -> Void)?
+    @State private var settings = TerminalSettings.shared
+
+    private var palette: AppThemePalette { settings.appPalette }
 
     private var protocolLabel: String {
         switch connection.connectionType {
@@ -26,9 +29,9 @@ struct ConnectionRow: View {
             Image(systemName: "server.rack")
                 .font(.callout)
                 .fontWeight(.medium)
-                .foregroundStyle(.white)
+                .foregroundStyle(palette.primaryText)
                 .frame(width: 38, height: 38)
-                .background(Color.green.gradient)
+                .background(palette.accent.gradient)
                 .cornerRadius(10)
 
             VStack(alignment: .leading, spacing: 4) {
@@ -36,7 +39,7 @@ struct ConnectionRow: View {
                     Text(connection.name.isEmpty ? connection.host : connection.name)
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(palette.primaryText)
 
                     Text(protocolLabel)
                         .font(.system(size: 9, weight: .bold, design: .monospaced))
@@ -49,7 +52,7 @@ struct ConnectionRow: View {
 
                 Text("\(connection.username)@\(connection.host):\(connection.port)")
                     .font(.caption)
-                    .foregroundStyle(.gray.opacity(0.7))
+                    .foregroundStyle(palette.secondaryText)
             }
 
             Spacer()
@@ -60,7 +63,7 @@ struct ConnectionRow: View {
                 } label: {
                     Image(systemName: "pencil")
                         .font(.callout)
-                        .foregroundStyle(.gray.opacity(0.5))
+                        .foregroundStyle(palette.tertiaryText)
                         .frame(width: 36, height: 36)
                         .contentShape(Rectangle())
                 }
@@ -69,14 +72,14 @@ struct ConnectionRow: View {
 
             Image(systemName: "chevron.right")
                 .font(.caption2)
-                .foregroundStyle(.gray.opacity(0.4))
+                .foregroundStyle(palette.tertiaryText.opacity(0.8))
         }
         .padding(14)
-        .background(Color(white: 0.11))
+        .background(palette.surfaceBackground)
         .cornerRadius(14)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+                .stroke(palette.border, lineWidth: 0.5)
         )
     }
 }

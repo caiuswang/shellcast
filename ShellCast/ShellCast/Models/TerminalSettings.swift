@@ -2,6 +2,134 @@ import Foundation
 import SwiftUI
 import UIKit
 
+private extension Color {
+    init(hex: UInt32, alpha: Double = 1) {
+        self.init(
+            .sRGB,
+            red: Double((hex >> 16) & 0xFF) / 255.0,
+            green: Double((hex >> 8) & 0xFF) / 255.0,
+            blue: Double(hex & 0xFF) / 255.0,
+            opacity: alpha
+        )
+    }
+}
+
+struct AppThemePalette {
+    let accent: Color
+    let accentForeground: Color
+    let screenBackground: Color
+    let surfaceBackground: Color
+    let elevatedSurfaceBackground: Color
+    let controlBackground: Color
+    let selectedControlBackground: Color
+    let border: Color
+    let primaryText: Color
+    let secondaryText: Color
+    let tertiaryText: Color
+    let overlayBackground: Color
+}
+
+extension AppThemePalette {
+    var accentUIColor: UIColor { UIColor(accent) }
+    var accentForegroundUIColor: UIColor { UIColor(accentForeground) }
+    var surfaceBackgroundUIColor: UIColor { UIColor(surfaceBackground) }
+    var elevatedSurfaceBackgroundUIColor: UIColor { UIColor(elevatedSurfaceBackground) }
+    var controlBackgroundUIColor: UIColor { UIColor(controlBackground) }
+    var selectedControlBackgroundUIColor: UIColor { UIColor(selectedControlBackground) }
+    var borderUIColor: UIColor { UIColor(border) }
+    var overlayBackgroundUIColor: UIColor { UIColor(overlayBackground) }
+}
+
+enum AppTheme: String, CaseIterable {
+    case graphite = "Graphite"
+    case emerald = "Emerald"
+    case sapphire = "Sapphire"
+    case amethyst = "Amethyst"
+    case sunset = "Sunset"
+
+    var previewColor: Color { palette.accent }
+
+    var palette: AppThemePalette {
+        switch self {
+        case .emerald:
+            AppThemePalette(
+                accent: Color(hex: 0x38D27D),
+                accentForeground: .black,
+                screenBackground: Color(hex: 0x070B09),
+                surfaceBackground: Color(hex: 0x0E1511),
+                elevatedSurfaceBackground: Color(hex: 0x131C16),
+                controlBackground: Color(hex: 0x1A251E),
+                selectedControlBackground: Color(hex: 0x254432),
+                border: Color.white.opacity(0.06),
+                primaryText: .white,
+                secondaryText: Color(hex: 0xB6C2BA),
+                tertiaryText: Color(hex: 0x7F8B84),
+                overlayBackground: Color.black.opacity(0.72)
+            )
+        case .sapphire:
+            AppThemePalette(
+                accent: Color(hex: 0x52A8FF),
+                accentForeground: .white,
+                screenBackground: Color(hex: 0x060A10),
+                surfaceBackground: Color(hex: 0x0D1420),
+                elevatedSurfaceBackground: Color(hex: 0x121B29),
+                controlBackground: Color(hex: 0x182233),
+                selectedControlBackground: Color(hex: 0x233A59),
+                border: Color.white.opacity(0.06),
+                primaryText: .white,
+                secondaryText: Color(hex: 0xB1BED2),
+                tertiaryText: Color(hex: 0x79879B),
+                overlayBackground: Color.black.opacity(0.74)
+            )
+        case .amethyst:
+            AppThemePalette(
+                accent: Color(hex: 0xB181FF),
+                accentForeground: .white,
+                screenBackground: Color(hex: 0x0A0810),
+                surfaceBackground: Color(hex: 0x141021),
+                elevatedSurfaceBackground: Color(hex: 0x1B152B),
+                controlBackground: Color(hex: 0x251D38),
+                selectedControlBackground: Color(hex: 0x413064),
+                border: Color.white.opacity(0.06),
+                primaryText: .white,
+                secondaryText: Color(hex: 0xC3BAD6),
+                tertiaryText: Color(hex: 0x8A809B),
+                overlayBackground: Color.black.opacity(0.76)
+            )
+        case .sunset:
+            AppThemePalette(
+                accent: Color(hex: 0xFF8A4C),
+                accentForeground: .black,
+                screenBackground: Color(hex: 0x100905),
+                surfaceBackground: Color(hex: 0x1A110C),
+                elevatedSurfaceBackground: Color(hex: 0x231813),
+                controlBackground: Color(hex: 0x31211A),
+                selectedControlBackground: Color(hex: 0x5B3727),
+                border: Color.white.opacity(0.06),
+                primaryText: .white,
+                secondaryText: Color(hex: 0xD0B7A8),
+                tertiaryText: Color(hex: 0x997B69),
+                overlayBackground: Color.black.opacity(0.74)
+            )
+        case .graphite:
+            AppThemePalette(
+                accent: Color(hex: 0xA7B0BE),
+                accentForeground: .black,
+                screenBackground: Color(hex: 0x060708),
+                surfaceBackground: Color(hex: 0x101214),
+                elevatedSurfaceBackground: Color(hex: 0x16191C),
+                controlBackground: Color(hex: 0x202429),
+                selectedControlBackground: Color(hex: 0x343A42),
+                border: Color.white.opacity(0.06),
+                primaryText: .white,
+                secondaryText: Color(hex: 0xC0C6CE),
+                tertiaryText: Color(hex: 0x838A94),
+                overlayBackground: Color.black.opacity(0.78)
+            )
+        }
+    }
+}
+
 enum CursorMode: String, CaseIterable {
     case block
     case underline
@@ -150,8 +278,12 @@ enum WhisperModel: String, CaseIterable {
 final class TerminalSettings {
     static let shared = TerminalSettings()
 
-    var theme: TerminalTheme {
-        didSet { UserDefaults.standard.set(theme.rawValue, forKey: "terminal_theme") }
+    var appTheme: AppTheme {
+        didSet { UserDefaults.standard.set(appTheme.rawValue, forKey: "app_theme") }
+    }
+
+    var terminalTheme: TerminalTheme {
+        didSet { UserDefaults.standard.set(terminalTheme.rawValue, forKey: "terminal_theme") }
     }
 
     var font: TerminalFont {
@@ -186,9 +318,12 @@ final class TerminalSettings {
         didSet { UserDefaults.standard.set(whisperModel.rawValue, forKey: "whisper_model") }
     }
 
+    var appPalette: AppThemePalette { appTheme.palette }
+
     private init() {
         let ud = UserDefaults.standard
-        self.theme = TerminalTheme(rawValue: ud.string(forKey: "terminal_theme") ?? "") ?? .default
+        self.appTheme = AppTheme(rawValue: ud.string(forKey: "app_theme") ?? "") ?? .graphite
+        self.terminalTheme = TerminalTheme(rawValue: ud.string(forKey: "terminal_theme") ?? "") ?? .default
         self.font = TerminalFont(rawValue: ud.string(forKey: "terminal_font") ?? "") ?? .jetBrainsMono
         let storedSize = ud.integer(forKey: "terminal_font_size")
         self.fontSize = storedSize == 0 ? 14 : storedSize

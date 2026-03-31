@@ -3,6 +3,8 @@ import SwiftUI
 struct SettingsView: View {
     @State private var settings = TerminalSettings.shared
 
+    private var palette: AppThemePalette { settings.appPalette }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -26,11 +28,11 @@ struct SettingsView: View {
                         divider
                         scrollbackRow
                     }
-                    .background(Color(white: 0.11))
+                    .background(palette.surfaceBackground)
                     .cornerRadius(14)
                     .overlay(
                         RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+                            .stroke(palette.border, lineWidth: 0.5)
                     )
 
                     // VOICE INPUT section
@@ -41,11 +43,11 @@ struct SettingsView: View {
                         divider
                         whisperModelRow
                     }
-                    .background(Color(white: 0.11))
+                    .background(palette.surfaceBackground)
                     .cornerRadius(14)
                     .overlay(
                         RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+                            .stroke(palette.border, lineWidth: 0.5)
                     )
 
                     // Version footer
@@ -53,7 +55,7 @@ struct SettingsView: View {
                         Spacer()
                         Text("v1.0")
                             .font(.caption2)
-                            .foregroundStyle(.gray.opacity(0.25))
+                            .foregroundStyle(palette.tertiaryText.opacity(0.5))
                         Spacer()
                     }
                     .padding(.top, 4)
@@ -61,7 +63,7 @@ struct SettingsView: View {
                 .padding()
                 .iPadContentWidth(600)
             }
-            .background(Color(white: 0.04))
+            .background(palette.screenBackground)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -77,9 +79,9 @@ struct SettingsView: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(color)
             Text(title)
-                .font(.caption)
+                .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundStyle(.gray.opacity(0.7))
+                .foregroundStyle(palette.secondaryText)
         }
         .padding(.horizontal, 4)
     }
@@ -87,44 +89,49 @@ struct SettingsView: View {
     // MARK: - App Header
 
     private var appHeader: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                ForEach(TerminalTheme.allCases, id: \.self) { theme in
-                    let isSelected = settings.theme == theme
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .center, spacing: 12) {
+                Image(systemName: "slider.horizontal.3")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(palette.accent)
+                    .frame(width: 38, height: 38)
+                    .background(palette.controlBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                    VStack(spacing: 8) {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(theme.previewColor)
-                            .frame(width: 80, height: 52)
-                            .overlay(
-                                Text(">_")
-                                    .font(.system(size: 14, weight: .bold, design: .monospaced))
-                                    .foregroundStyle(.white.opacity(0.5))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(
-                                        isSelected ? .green : Color.white.opacity(0.06),
-                                        lineWidth: isSelected ? 2 : 0.5
-                                    )
-                            )
-                            .shadow(color: isSelected ? .green.opacity(0.2) : .clear, radius: 8, y: 2)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("App appearance")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(palette.primaryText)
 
-                        Text(theme.rawValue)
-                            .font(.system(size: 10, weight: isSelected ? .semibold : .regular))
-                            .foregroundStyle(isSelected ? .green : .gray.opacity(0.5))
-                            .lineLimit(1)
-                    }
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            settings.theme = theme
-                        }
+                    Text("Current: \(settings.appTheme.rawValue)")
+                        .font(.caption)
+                        .foregroundStyle(palette.secondaryText)
+                }
+
+                Spacer(minLength: 0)
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(AppTheme.allCases, id: \.self) { theme in
+                        appThemeHeaderChip(theme)
                     }
                 }
+                .padding(.horizontal, 1)
             }
-            .padding(.horizontal, 4)
+
+            Text("Choose ShellCast's app color theme here. Terminal colors are configured separately below.")
+                .font(.caption)
+                .foregroundStyle(palette.secondaryText)
+                .padding(.horizontal, 2)
         }
-        .padding(.vertical, 4)
+        .padding(16)
+        .background(palette.elevatedSurfaceBackground)
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(palette.border, lineWidth: 0.8)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: - Rows
@@ -136,10 +143,10 @@ struct SettingsView: View {
             settingsRow(
                 icon: "paintpalette.fill",
                 iconColor: .purple,
-                title: "Theme"
+                title: "Terminal Theme"
             ) {
-                Text(settings.theme.rawValue)
-                    .foregroundStyle(.gray)
+                Text(settings.terminalTheme.rawValue)
+                    .foregroundStyle(palette.secondaryText)
             }
         }
     }
@@ -154,10 +161,10 @@ struct SettingsView: View {
                 title: "Fonts"
             ) {
                 Text(settings.font.rawValue)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(palette.secondaryText)
                 Image(systemName: "chevron.right")
                     .font(.caption2)
-                    .foregroundStyle(.gray.opacity(0.5))
+                    .foregroundStyle(palette.tertiaryText)
             }
         }
     }
@@ -174,13 +181,13 @@ struct SettingsView: View {
                 } label: {
                     Image(systemName: "minus")
                         .font(.caption)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(palette.primaryText)
                         .frame(width: 32, height: 32)
                 }
 
                 Text("\(settings.fontSize)pt")
                     .font(.system(.callout, design: .monospaced))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(palette.primaryText)
                     .frame(width: 44)
 
                 Button {
@@ -188,11 +195,11 @@ struct SettingsView: View {
                 } label: {
                     Image(systemName: "plus")
                         .font(.caption)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(palette.primaryText)
                         .frame(width: 32, height: 32)
                 }
             }
-            .background(Color(white: 0.18))
+            .background(palette.controlBackground)
             .cornerRadius(8)
         }
     }
@@ -210,14 +217,14 @@ struct SettingsView: View {
                     } label: {
                         cursorIcon(for: mode)
                             .font(.system(.body, design: .monospaced))
-                            .foregroundStyle(settings.cursorMode == mode ? .white : .gray.opacity(0.6))
+                            .foregroundStyle(settings.cursorMode == mode ? palette.primaryText : palette.secondaryText)
                             .frame(width: 32, height: 32)
-                            .background(settings.cursorMode == mode ? Color(white: 0.28) : Color.clear)
+                            .background(settings.cursorMode == mode ? palette.selectedControlBackground : Color.clear)
                             .cornerRadius(6)
                     }
                 }
             }
-            .background(Color(white: 0.18))
+            .background(palette.controlBackground)
             .cornerRadius(8)
         }
     }
@@ -229,7 +236,7 @@ struct SettingsView: View {
             title: "Cursor Blink"
         ) {
             Toggle("", isOn: $settings.cursorBlink)
-                .tint(.green)
+                .tint(palette.accent)
                 .labelsHidden()
         }
     }
@@ -248,15 +255,15 @@ struct SettingsView: View {
                         Text(size.label)
                             .font(.caption2)
                             .fontWeight(.medium)
-                            .foregroundStyle(settings.scrollbackSize == size ? .white : .gray.opacity(0.6))
+                            .foregroundStyle(settings.scrollbackSize == size ? palette.primaryText : palette.secondaryText)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 7)
-                            .background(settings.scrollbackSize == size ? Color(white: 0.28) : Color.clear)
+                            .background(settings.scrollbackSize == size ? palette.selectedControlBackground : Color.clear)
                             .cornerRadius(6)
                     }
                 }
             }
-            .background(Color(white: 0.18))
+            .background(palette.controlBackground)
             .cornerRadius(8)
         }
     }
@@ -275,15 +282,15 @@ struct SettingsView: View {
                         Text(engine.displayName)
                             .font(.caption2)
                             .fontWeight(.medium)
-                            .foregroundStyle(settings.speechEngine == engine ? .white : .gray.opacity(0.6))
+                            .foregroundStyle(settings.speechEngine == engine ? palette.primaryText : palette.secondaryText)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 7)
-                            .background(settings.speechEngine == engine ? Color(white: 0.28) : Color.clear)
+                            .background(settings.speechEngine == engine ? palette.selectedControlBackground : Color.clear)
                             .cornerRadius(6)
                     }
                 }
             }
-            .background(Color(white: 0.18))
+            .background(palette.controlBackground)
             .cornerRadius(8)
         }
     }
@@ -296,7 +303,7 @@ struct SettingsView: View {
         ) {
             Text("\(settings.whisperModel.displayName) · \(settings.whisperModel.sizeLabel)")
                 .font(.caption)
-                .foregroundStyle(.gray)
+                .foregroundStyle(palette.secondaryText)
         }
         .opacity(settings.speechEngine == .whisper ? 1 : 0.4)
     }
@@ -314,13 +321,13 @@ struct SettingsView: View {
             Image(systemName: icon)
                 .font(.caption)
                 .fontWeight(.medium)
-                .foregroundStyle(.white)
+                .foregroundStyle(palette.primaryText)
                 .frame(width: 28, height: 28)
                 .background(iconColor.gradient)
                 .cornerRadius(7)
 
             Text(title)
-                .foregroundStyle(.white)
+                .foregroundStyle(palette.primaryText)
 
             Spacer()
 
@@ -332,9 +339,79 @@ struct SettingsView: View {
 
     private var divider: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.06))
+            .fill(palette.border)
             .frame(height: 0.5)
             .padding(.leading, 54)
+    }
+
+    private func headerBadge(icon: String, text: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.caption2)
+
+            Text(text)
+                .font(.caption)
+                .lineLimit(1)
+        }
+        .foregroundStyle(palette.primaryText.opacity(0.88))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(palette.controlBackground)
+        .clipShape(Capsule())
+    }
+
+    private func appThemeHeaderChip(_ theme: AppTheme) -> some View {
+        let isSelected = settings.appTheme == theme
+
+        return Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                settings.appTheme = theme
+            }
+        } label: {
+            HStack(spacing: 10) {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(theme.previewColor)
+                    .frame(width: 34, height: 34)
+                    .overlay(
+                        Image(systemName: "circle.lefthalf.filled")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(theme.palette.accentForeground.opacity(0.75))
+                    )
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(theme.rawValue)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(palette.primaryText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
+
+                    Text(isSelected ? "Active" : "Tap to apply")
+                        .font(.caption2)
+                        .foregroundStyle(isSelected ? theme.previewColor.opacity(0.95) : palette.secondaryText)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(theme.previewColor.opacity(0.95))
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .frame(width: 170, height: 56, alignment: .leading)
+            .background(isSelected ? palette.selectedControlBackground.opacity(0.9) : palette.controlBackground.opacity(0.55))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(
+                        isSelected ? theme.previewColor.opacity(0.95) : palette.border,
+                        lineWidth: isSelected ? 1.2 : 0.8
+                    )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder
@@ -355,12 +432,13 @@ struct SettingsView: View {
 
 struct ThemePickerView: View {
     let settings: TerminalSettings
+    private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         List {
             ForEach(TerminalTheme.allCases, id: \.self) { theme in
                 Button {
-                    settings.theme = theme
+                    settings.terminalTheme = theme
                 } label: {
                     HStack(spacing: 14) {
                         RoundedRectangle(cornerRadius: 6)
@@ -372,19 +450,21 @@ struct ThemePickerView: View {
                             )
 
                         Text(theme.rawValue)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(palette.primaryText)
 
                         Spacer()
 
-                        if settings.theme == theme {
+                        if settings.terminalTheme == theme {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
+                                .foregroundStyle(palette.accent)
                         }
                     }
                 }
             }
         }
-        .navigationTitle("Theme")
+        .scrollContentBackground(.hidden)
+        .background(palette.screenBackground)
+        .navigationTitle("Terminal Theme")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -393,6 +473,7 @@ struct ThemePickerView: View {
 
 struct FontPickerView: View {
     let settings: TerminalSettings
+    private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         List {
@@ -403,22 +484,24 @@ struct FontPickerView: View {
                     HStack(spacing: 14) {
                         Text("Aa")
                             .font(.system(.body, design: font == .system ? .monospaced : .monospaced))
-                            .foregroundStyle(.green)
+                            .foregroundStyle(palette.accent)
                             .frame(width: 40)
 
                         Text(font.rawValue)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(palette.primaryText)
 
                         Spacer()
 
                         if settings.font == font {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
+                                .foregroundStyle(palette.accent)
                         }
                     }
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(palette.screenBackground)
         .navigationTitle("Fonts")
         .navigationBarTitleDisplayMode(.inline)
     }

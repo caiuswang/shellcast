@@ -19,8 +19,10 @@ struct TerminalContainerView: View {
     @State private var toastMessage: String?
     /// Lightweight SSH session for tmux exec commands when using Mosh transport
     @State private var moshExecSession: SSHSession?
+    @State private var settings = TerminalSettings.shared
 
     private var isSSH: Bool { transport is SSHSession }
+    private var palette: AppThemePalette { settings.appPalette }
 
     /// SSH transport for exec commands — direct for SSH, lazy-created for Mosh
     private var sshTransportForExec: SSHSession? {
@@ -54,9 +56,9 @@ struct TerminalContainerView: View {
                             Image(systemName: "chevron.down")
                                 .font(.caption)
                                 .fontWeight(.bold)
-                                .foregroundStyle(.white.opacity(0.8))
+                                .foregroundStyle(palette.primaryText.opacity(0.8))
                                 .frame(width: 32, height: 32)
-                                .background(Color(white: 0.15).opacity(0.8))
+                                .background(palette.controlBackground.opacity(0.85))
                                 .clipShape(Circle())
                         }
                         // Close — disconnect and dismiss
@@ -73,9 +75,9 @@ struct TerminalContainerView: View {
                             Image(systemName: "xmark")
                                 .font(.caption)
                                 .fontWeight(.bold)
-                                .foregroundStyle(.white.opacity(0.8))
+                                .foregroundStyle(palette.primaryText.opacity(0.8))
                                 .frame(width: 32, height: 32)
-                                .background(Color(white: 0.15).opacity(0.8))
+                                .background(palette.controlBackground.opacity(0.85))
                                 .clipShape(Circle())
                         }
                     }
@@ -87,29 +89,29 @@ struct TerminalContainerView: View {
 
             // Reconnecting overlay
             if bridge.isReconnecting {
-                Color.black.opacity(0.7)
+                palette.overlayBackground
                     .ignoresSafeArea()
                 VStack(spacing: 16) {
                     ZStack {
                         Circle()
-                            .stroke(Color.green.opacity(0.15), lineWidth: 3)
+                            .stroke(palette.accent.opacity(0.2), lineWidth: 3)
                             .frame(width: 52, height: 52)
                         ProgressView()
                             .controlSize(.large)
-                            .tint(.green)
+                            .tint(palette.accent)
                     }
                     Text("Reconnecting...")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(palette.primaryText)
                 }
                 .padding(28)
                 .background(
                     RoundedRectangle(cornerRadius: 18)
-                        .fill(Color(white: 0.08).opacity(0.95))
+                        .fill(palette.elevatedSurfaceBackground.opacity(0.96))
                         .overlay(
                             RoundedRectangle(cornerRadius: 18)
-                                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+                                .stroke(palette.border, lineWidth: 0.5)
                         )
                 )
             }
@@ -138,12 +140,12 @@ struct TerminalContainerView: View {
                             .font(.caption)
                             .fontWeight(.medium)
                     }
-                    .foregroundStyle(.white)
+                    .foregroundStyle(palette.primaryText)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
                     .background(
                         Capsule()
-                            .fill(Color.green.opacity(0.85))
+                            .fill(palette.accent.opacity(0.88))
                     )
                     .padding(.bottom, 60)
                 }
@@ -153,7 +155,7 @@ struct TerminalContainerView: View {
 
             // Disconnected overlay
             if bridge.isDisconnected && !bridge.isReconnecting {
-                Color.black.opacity(0.7)
+                palette.overlayBackground
                     .ignoresSafeArea()
                 VStack(spacing: 20) {
                     ZStack {
@@ -167,7 +169,7 @@ struct TerminalContainerView: View {
 
                     Text("Connection Lost")
                         .font(.headline)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(palette.primaryText)
 
                     if let reconnectError {
                         Text(reconnectError)
@@ -188,10 +190,10 @@ struct TerminalContainerView: View {
                                 Text("Reconnect")
                             }
                             .fontWeight(.semibold)
-                            .foregroundStyle(.black)
+                            .foregroundStyle(palette.accentForeground)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(Color.green.gradient)
+                            .background(palette.accent.gradient)
                             .cornerRadius(12)
                         }
 
@@ -203,7 +205,7 @@ struct TerminalContainerView: View {
                         } label: {
                             Text("Close")
                                 .font(.subheadline)
-                                .foregroundStyle(.gray.opacity(0.6))
+                                .foregroundStyle(palette.secondaryText)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
                         }
@@ -213,10 +215,10 @@ struct TerminalContainerView: View {
                 .padding(32)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color(white: 0.08).opacity(0.95))
+                        .fill(palette.elevatedSurfaceBackground.opacity(0.96))
                         .overlay(
                             RoundedRectangle(cornerRadius: 20)
-                                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+                                .stroke(palette.border, lineWidth: 0.5)
                         )
                 )
                 .padding(.horizontal, 40)
@@ -469,7 +471,7 @@ class TerminalViewController: UIViewController {
         terminalView.terminalDelegate = bridge
 
         // Apply theme colors
-        let theme = settings.theme
+        let theme = settings.terminalTheme
         terminalView.nativeBackgroundColor = theme.backgroundColor
         terminalView.nativeForegroundColor = theme.foregroundColor
         terminalView.caretColor = theme.caretColor

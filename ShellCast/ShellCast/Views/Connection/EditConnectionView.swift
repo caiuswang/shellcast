@@ -26,6 +26,7 @@ struct EditConnectionView: View {
     @State private var showKeyFilePicker = false
     @State private var keyPassphrase: String = ""
     @State private var validationError: String?
+    @State private var settings = TerminalSettings.shared
 
     init(mode: Mode, onConnect: ((Connection) -> Void)? = nil) {
         self.mode = mode
@@ -38,6 +39,7 @@ struct EditConnectionView: View {
         !host.isEmpty && !host.contains(" ") && !host.contains("\\")
     }
     private var canSave: Bool { isHostValid && !username.isEmpty && (port.isEmpty || isPortValid) }
+    private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         NavigationStack {
@@ -51,13 +53,13 @@ struct EditConnectionView: View {
                         VStack(spacing: 14) {
                             fieldRow(icon: "tag", title: "Name") {
                                 TextField("My Server", text: $name)
-                                    .textFieldStyle(DarkFieldStyle())
+                                    .textFieldStyle(DarkFieldStyle(palette: palette))
                             }
 
                             HStack(spacing: 12) {
                                 fieldRow(icon: "globe", title: "Host") {
                                     TextField("hostname or IP", text: $host)
-                                        .textFieldStyle(DarkFieldStyle())
+                                        .textFieldStyle(DarkFieldStyle(palette: palette))
                                         .textInputAutocapitalization(.never)
                                         .autocorrectionDisabled()
                                     if !host.isEmpty && !isHostValid {
@@ -68,7 +70,7 @@ struct EditConnectionView: View {
                                 }
                                 fieldRow(icon: "number", title: "Port", width: 80) {
                                     TextField("22", text: $port)
-                                        .textFieldStyle(DarkFieldStyle())
+                                        .textFieldStyle(DarkFieldStyle(palette: palette))
                                         .keyboardType(.numberPad)
                                     if !port.isEmpty && !isPortValid {
                                         Text("1-65535")
@@ -80,7 +82,7 @@ struct EditConnectionView: View {
 
                             fieldRow(icon: "person", title: "Username") {
                                 TextField("user", text: $username)
-                                    .textFieldStyle(DarkFieldStyle())
+                                    .textFieldStyle(DarkFieldStyle(palette: palette))
                                     .textInputAutocapitalization(.never)
                                     .autocorrectionDisabled()
                             }
@@ -101,34 +103,34 @@ struct EditConnectionView: View {
 
                             if authMethod == .password {
                                 SecureField("Password", text: $password)
-                                    .textFieldStyle(DarkFieldStyle())
+                                    .textFieldStyle(DarkFieldStyle(palette: palette))
                             } else if authMethod == .keyFile {
                                 Button {
                                     showKeyFilePicker = true
                                 } label: {
                                     HStack {
-                                        Image(systemName: keyFileName != nil ? "key.fill" : "doc.badge.plus")
-                                            .foregroundStyle(keyFileName != nil ? .green : .gray)
-                                        Text(keyFileName ?? "Import Private Key")
-                                            .foregroundStyle(keyFileName != nil ? .white : .gray)
+                                         Image(systemName: keyFileName != nil ? "key.fill" : "doc.badge.plus")
+                                             .foregroundStyle(keyFileName != nil ? palette.accent : palette.secondaryText)
+                                         Text(keyFileName ?? "Import Private Key")
+                                             .foregroundStyle(keyFileName != nil ? palette.primaryText : palette.secondaryText)
                                         Spacer()
                                         if keyFileName != nil {
                                             Button {
                                                 keyFileName = nil
                                                 keyFileData = nil
                                             } label: {
-                                                Image(systemName: "xmark.circle.fill")
-                                                    .foregroundStyle(.gray.opacity(0.6))
-                                            }
-                                        }
-                                    }
-                                    .padding(12)
-                                    .background(Color(white: 0.12))
-                                    .cornerRadius(10)
-                                }
+                                                 Image(systemName: "xmark.circle.fill")
+                                                     .foregroundStyle(palette.tertiaryText)
+                                             }
+                                         }
+                                     }
+                                     .padding(12)
+                                     .background(palette.controlBackground)
+                                     .cornerRadius(10)
+                                 }
 
                                 SecureField("Passphrase (optional)", text: $keyPassphrase)
-                                    .textFieldStyle(DarkFieldStyle())
+                                    .textFieldStyle(DarkFieldStyle(palette: palette))
                             }
 
                             if authMethod == .tailscaleSSH {
@@ -166,11 +168,12 @@ struct EditConnectionView: View {
                                 .font(.headline)
                         }
                         .foregroundStyle(.black)
+                        .foregroundStyle(palette.accentForeground)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color.green.gradient)
+                        .background(palette.accent.gradient)
                         .cornerRadius(14)
-                        .shadow(color: .green.opacity(canSave ? 0.25 : 0), radius: 12, y: 6)
+                        .shadow(color: palette.accent.opacity(canSave ? 0.25 : 0), radius: 12, y: 6)
                     }
                     .disabled(!canSave)
                     .opacity(canSave ? 1 : 0.5)
@@ -179,7 +182,7 @@ struct EditConnectionView: View {
                 .padding(20)
                 .iPadContentWidth(600)
             }
-            .background(Color(white: 0.04))
+            .background(palette.screenBackground)
             .navigationTitle(isEditing ? "Edit Connection" : "New Connection")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -188,7 +191,7 @@ struct EditConnectionView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.gray.opacity(0.6))
+                            .foregroundStyle(palette.secondaryText)
                             .font(.title3)
                     }
                 }
@@ -198,7 +201,7 @@ struct EditConnectionView: View {
                     } label: {
                         Text("Save")
                             .fontWeight(.semibold)
-                            .foregroundStyle(.green)
+                            .foregroundStyle(palette.accent)
                     }
                 }
             }
@@ -247,11 +250,11 @@ struct EditConnectionView: View {
             content()
         }
         .padding(16)
-        .background(Color(white: 0.09))
+        .background(palette.surfaceBackground)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+                .stroke(palette.border, lineWidth: 0.5)
         )
     }
 
@@ -260,7 +263,7 @@ struct EditConnectionView: View {
             Image(systemName: icon)
                 .font(.caption)
                 .fontWeight(.medium)
-                .foregroundStyle(.white)
+                .foregroundStyle(palette.primaryText)
                 .frame(width: 24, height: 24)
                 .background(color.gradient)
                 .cornerRadius(6)
@@ -268,7 +271,7 @@ struct EditConnectionView: View {
             Text(title)
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundStyle(.gray.opacity(0.6))
+                .foregroundStyle(palette.secondaryText)
                 .tracking(0.5)
         }
     }
@@ -279,10 +282,10 @@ struct EditConnectionView: View {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.caption2)
-                    .foregroundStyle(.gray.opacity(0.5))
+                    .foregroundStyle(palette.tertiaryText)
                 Text(title)
                     .font(.subheadline)
-                    .foregroundStyle(.gray.opacity(0.7))
+                    .foregroundStyle(palette.secondaryText)
             }
             content()
         }
@@ -294,11 +297,11 @@ struct EditConnectionView: View {
         HStack(alignment: .top, spacing: 6) {
             Image(systemName: icon)
                 .font(.caption2)
-                .foregroundStyle(.gray.opacity(0.5))
+                .foregroundStyle(palette.tertiaryText)
                 .padding(.top, 1)
             Text(text)
                 .font(.caption)
-                .foregroundStyle(.gray.opacity(0.5))
+                .foregroundStyle(palette.secondaryText)
         }
     }
 
@@ -365,15 +368,17 @@ struct EditConnectionView: View {
 }
 
 struct DarkFieldStyle: TextFieldStyle {
+    let palette: AppThemePalette
+
     func _body(configuration: TextField<_Label>) -> some View {
         configuration
             .padding(12)
-            .background(Color(white: 0.14))
+            .background(palette.controlBackground)
             .cornerRadius(10)
-            .foregroundStyle(.white)
+            .foregroundStyle(palette.primaryText)
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.white.opacity(0.04), lineWidth: 0.5)
+                    .stroke(palette.border.opacity(0.8), lineWidth: 0.5)
             )
     }
 }

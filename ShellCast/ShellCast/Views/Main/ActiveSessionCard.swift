@@ -6,6 +6,9 @@ struct ActiveSessionCard: View {
     var connectionName: String?
 
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @State private var settings = TerminalSettings.shared
+
+    private var palette: AppThemePalette { settings.appPalette }
 
     private var thumbWidth: CGFloat { sizeClass == .regular ? 240 : 180 }
     private var thumbHeight: CGFloat { sizeClass == .regular ? 160 : 120 }
@@ -21,11 +24,11 @@ struct ActiveSessionCard: View {
                         LiveDot()
                         Text("LIVE")
                             .font(.system(size: 8, weight: .bold, design: .monospaced))
-                            .foregroundStyle(.green)
+                            .foregroundStyle(palette.accent)
                     }
                     .padding(.horizontal, 6)
                     .padding(.vertical, 3)
-                    .background(.black.opacity(0.6))
+                    .background(palette.overlayBackground)
                     .cornerRadius(4)
                     .padding(6)
                 }
@@ -35,27 +38,27 @@ struct ActiveSessionCard: View {
                 Text(session.tmuxSessionName ?? "Shell")
                     .font(.caption)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(palette.primaryText)
 
                 if let connectionName {
                     Text(connectionName)
                         .font(.caption2)
-                        .foregroundStyle(.green.opacity(0.7))
+                        .foregroundStyle(palette.accent.opacity(0.8))
                 }
 
                 Text((session.snapshotCapturedAt ?? session.lastActiveAt).relativeDescription)
                     .font(.caption2)
-                    .foregroundStyle(.gray.opacity(0.6))
+                    .foregroundStyle(palette.secondaryText)
             }
         }
         .padding(10)
-        .background(Color(white: 0.09))
+        .background(palette.elevatedSurfaceBackground)
         .cornerRadius(14)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(session.isActive ? .green.opacity(0.3) : Color.white.opacity(0.05), lineWidth: session.isActive ? 1 : 0.5)
+                .stroke(session.isActive ? palette.accent.opacity(0.35) : palette.border, lineWidth: session.isActive ? 1 : 0.5)
         )
-        .shadow(color: session.isActive ? .green.opacity(0.06) : .clear, radius: 12, y: 4)
+        .shadow(color: session.isActive ? palette.accent.opacity(0.08) : .clear, radius: 12, y: 4)
     }
 }
 
@@ -64,10 +67,13 @@ private struct SnapshotThumbnail: View {
     let imageData: Data?
     var width: CGFloat = 180
     var height: CGFloat = 120
+    @State private var settings = TerminalSettings.shared
+
+    private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         RoundedRectangle(cornerRadius: 10)
-            .fill(Color(white: 0.07))
+            .fill(palette.surfaceBackground)
             .frame(width: width, height: height)
             .overlay {
                 if let imageData, let uiImage = UIImage(data: imageData) {
@@ -77,7 +83,7 @@ private struct SnapshotThumbnail: View {
                 } else {
                     Image(systemName: "terminal")
                         .font(.largeTitle)
-                        .foregroundStyle(.green.opacity(0.3))
+                        .foregroundStyle(palette.accent.opacity(0.3))
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -87,10 +93,13 @@ private struct SnapshotThumbnail: View {
 /// Isolated pulsing dot — animation stays contained, won't trigger parent re-renders.
 private struct LiveDot: View {
     @State private var isPulsing = false
+    @State private var settings = TerminalSettings.shared
+
+    private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         Circle()
-            .fill(.green)
+            .fill(palette.accent)
             .frame(width: 7, height: 7)
             .opacity(isPulsing ? 1.0 : 0.5)
             .onAppear {

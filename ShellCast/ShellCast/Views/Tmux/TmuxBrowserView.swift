@@ -13,6 +13,9 @@ struct TmuxBrowserView: View {
     @State private var deleteTarget: TmuxSession?
     @State private var operationError: String?
     @State private var showOperationError = false
+    @State private var settings = TerminalSettings.shared
+
+    private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -24,19 +27,19 @@ struct TmuxBrowserView: View {
                             Image(systemName: "terminal")
                                 .font(.callout)
                                 .fontWeight(.medium)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(palette.primaryText)
                                 .frame(width: 36, height: 36)
-                                .background(Color.green.gradient)
+                                .background(palette.accent.gradient)
                                 .cornerRadius(10)
 
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Tmux Sessions")
                                     .font(.title3)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(palette.primaryText)
                                 Text("\(sessions.count) session\(sessions.count == 1 ? "" : "s") found")
                                     .font(.caption)
-                                    .foregroundStyle(.gray.opacity(0.7))
+                                    .foregroundStyle(palette.secondaryText)
                             }
                         }
 
@@ -64,34 +67,34 @@ struct TmuxBrowserView: View {
 
                                 if session.id != sessions.last?.id {
                                     Rectangle()
-                                        .fill(Color.white.opacity(0.06))
+                                        .fill(palette.border)
                                         .frame(height: 0.5)
                                         .padding(.leading, 52)
                                 }
                             }
                         }
-                        .background(Color(white: 0.09))
+                        .background(palette.surfaceBackground)
                         .cornerRadius(14)
                         .overlay(
                             RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+                                .stroke(palette.border, lineWidth: 0.5)
                         )
                     } else {
                         VStack(spacing: 16) {
                             ZStack {
                                 Circle()
-                                    .fill(.green.opacity(0.08))
+                                    .fill(palette.accent.opacity(0.08))
                                     .frame(width: 72, height: 72)
                                 Image(systemName: "terminal")
                                     .font(.system(size: 28))
-                                    .foregroundStyle(.green.opacity(0.4))
+                                    .foregroundStyle(palette.accent.opacity(0.4))
                             }
                             Text("No Tmux Sessions")
                                 .font(.headline)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(palette.primaryText)
                             Text("Start a new session or connect without tmux")
                                 .font(.caption)
-                                .foregroundStyle(.gray.opacity(0.5))
+                                .foregroundStyle(palette.secondaryText)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 32)
@@ -104,18 +107,18 @@ struct TmuxBrowserView: View {
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemName: "plus.circle.fill")
-                                    .foregroundStyle(.green)
+                                    .foregroundStyle(palette.accent)
                                 Text("New tmux session")
                                     .fontWeight(.medium)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(palette.primaryText)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(14)
-                            .background(Color(white: 0.12))
+                            .background(palette.controlBackground)
                             .cornerRadius(12)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.green.opacity(0.15), lineWidth: 0.5)
+                                    .stroke(palette.accent.opacity(0.2), lineWidth: 0.5)
                             )
                         }
 
@@ -124,10 +127,10 @@ struct TmuxBrowserView: View {
                         } label: {
                             Text("Connect without tmux")
                                 .font(.subheadline)
-                                .foregroundStyle(.gray.opacity(0.6))
+                                .foregroundStyle(palette.secondaryText)
                                 .frame(maxWidth: .infinity)
                                 .padding(14)
-                                .background(Color(white: 0.06))
+                                .background(palette.elevatedSurfaceBackground)
                                 .cornerRadius(12)
                         }
                     }
@@ -135,7 +138,7 @@ struct TmuxBrowserView: View {
                 .padding(20)
                 .iPadContentWidth(600)
             }
-            .background(Color(white: 0.04))
+            .background(palette.screenBackground)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -143,7 +146,7 @@ struct TmuxBrowserView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.gray.opacity(0.6))
+                            .foregroundStyle(palette.secondaryText)
                             .font(.title3)
                     }
                 }
@@ -237,6 +240,9 @@ struct TmuxWindowBrowserView: View {
     @State private var deleteTarget: TmuxWindow?
     @State private var operationError: String?
     @State private var showOperationError = false
+    @State private var settings = TerminalSettings.shared
+
+    private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         ScrollView {
@@ -248,7 +254,7 @@ struct TmuxWindowBrowserView: View {
                         .fontWeight(.medium)
                         .foregroundStyle(.white)
                         .frame(width: 36, height: 36)
-                        .background(Color.cyan.gradient)
+                        .background(palette.accent.gradient)
                         .cornerRadius(10)
 
                     VStack(alignment: .leading, spacing: 2) {
@@ -258,7 +264,7 @@ struct TmuxWindowBrowserView: View {
                             .foregroundStyle(.white)
                         Text("\(windows.count) window\(windows.count == 1 ? "" : "s")")
                             .font(.caption)
-                            .foregroundStyle(.gray.opacity(0.7))
+                            .foregroundStyle(palette.secondaryText)
                     }
                 }
 
@@ -304,17 +310,17 @@ struct TmuxWindowBrowserView: View {
 
                             if window.id != windows.last?.id {
                                 Rectangle()
-                                    .fill(Color.white.opacity(0.06))
+                                    .fill(palette.border)
                                     .frame(height: 0.5)
                                     .padding(.leading, 52)
                             }
                         }
                     }
-                    .background(Color(white: 0.09))
+                    .background(palette.surfaceBackground)
                     .cornerRadius(14)
                     .overlay(
                         RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+                            .stroke(palette.border, lineWidth: 0.5)
                     )
                 }
 
@@ -335,14 +341,14 @@ struct TmuxWindowBrowserView: View {
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.green.opacity(0.15), lineWidth: 0.5)
+                            .stroke(palette.accent.opacity(0.2), lineWidth: 0.5)
                     )
                 }
             }
             .padding(20)
             .iPadContentWidth(600)
         }
-        .background(Color(white: 0.04))
+        .background(palette.screenBackground)
         .navigationBarTitleDisplayMode(.inline)
         .alert("Error", isPresented: $showOperationError) {
             Button("OK") {}
@@ -421,14 +427,17 @@ struct TmuxWindowBrowserView: View {
 
 struct TmuxSessionRow: View {
     let session: TmuxSession
+    @State private var settings = TerminalSettings.shared
+
+    private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "terminal")
                 .font(.caption)
-                .foregroundStyle(.green.opacity(0.8))
+                .foregroundStyle(palette.accent.opacity(0.8))
                 .frame(width: 28, height: 28)
-                .background(Color.green.opacity(0.1))
+                .background(palette.accent.opacity(0.12))
                 .cornerRadius(7)
 
             VStack(alignment: .leading, spacing: 3) {
@@ -441,10 +450,10 @@ struct TmuxSessionRow: View {
                     if session.attachedClients > 0 {
                         Text("Connected")
                             .font(.system(size: 9, weight: .bold, design: .monospaced))
-                            .foregroundStyle(.green)
+                            .foregroundStyle(palette.accent)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.green.opacity(0.15))
+                            .background(palette.accent.opacity(0.15))
                             .cornerRadius(4)
                     }
                 }
@@ -452,12 +461,12 @@ struct TmuxSessionRow: View {
                 HStack(spacing: 8) {
                     Text("\(session.windowCount) windows")
                         .font(.caption)
-                        .foregroundStyle(.gray.opacity(0.6))
+                        .foregroundStyle(palette.secondaryText)
 
                     if let lastAttached = session.lastAttached {
                         Text(lastAttached.relativeDescription)
                             .font(.caption)
-                            .foregroundStyle(.gray.opacity(0.4))
+                            .foregroundStyle(palette.tertiaryText)
                     }
                 }
             }
@@ -466,7 +475,7 @@ struct TmuxSessionRow: View {
 
             Image(systemName: "chevron.right")
                 .font(.caption2)
-                .foregroundStyle(.gray.opacity(0.4))
+                .foregroundStyle(palette.tertiaryText)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
@@ -475,14 +484,17 @@ struct TmuxSessionRow: View {
 
 struct TmuxWindowRow: View {
     let window: TmuxWindow
+    @State private var settings = TerminalSettings.shared
+
+    private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "macwindow")
                 .font(.caption)
-                .foregroundStyle(.cyan.opacity(0.8))
+                .foregroundStyle(palette.accent.opacity(0.8))
                 .frame(width: 28, height: 28)
-                .background(Color.cyan.opacity(0.1))
+                .background(palette.accent.opacity(0.12))
                 .cornerRadius(7)
 
             VStack(alignment: .leading, spacing: 3) {
@@ -495,17 +507,17 @@ struct TmuxWindowRow: View {
                     if window.isActive {
                         Text("Active")
                             .font(.system(size: 9, weight: .bold, design: .monospaced))
-                            .foregroundStyle(.green)
+                            .foregroundStyle(palette.accent)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.green.opacity(0.15))
+                            .background(palette.accent.opacity(0.15))
                             .cornerRadius(4)
                     }
                 }
 
                 Text("\(window.paneCount) pane\(window.paneCount == 1 ? "" : "s")")
                     .font(.caption)
-                    .foregroundStyle(.gray.opacity(0.6))
+                    .foregroundStyle(palette.secondaryText)
             }
 
             Spacer()
