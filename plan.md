@@ -131,7 +131,7 @@ HomeView (root)
 
 **Milestone: SSH into Tailscale machine and type commands from phone.** ✅
 
-### Phase 2: Tmux Integration — IN PROGRESS
+### Phase 2: Tmux Integration ✅ COMPLETE
 - [x] Flow: connect → tmux browser → select session → `tmux attach -t` → terminal
 - [x] "Connect without tmux" and "New tmux session" actions
 - [x] Tmux window listing within a session
@@ -152,7 +152,7 @@ HomeView (root)
 
 **Milestone: Full flow from home → tmux session → terminal.** ✅
 
-### Phase 3: Keyboard Toolbar + UX Polish — IN PROGRESS
+### Phase 3: Keyboard Toolbar + UX Polish ✅ COMPLETE
 - [x] Custom `KeyboardToolbar` — persistent toolbar with Ctrl/Alt modifiers, Esc, Tab, arrows, PgUp/PgDn, symbols
   - Layout adapts based on keyboard visibility
   - Sends correct ANSI escape sequences and control characters
@@ -190,9 +190,9 @@ HomeView (root)
   - EditConnectionView, TmuxBrowserView, SettingsView: constrained content width
   - All adaptations use `horizontalSizeClass` (works with Split View, Stage Manager)
 
-**Milestone: Comfortable daily-driver terminal experience.** (keyboard ✅, polish TODO)
+**Milestone: Comfortable daily-driver terminal experience.** ✅
 
-### Phase 4: Mosh Integration
+### Phase 4: Mosh Integration ✅ COMPLETE
 - [x] Pre-built `mosh.xcframework` + `Protobuf_C_.xcframework` from blinksh releases (download script)
 - [x] `MoshSession` conforming to `TransportSession` — wraps `mosh_main()` with pipe I/O
 - [x] `MoshService` — SSH bootstrap → run `mosh-server` → parse MOSH_KEY + UDP port → init mosh-client
@@ -209,7 +209,7 @@ HomeView (root)
   - Foreground resume: detects if Mosh session survived iOS suspension
   - Graceful fallback: shows reconnect prompt if session was killed
 
-**Milestone: Connections survive network changes and phone sleep.**
+**Milestone: Connections survive network changes and phone sleep.** ✅
 
 ### Phase 5: Polish + Ship
 - [x] SSH key file import via Files app (`fileImporter` + Keychain storage)
@@ -223,7 +223,14 @@ HomeView (root)
   - Asset catalog with AppIcon.appiconset configured in project.yml
   - Generator script at `Scripts/generate_app_icon.swift` for reproducibility
 - [x] Error handling, edge cases, empty states
-- [ ] TestFlight beta
+- [x] TestFlight build infrastructure
+  - `Scripts/build-testflight.sh` — archive, export IPA, optional upload
+  - `Scripts/ExportOptions.plist` — automatic signing for App Store Connect
+  - Auto-incrementing build numbers (timestamp-based)
+  - **TODO**: Set `DEVELOPMENT_TEAM` in project.yml to your Apple Team ID, then run the script
+- [x] Production-ready cleanup
+  - All debug prints wrapped in `#if DEBUG` via `debugLog()` utility
+  - Input validation on connection form (host format, port range 1-65535)
 
 ## Risks
 
