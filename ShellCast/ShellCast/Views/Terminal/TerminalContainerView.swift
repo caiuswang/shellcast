@@ -44,32 +44,40 @@ struct TerminalContainerView: View {
             VStack {
                 HStack {
                     Spacer()
-                    // Minimize — return to HomeView, keep session alive
-                    Button {
-                        saveSnapshot()
-                        bridge.stop()
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.down.circle.fill")
-                            .font(.title2)
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(.white, .gray.opacity(0.5))
-                    }
-                    // Close — disconnect and dismiss
-                    Button {
-                        saveSnapshot()
-                        bridge.stop()
-                        Task { await transport.disconnect() }
-                        if let sessionRecord {
-                            sessionRecord.isActive = false
-                            try? modelContext.save()
+                    HStack(spacing: 8) {
+                        // Minimize — return to HomeView, keep session alive
+                        Button {
+                            saveSnapshot()
+                            bridge.stop()
+                            dismiss()
+                        } label: {
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.white.opacity(0.8))
+                                .frame(width: 32, height: 32)
+                                .background(Color(white: 0.15).opacity(0.8))
+                                .clipShape(Circle())
                         }
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title2)
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(.white, .gray.opacity(0.5))
+                        // Close — disconnect and dismiss
+                        Button {
+                            saveSnapshot()
+                            bridge.stop()
+                            Task { await transport.disconnect() }
+                            if let sessionRecord {
+                                sessionRecord.isActive = false
+                                try? modelContext.save()
+                            }
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.white.opacity(0.8))
+                                .frame(width: 32, height: 32)
+                                .background(Color(white: 0.15).opacity(0.8))
+                                .clipShape(Circle())
+                        }
                     }
                     .padding(.trailing, 12)
                 }
@@ -81,14 +89,29 @@ struct TerminalContainerView: View {
             if bridge.isReconnecting {
                 Color.black.opacity(0.7)
                     .ignoresSafeArea()
-                VStack(spacing: 12) {
-                    ProgressView()
-                        .tint(.green)
-                        .scaleEffect(1.5)
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .stroke(Color.green.opacity(0.15), lineWidth: 3)
+                            .frame(width: 52, height: 52)
+                        ProgressView()
+                            .controlSize(.large)
+                            .tint(.green)
+                    }
                     Text("Reconnecting...")
-                        .font(.headline)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
                         .foregroundStyle(.white)
                 }
+                .padding(28)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(Color(white: 0.08).opacity(0.95))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+                        )
+                )
             }
 
             // Tmux switcher overlay — works for both SSH and Mosh
@@ -108,15 +131,21 @@ struct TerminalContainerView: View {
             if let toast = toastMessage {
                 VStack {
                     Spacer()
-                    Text(toast)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.green.opacity(0.8))
-                        .cornerRadius(16)
-                        .padding(.bottom, 60)
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption)
+                        Text(toast)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule()
+                            .fill(Color.green.opacity(0.85))
+                    )
+                    .padding(.bottom, 60)
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .zIndex(5)
@@ -126,42 +155,71 @@ struct TerminalContainerView: View {
             if bridge.isDisconnected && !bridge.isReconnecting {
                 Color.black.opacity(0.7)
                     .ignoresSafeArea()
-                VStack(spacing: 16) {
-                    Image(systemName: "wifi.slash")
-                        .font(.system(size: 40))
-                        .foregroundStyle(.red)
+                VStack(spacing: 20) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.red.opacity(0.1))
+                            .frame(width: 64, height: 64)
+                        Image(systemName: "wifi.slash")
+                            .font(.system(size: 26))
+                            .foregroundStyle(.red.opacity(0.8))
+                    }
+
                     Text("Connection Lost")
                         .font(.headline)
                         .foregroundStyle(.white)
+
                     if let reconnectError {
                         Text(reconnectError)
                             .font(.caption)
-                            .foregroundStyle(.red.opacity(0.8))
+                            .foregroundStyle(.red.opacity(0.7))
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal, 32)
+                            .padding(.horizontal, 16)
                     }
-                    Button {
-                        self.reconnectError = nil
-                        attemptReconnect()
-                    } label: {
-                        Text("Reconnect")
+
+                    VStack(spacing: 10) {
+                        Button {
+                            self.reconnectError = nil
+                            attemptReconnect()
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.caption)
+                                Text("Reconnect")
+                            }
                             .fontWeight(.semibold)
                             .foregroundStyle(.black)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 10)
-                            .background(Color.green)
-                            .cornerRadius(8)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.green.gradient)
+                            .cornerRadius(12)
+                        }
+
+                        Button {
+                            saveSnapshot()
+                            bridge.stop()
+                            Task { await transport.disconnect() }
+                            dismiss()
+                        } label: {
+                            Text("Close")
+                                .font(.subheadline)
+                                .foregroundStyle(.gray.opacity(0.6))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                        }
                     }
-                    Button {
-                        saveSnapshot()
-                        bridge.stop()
-                        Task { await transport.disconnect() }
-                        dismiss()
-                    } label: {
-                        Text("Close")
-                            .foregroundStyle(.gray)
-                    }
+                    .frame(maxWidth: 220)
                 }
+                .padding(32)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color(white: 0.08).opacity(0.95))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+                        )
+                )
+                .padding(.horizontal, 40)
             }
         }
         .statusBarHidden()
