@@ -21,6 +21,7 @@
 		3F092D55A30EA060E5CC9281 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6726B66D9CC86DDD8EA70798 /* KeychainService.swift */; };
 		3F8CFE6AB3CC4EB6922780FA /* MoshService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C698034D08F700820A025B61 /* MoshService.swift */; };
 		41CE7E2EBD800643D19F03EE /* TransportSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD78C13923FD491B76957AD7 /* TransportSession.swift */; };
+		4C1A2BB48ABB6BEA56C0ED72 /* DebugLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C95DA1DB825ACD9831A6C /* DebugLog.swift */; };
 		5149F292471846A0B2B70560 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 90386C1F71AF752095B7FB33 /* WhisperKit */; };
 		54330C917B154E3D36EEF18D /* tokenizer.json in Resources */ = {isa = PBXBuildFile; fileRef = FA207C1E249CDFC75F5AAB75 /* tokenizer.json */; };
 		67E85238EDBA27838AA7DF29 /* JetBrainsMonoNerdFontMono-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */; };
@@ -124,6 +125,7 @@
 		B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionRow.swift; sourceTree = "<group>"; };
 		C2A6BDCA94266B0457F457D2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C698034D08F700820A025B61 /* MoshService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoshService.swift; sourceTree = "<group>"; };
+		D35C95DA1DB825ACD9831A6C /* DebugLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLog.swift; sourceTree = "<group>"; };
 		D5124CDBF147AA4F8371D642 /* tokenizer_config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokenizer_config.json; sourceTree = "<group>"; };
 		D886DD705902431727A8D5CE /* AuthMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethod.swift; sourceTree = "<group>"; };
 		D941806241DCF9F5A72299C8 /* ConnectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionType.swift; sourceTree = "<group>"; };
@@ -326,6 +328,7 @@
 		CDE8B1A9EF0A6ED1FAD6EB26 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				D35C95DA1DB825ACD9831A6C /* DebugLog.swift */,
 				4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */,
 			);
 			path = Utilities;
@@ -481,6 +484,7 @@
 				D8E0106A70EA257C8160A171 /* ConnectionManager.swift in Sources */,
 				D1697AFEF68A9BC9D6B098CE /* ConnectionRow.swift in Sources */,
 				2166959FB8276DDF0B2D0415 /* ConnectionType.swift in Sources */,
+				4C1A2BB48ABB6BEA56C0ED72 /* DebugLog.swift in Sources */,
 				82118C48FF254F1FD174CF61 /* EditConnectionView.swift in Sources */,
 				97A5F4A101629D6161484D69 /* HomeView.swift in Sources */,
 				A9C02678D8863EC499917960 /* KeyboardToolbar.swift in Sources */,
