@@ -42,142 +42,144 @@ struct EditConnectionView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    field("Name") {
-                        TextField("My Server", text: $name)
-                            .textFieldStyle(DarkFieldStyle())
-                    }
+                VStack(alignment: .leading, spacing: 24) {
 
-                    HStack(spacing: 12) {
-                        field("Host") {
-                            TextField("hostname or IP", text: $host)
-                                .textFieldStyle(DarkFieldStyle())
-                                .textInputAutocapitalization(.never)
-                                .autocorrectionDisabled()
-                            if !host.isEmpty && !isHostValid {
-                                Text("Invalid hostname")
-                                    .font(.caption2)
-                                    .foregroundStyle(.red)
+                    // SERVER section
+                    sectionCard {
+                        sectionHeader("SERVER", icon: "server.rack", color: .green)
+
+                        VStack(spacing: 14) {
+                            fieldRow(icon: "tag", title: "Name") {
+                                TextField("My Server", text: $name)
+                                    .textFieldStyle(DarkFieldStyle())
+                            }
+
+                            HStack(spacing: 12) {
+                                fieldRow(icon: "globe", title: "Host") {
+                                    TextField("hostname or IP", text: $host)
+                                        .textFieldStyle(DarkFieldStyle())
+                                        .textInputAutocapitalization(.never)
+                                        .autocorrectionDisabled()
+                                    if !host.isEmpty && !isHostValid {
+                                        Text("Invalid hostname")
+                                            .font(.caption2)
+                                            .foregroundStyle(.red.opacity(0.8))
+                                    }
+                                }
+                                fieldRow(icon: "number", title: "Port", width: 80) {
+                                    TextField("22", text: $port)
+                                        .textFieldStyle(DarkFieldStyle())
+                                        .keyboardType(.numberPad)
+                                    if !port.isEmpty && !isPortValid {
+                                        Text("1-65535")
+                                            .font(.caption2)
+                                            .foregroundStyle(.red.opacity(0.8))
+                                    }
+                                }
+                            }
+
+                            fieldRow(icon: "person", title: "Username") {
+                                TextField("user", text: $username)
+                                    .textFieldStyle(DarkFieldStyle())
+                                    .textInputAutocapitalization(.never)
+                                    .autocorrectionDisabled()
                             }
                         }
-                        field("Port", width: 80) {
-                            TextField("22", text: $port)
-                                .textFieldStyle(DarkFieldStyle())
-                                .keyboardType(.numberPad)
-                            if !port.isEmpty && !isPortValid {
-                                Text("1-65535")
-                                    .font(.caption2)
-                                    .foregroundStyle(.red)
-                            }
-                        }
                     }
 
-                    field("Username") {
-                        TextField("user", text: $username)
-                            .textFieldStyle(DarkFieldStyle())
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                    }
+                    // AUTHENTICATION section
+                    sectionCard {
+                        sectionHeader("AUTHENTICATION", icon: "lock.shield", color: .blue)
 
-                    // Authentication
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text("Authentication")
-                                .font(.subheadline)
-                                .foregroundStyle(.gray)
-                            Spacer()
+                        VStack(alignment: .leading, spacing: 12) {
                             Picker("", selection: $authMethod) {
                                 Text("Password").tag(AuthMethod.password)
                                 Text("Key File").tag(AuthMethod.keyFile)
                                 Text("Tailscale").tag(AuthMethod.tailscaleSSH)
                             }
                             .pickerStyle(.segmented)
-                            .frame(width: 260)
-                        }
 
-                        if authMethod == .password {
-                            SecureField("Password", text: $password)
-                                .textFieldStyle(DarkFieldStyle())
-                        } else if authMethod == .keyFile {
-                            Button {
-                                showKeyFilePicker = true
-                            } label: {
-                                HStack {
-                                    Image(systemName: keyFileName != nil ? "key.fill" : "doc.badge.plus")
-                                        .foregroundStyle(keyFileName != nil ? .green : .gray)
-                                    Text(keyFileName ?? "Import Private Key")
-                                        .foregroundStyle(keyFileName != nil ? .white : .gray)
-                                    Spacer()
-                                    if keyFileName != nil {
-                                        Button {
-                                            keyFileName = nil
-                                            keyFileData = nil
-                                        } label: {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .foregroundStyle(.gray)
+                            if authMethod == .password {
+                                SecureField("Password", text: $password)
+                                    .textFieldStyle(DarkFieldStyle())
+                            } else if authMethod == .keyFile {
+                                Button {
+                                    showKeyFilePicker = true
+                                } label: {
+                                    HStack {
+                                        Image(systemName: keyFileName != nil ? "key.fill" : "doc.badge.plus")
+                                            .foregroundStyle(keyFileName != nil ? .green : .gray)
+                                        Text(keyFileName ?? "Import Private Key")
+                                            .foregroundStyle(keyFileName != nil ? .white : .gray)
+                                        Spacer()
+                                        if keyFileName != nil {
+                                            Button {
+                                                keyFileName = nil
+                                                keyFileData = nil
+                                            } label: {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .foregroundStyle(.gray.opacity(0.6))
+                                            }
                                         }
                                     }
+                                    .padding(12)
+                                    .background(Color(white: 0.12))
+                                    .cornerRadius(10)
                                 }
-                                .padding(12)
-                                .background(Color(white: 0.12))
-                                .cornerRadius(8)
+
+                                SecureField("Passphrase (optional)", text: $keyPassphrase)
+                                    .textFieldStyle(DarkFieldStyle())
                             }
 
-                            SecureField("Passphrase (optional)", text: $keyPassphrase)
-                                .textFieldStyle(DarkFieldStyle())
+                            if authMethod == .tailscaleSSH {
+                                hintLabel("Tailscale handles authentication via ACLs at the network layer. No password or key needed.", icon: "info.circle")
+                            } else if authMethod == .password {
+                                hintLabel("Using Tailscale SSH? Select \"Tailscale\" auth instead.", icon: "lightbulb")
+                            }
                         }
                     }
 
-                    if authMethod == .tailscaleSSH {
-                        Text("Tailscale handles authentication via ACLs at the network layer. No password or key needed.")
-                            .font(.caption)
-                            .foregroundStyle(.gray)
-                    } else if authMethod == .password {
-                        Text("Using Tailscale SSH? Select \"Tailscale\" auth instead — no password needed.")
-                            .font(.caption)
-                            .foregroundStyle(.gray)
-                    }
+                    // CONNECTION TYPE section
+                    sectionCard {
+                        sectionHeader("PROTOCOL", icon: "antenna.radiowaves.left.and.right", color: .orange)
 
-                    // Connection Type
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text("Connection Type")
-                                .font(.subheadline)
-                                .foregroundStyle(.gray)
-                            Spacer()
+                        VStack(alignment: .leading, spacing: 12) {
                             Picker("", selection: $connectionType) {
                                 Text("Auto").tag(ConnectionType.auto)
                                 Text("SSH").tag(ConnectionType.ssh)
                                 Text("Mosh").tag(ConnectionType.mosh)
                             }
                             .pickerStyle(.segmented)
-                            .frame(width: 200)
-                        }
 
-                        Text("Auto will use Mosh if available, otherwise SSH.")
-                            .font(.caption)
-                            .foregroundStyle(.gray)
+                            hintLabel("Auto will use Mosh if available, otherwise SSH.", icon: "info.circle")
+                        }
                     }
 
                     // Connect button
                     Button {
                         saveAndConnect()
                     } label: {
-                        Text("Connect")
-                            .font(.headline)
-                            .foregroundStyle(.black)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.green)
-                            .cornerRadius(12)
+                        HStack(spacing: 8) {
+                            Image(systemName: "bolt.fill")
+                                .font(.callout)
+                            Text("Connect")
+                                .font(.headline)
+                        }
+                        .foregroundStyle(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.green.gradient)
+                        .cornerRadius(14)
+                        .shadow(color: .green.opacity(canSave ? 0.25 : 0), radius: 12, y: 6)
                     }
                     .disabled(!canSave)
-                    .padding(.top, 8)
+                    .opacity(canSave ? 1 : 0.5)
+                    .padding(.top, 4)
                 }
                 .padding(20)
                 .iPadContentWidth(600)
             }
-            .background(Color.black)
+            .background(Color(white: 0.04))
             .navigationTitle(isEditing ? "Edit Connection" : "New Connection")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -185,15 +187,17 @@ struct EditConnectionView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark")
-                            .foregroundStyle(.white)
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.gray.opacity(0.6))
+                            .font(.title3)
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         save()
                     } label: {
-                        Image(systemName: "checkmark")
+                        Text("Save")
+                            .fontWeight(.semibold)
                             .foregroundStyle(.green)
                     }
                 }
@@ -235,6 +239,70 @@ struct EditConnectionView: View {
             }
         }
     }
+
+    // MARK: - UI Helpers
+
+    private func sectionCard(@ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            content()
+        }
+        .padding(16)
+        .background(Color(white: 0.09))
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+        )
+    }
+
+    private func sectionHeader(_ title: String, icon: String, color: Color) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundStyle(.white)
+                .frame(width: 24, height: 24)
+                .background(color.gradient)
+                .cornerRadius(6)
+
+            Text(title)
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundStyle(.gray.opacity(0.6))
+                .tracking(0.5)
+        }
+    }
+
+    @ViewBuilder
+    private func fieldRow(icon: String, title: String, width: CGFloat? = nil, @ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.caption2)
+                    .foregroundStyle(.gray.opacity(0.5))
+                Text(title)
+                    .font(.subheadline)
+                    .foregroundStyle(.gray.opacity(0.7))
+            }
+            content()
+        }
+        .frame(maxWidth: width == nil ? .infinity : nil)
+        .frame(width: width)
+    }
+
+    private func hintLabel(_ text: String, icon: String) -> some View {
+        HStack(alignment: .top, spacing: 6) {
+            Image(systemName: icon)
+                .font(.caption2)
+                .foregroundStyle(.gray.opacity(0.5))
+                .padding(.top, 1)
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(.gray.opacity(0.5))
+        }
+    }
+
+    // MARK: - Logic
 
     private var isEditing: Bool {
         if case .edit = mode { return true }
@@ -294,27 +362,19 @@ struct EditConnectionView: View {
             try? KeychainService.saveKeyPassphrase(keyPassphrase, for: connectionId)
         }
     }
-
-    @ViewBuilder
-    private func field(_ title: String, width: CGFloat? = nil, @ViewBuilder content: () -> some View) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.subheadline)
-                .foregroundStyle(.gray)
-            content()
-        }
-        .frame(maxWidth: width == nil ? .infinity : nil)
-        .frame(width: width)
-    }
 }
 
 struct DarkFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<_Label>) -> some View {
         configuration
             .padding(12)
-            .background(Color(white: 0.12))
-            .cornerRadius(8)
+            .background(Color(white: 0.14))
+            .cornerRadius(10)
             .foregroundStyle(.white)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.white.opacity(0.04), lineWidth: 0.5)
+            )
     }
 }
 
