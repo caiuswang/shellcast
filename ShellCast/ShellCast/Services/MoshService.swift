@@ -35,6 +35,7 @@ final class MoshSession: TransportSession {
     private(set) var needsStart = true
     private var continuation: AsyncStream<Data>.Continuation?
     private var moshThread: Thread?
+    private var moshPthread: pthread_t?
     private var inputPipe: Pipe?
     private var winSize = winsize()
     private var serializedState: Data?
@@ -102,6 +103,7 @@ final class MoshSession: TransportSession {
         // Run mosh_main on a dedicated thread (it blocks)
         let thread = Thread { [weak self] in
             guard let self else { return }
+            self.moshPthread = pthread_self()
 
             let fIn = fdopen(inputPipe.fileHandleForReading.fileDescriptor, "r")
             let fOut = fdopen(outputPipe.fileHandleForWriting.fileDescriptor, "w")
@@ -183,7 +185,12 @@ final class MoshSession: TransportSession {
     func resize(cols: Int, rows: Int) async throws {
         winSize.ws_col = UInt16(cols)
         winSize.ws_row = UInt16(rows)
-        // mosh_main reads winSize pointer directly on each iteration
+        // Signal only the mosh thread to pick up the new window size.
+        // Using pthread_kill avoids delivering SIGWINCH to the whole process,
+        // which could cause UIKit side-effects (view relayout, etc.).
+        if let pt = moshPthread {
+            pthread_kill(pt, SIGWINCH)
+        }
     }
 
     func disconnect() async {
@@ -193,6 +200,7 @@ final class MoshSession: TransportSession {
         continuation?.finish()
         moshThread?.cancel()
         moshThread = nil
+        moshPthread = nil
     }
 
     /// Get serialized state for background persistence

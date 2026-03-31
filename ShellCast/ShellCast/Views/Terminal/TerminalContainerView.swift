@@ -40,7 +40,7 @@ struct TerminalContainerView: View {
     var body: some View {
         ZStack {
             SwiftTermView(bridge: bridge)
-                .ignoresSafeArea(.container, edges: .bottom)
+                .ignoresSafeArea([.container, .keyboard], edges: .bottom)
 
             // Top-right buttons: minimize + close
             VStack {
@@ -678,19 +678,27 @@ class TerminalViewController: UIViewController {
         }
     }
 
+    private var lastLayoutHeight: CGFloat = 0
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        guard terminalView != nil else { return }
 
-        // Fallback: if keyboard notification hasn't fired yet (e.g., external keyboard),
-        // start the session once the layout stabilizes.
-        if !hasStartedSession && terminalView != nil && cellSize != .zero {
-            let availableHeight = terminalView.frame.height
-            if availableHeight > 0 {
-                computeCellSize()
-                resizeTerminal(availableHeight: availableHeight)
-                startSessionIfNeeded()
-            }
+        let availableHeight = terminalView.frame.height
+        guard availableHeight > 0 else { return }
+
+        if !hasStartedSession && cellSize != .zero {
+            // Fallback: if keyboard notification hasn't fired yet (e.g., external keyboard),
+            // start the session once the layout stabilizes.
+            computeCellSize()
+            resizeTerminal(availableHeight: availableHeight)
+            startSessionIfNeeded()
+        } else if hasStartedSession && cellSize != .zero && availableHeight != lastLayoutHeight {
+            // Resize terminal when frame changes outside of keyboard notifications
+            debugLog("[LAYOUT] height changed \(lastLayoutHeight) → \(availableHeight)")
+            resizeTerminal(availableHeight: availableHeight)
         }
+        lastLayoutHeight = availableHeight
     }
 
     override func viewWillDisappear(_ animated: Bool) {
