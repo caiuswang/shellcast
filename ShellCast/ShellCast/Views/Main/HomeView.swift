@@ -117,9 +117,9 @@ struct HomeView: View {
                     EditConnectionView(mode: .edit(connection))
                 case .tmuxBrowser(let sessions):
                     if let transport = activeTransport {
-                        TmuxBrowserView(initialSessions: sessions, transport: transport) { tmuxSession, windowIndex in
+                        TmuxBrowserView(initialSessions: sessions, transport: transport) { tmuxSession, windowIndex, shellCommand in
                             activeSheet = nil
-                            openShell(transport: transport, tmuxSession: tmuxSession, windowIndex: windowIndex)
+                            openShell(transport: transport, tmuxSession: tmuxSession, windowIndex: windowIndex, shellCommand: shellCommand)
                         }
                     }
                 }
@@ -374,11 +374,14 @@ struct HomeView: View {
         }
     }
 
-    private func openShell(transport: SSHSession, tmuxSession: TmuxSession?, windowIndex: Int? = nil) {
+    private func openShell(transport: SSHSession, tmuxSession: TmuxSession?, windowIndex: Int? = nil, shellCommand: String? = nil) {
         Task { @MainActor in
             do {
                 let tmuxCommand: String?
-                if let session = tmuxSession {
+                if let shellCommand, let session = tmuxSession {
+                    // Launch a shell command inside a new tmux session (e.g., claude --resume <id>)
+                    tmuxCommand = "tmux new-session -s \(session.name) '\(shellCommand)'"
+                } else if let session = tmuxSession {
                     if session.name == "new" {
                         tmuxCommand = "tmux new-session"
                     } else if let windowIndex {
@@ -395,6 +398,10 @@ struct HomeView: View {
                 let connectionId = self.activeConnectionId ?? UUID()
                 let sessionName = tmuxSession?.name
                 let record = findOrCreateSessionRecord(connectionId: connectionId, tmuxSessionName: sessionName)
+                // Track AI tool type if launching Claude Code
+                if shellCommand?.contains("claude") == true {
+                    record.aiToolType = "claude"
+                }
                 self.activeSessionRecord = record
 
                 // Choose transport based on connection type
@@ -484,7 +491,10 @@ struct HomeView: View {
 
                 // Build the tmux attach command
                 let tmuxCommand: String?
-                if let sessionName = session.tmuxSessionName {
+                if session.aiToolType == "claude", let sessionName = session.tmuxSessionName {
+                    // For Claude Code sessions, try to attach to the tmux session that was running it
+                    tmuxCommand = "tmux attach -t \(sessionName)"
+                } else if let sessionName = session.tmuxSessionName {
                     tmuxCommand = "tmux attach -t \(sessionName)"
                 } else {
                     tmuxCommand = nil

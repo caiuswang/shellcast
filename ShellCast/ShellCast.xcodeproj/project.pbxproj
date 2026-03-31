@@ -43,14 +43,17 @@
 		AC7233A415BF3267D4EA4F06 /* TimeFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */; };
 		AC862C2227B11220F7858017 /* Protobuf_C_.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2EA0D3D584A9D1B14B122FB /* Protobuf_C_.xcframework */; };
 		ADC84C52F3BB8F143772DB75 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8BAF4E14868D612E592213F9 /* Assets.xcassets */; };
+		B253A8E668340140500E3C13 /* ClaudeCodeBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E90E2A9F2E5290C11031EF3 /* ClaudeCodeBrowserView.swift */; };
 		B454F67039C8678AC55B49F8 /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = BAF34F9CC9AA10B8DB178F33 /* SwiftTerm */; };
 		B8F0A8D4D5C8C4745A87846F /* WhisperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FFFC26F812935ACB1AE1A9 /* WhisperService.swift */; };
 		B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */; };
 		BFB95968FB306F0A8F0DABE6 /* TerminalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4800BD4740F6F26923B912F2 /* TerminalSettings.swift */; };
 		CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */; };
+		CE35D5F91B70E3D62EA5BA94 /* ClaudeCodeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B120F558A8FB902812C51510 /* ClaudeCodeSession.swift */; };
 		D1697AFEF68A9BC9D6B098CE /* ConnectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */; };
 		D8E0106A70EA257C8160A171 /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */; };
 		DC781359A20E8E2128EEC1F9 /* TmuxSwitcherOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C23234FBB9E4B647294C2F4 /* TmuxSwitcherOverlay.swift */; };
+		DD327A22E969FC92BCF514C8 /* ClaudeCodeParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C903F48459C3B3CB51DB7A6C /* ClaudeCodeParser.swift */; };
 		E16D2496E935F03D5D4DE84E /* config.json in Resources */ = {isa = PBXBuildFile; fileRef = B3BD57C2918A942D29425698 /* config.json */; };
 		E667F6D8BA692FFA54926FD5 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A6BDCA94266B0457F457D2 /* SettingsView.swift */; };
 		E7BF50AE512C431EBC34DABF /* merges.txt in Resources */ = {isa = PBXBuildFile; fileRef = 25786352B6CFFDAC177133C9 /* merges.txt */; };
@@ -100,6 +103,7 @@
 		181D6D7FB964ADB23B8ABEB2 /* ShellCastUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ShellCastUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		18ED85687617B1A5C79A9437 /* ShellCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellCastApp.swift; sourceTree = "<group>"; };
 		1CF9CE4693072E56B9DFA92B /* added_tokens.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = added_tokens.json; sourceTree = "<group>"; };
+		1E90E2A9F2E5290C11031EF3 /* ClaudeCodeBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCodeBrowserView.swift; sourceTree = "<group>"; };
 		23317A00D128D5D060821218 /* TerminalContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalContainerView.swift; sourceTree = "<group>"; };
 		23FFFC26F812935ACB1AE1A9 /* WhisperService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperService.swift; sourceTree = "<group>"; };
 		25786352B6CFFDAC177133C9 /* merges.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = merges.txt; sourceTree = "<group>"; };
@@ -130,11 +134,13 @@
 		AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSession.swift; sourceTree = "<group>"; };
 		AA4F2160E25985C381E065CE /* ShellCast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShellCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD78C13923FD491B76957AD7 /* TransportSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportSession.swift; sourceTree = "<group>"; };
+		B120F558A8FB902812C51510 /* ClaudeCodeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCodeSession.swift; sourceTree = "<group>"; };
 		B3BD57C2918A942D29425698 /* config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = config.json; sourceTree = "<group>"; };
 		B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionRow.swift; sourceTree = "<group>"; };
 		BC8D9CA8FFF23021EB510289 /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		C2A6BDCA94266B0457F457D2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C698034D08F700820A025B61 /* MoshService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoshService.swift; sourceTree = "<group>"; };
+		C903F48459C3B3CB51DB7A6C /* ClaudeCodeParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCodeParser.swift; sourceTree = "<group>"; };
 		D35C95DA1DB825ACD9831A6C /* DebugLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLog.swift; sourceTree = "<group>"; };
 		D5124CDBF147AA4F8371D642 /* tokenizer_config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokenizer_config.json; sourceTree = "<group>"; };
 		D886DD705902431727A8D5CE /* AuthMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethod.swift; sourceTree = "<group>"; };
@@ -218,6 +224,7 @@
 			isa = PBXGroup;
 			children = (
 				D886DD705902431727A8D5CE /* AuthMethod.swift */,
+				B120F558A8FB902812C51510 /* ClaudeCodeSession.swift */,
 				36B824D527DCAF8B7F84AA2C /* Connection.swift */,
 				D941806241DCF9F5A72299C8 /* ConnectionType.swift */,
 				E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */,
@@ -254,6 +261,14 @@
 			path = ShellCastTests;
 			sourceTree = "<group>";
 		};
+		7439925FEB99241DC2F0C930 /* AITools */ = {
+			isa = PBXGroup;
+			children = (
+				1E90E2A9F2E5290C11031EF3 /* ClaudeCodeBrowserView.swift */,
+			);
+			path = AITools;
+			sourceTree = "<group>";
+		};
 		7ED1B78EE5F4B0AA5F44CCD9 /* WhisperModels */ = {
 			isa = PBXGroup;
 			children = (
@@ -266,6 +281,7 @@
 			isa = PBXGroup;
 			children = (
 				FC0361E85DF9B8851B5F4B10 /* AppleSpeechService.swift */,
+				C903F48459C3B3CB51DB7A6C /* ClaudeCodeParser.swift */,
 				7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */,
 				6726B66D9CC86DDD8EA70798 /* KeychainService.swift */,
 				C698034D08F700820A025B61 /* MoshService.swift */,
@@ -293,6 +309,7 @@
 		AC1CCE346402C5E2F7BD1129 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7439925FEB99241DC2F0C930 /* AITools */,
 				49567D0123958379FA4D7A7D /* Connection */,
 				B4192286BC2E4CB5E89B9324 /* Main */,
 				280DDBB16454508F533AFAFD /* Settings */,
@@ -519,6 +536,9 @@
 				2FA6DDCBC8ED256F995110F1 /* ActiveSessionCard.swift in Sources */,
 				2A564E6C7C7292E1311CF8C6 /* AppleSpeechService.swift in Sources */,
 				7563E1D7A8085874F68DA607 /* AuthMethod.swift in Sources */,
+				B253A8E668340140500E3C13 /* ClaudeCodeBrowserView.swift in Sources */,
+				DD327A22E969FC92BCF514C8 /* ClaudeCodeParser.swift in Sources */,
+				CE35D5F91B70E3D62EA5BA94 /* ClaudeCodeSession.swift in Sources */,
 				EADE230217D5A26870FD16C4 /* Connection.swift in Sources */,
 				D8E0106A70EA257C8160A171 /* ConnectionManager.swift in Sources */,
 				D1697AFEF68A9BC9D6B098CE /* ConnectionRow.swift in Sources */,

@@ -1,9 +1,15 @@
 import SwiftUI
 
+/// Navigation wrapper that carries claudeOnly flag alongside the session
+struct WindowNavigation: Hashable {
+    let session: TmuxSession
+    let claudeOnly: Bool
+}
+
 struct TmuxBrowserView: View {
     let initialSessions: [TmuxSession]
     let transport: SSHSession
-    let onSelect: (TmuxSession?, Int?) -> Void
+    let onSelect: (TmuxSession?, Int?, String?) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var navigationPath = NavigationPath()
@@ -15,128 +21,47 @@ struct TmuxBrowserView: View {
     @State private var showOperationError = false
     @State private var settings = TerminalSettings.shared
 
+    // Claude Code state
+    @State private var claudeInstalled = false
+    @State private var claudeSessions: [ClaudeCodeSession] = []
+    @State private var claudeRunningSessions: Set<String> = []
+    @State private var loadingClaude = true
+    @State private var claudePath = "claude"
+    @State private var selectedTab = 0  // 0 = Tmux, 1 = Claude Tmux, 2 = Claude Code
+
     private var palette: AppThemePalette { settings.appPalette }
+
+    /// Tmux sessions that are running Claude Code
+    private var claudeTmuxSessions: [TmuxSession] {
+        sessions.filter { claudeRunningSessions.contains($0.name) }
+    }
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    if !sessions.isEmpty {
-                        // Header
-                        HStack(spacing: 12) {
-                            Image(systemName: "terminal")
-                                .font(.callout)
-                                .fontWeight(.medium)
-                                .foregroundStyle(palette.primaryText)
-                                .frame(width: 36, height: 36)
-                                .background(palette.accent.gradient)
-                                .cornerRadius(10)
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Tmux Sessions")
-                                    .font(.title3)
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(palette.primaryText)
-                                Text("\(sessions.count) session\(sessions.count == 1 ? "" : "s") found")
-                                    .font(.caption)
-                                    .foregroundStyle(palette.secondaryText)
-                            }
-                        }
-
-                        // Session list
-                        VStack(spacing: 0) {
-                            ForEach(sessions) { session in
-                                Button {
-                                    navigationPath.append(session)
-                                } label: {
-                                    TmuxSessionRow(session: session)
-                                }
-                                .contextMenu {
-                                    Button {
-                                        renameText = session.name
-                                        renameTarget = session
-                                    } label: {
-                                        Label("Rename", systemImage: "pencil")
-                                    }
-                                    Button(role: .destructive) {
-                                        deleteTarget = session
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
-                                }
-
-                                if session.id != sessions.last?.id {
-                                    Rectangle()
-                                        .fill(palette.border)
-                                        .frame(height: 0.5)
-                                        .padding(.leading, 52)
-                                }
-                            }
-                        }
-                        .background(palette.surfaceBackground)
-                        .cornerRadius(14)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(palette.border, lineWidth: 0.5)
-                        )
-                    } else {
-                        VStack(spacing: 16) {
-                            ZStack {
-                                Circle()
-                                    .fill(palette.accent.opacity(0.08))
-                                    .frame(width: 72, height: 72)
-                                Image(systemName: "terminal")
-                                    .font(.system(size: 28))
-                                    .foregroundStyle(palette.accent.opacity(0.4))
-                            }
-                            Text("No Tmux Sessions")
-                                .font(.headline)
-                                .foregroundStyle(palette.primaryText)
-                            Text("Start a new session or connect without tmux")
-                                .font(.caption)
-                                .foregroundStyle(palette.secondaryText)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 32)
+            VStack(spacing: 0) {
+                // Tab picker
+                if claudeInstalled {
+                    Picker("", selection: $selectedTab) {
+                        Text("Tmux").tag(0)
+                        Text("Claude Tmux").tag(1)
+                        Text("Sessions").tag(2)
                     }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 4)
+                }
 
-                    // Action buttons
-                    VStack(spacing: 10) {
-                        Button {
-                            onSelect(TmuxSession(name: "new", windowCount: 0, lastAttached: nil, attachedClients: 0), nil)
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "plus.circle.fill")
-                                    .foregroundStyle(palette.accent)
-                                Text("New tmux session")
-                                    .fontWeight(.medium)
-                                    .foregroundStyle(palette.primaryText)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(14)
-                            .background(palette.controlBackground)
-                            .cornerRadius(12)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(palette.accent.opacity(0.2), lineWidth: 0.5)
-                            )
-                        }
-
-                        Button {
-                            onSelect(nil, nil)
-                        } label: {
-                            Text("Connect without tmux")
-                                .font(.subheadline)
-                                .foregroundStyle(palette.secondaryText)
-                                .frame(maxWidth: .infinity)
-                                .padding(14)
-                                .background(palette.elevatedSurfaceBackground)
-                                .cornerRadius(12)
-                        }
+                ScrollView {
+                    switch selectedTab {
+                    case 1:
+                        claudeTmuxContent
+                    case 2:
+                        claudeContent
+                    default:
+                        tmuxContent
                     }
                 }
-                .padding(20)
-                .iPadContentWidth(600)
             }
             .background(palette.screenBackground)
             .navigationBarTitleDisplayMode(.inline)
@@ -151,11 +76,12 @@ struct TmuxBrowserView: View {
                     }
                 }
             }
-            .navigationDestination(for: TmuxSession.self) { session in
+            .navigationDestination(for: WindowNavigation.self) { nav in
                 TmuxWindowBrowserView(
-                    session: session,
+                    session: nav.session,
                     transport: transport,
-                    onSelect: onSelect
+                    onSelect: onSelect,
+                    claudeOnly: nav.claudeOnly
                 )
             }
             .alert("Rename Session", isPresented: .init(
@@ -196,6 +122,221 @@ struct TmuxBrowserView: View {
         .onAppear {
             sessions = initialSessions
         }
+        .task {
+            debugLog("[CLAUDE-UI] .task started, initialSessions count: \(initialSessions.count)")
+            do {
+                let installed = try await ClaudeCodeParser.isInstalled(over: transport)
+                debugLog("[CLAUDE-UI] isInstalled: \(installed)")
+                claudeInstalled = installed
+                if claudeInstalled {
+                    claudePath = (try? await ClaudeCodeParser.resolveClaudePath(over: transport)) ?? "claude"
+                    do {
+                        claudeSessions = try await ClaudeCodeParser.listSessions(over: transport)
+                        debugLog("[CLAUDE-UI] listSessions returned \(claudeSessions.count) sessions")
+                    } catch {
+                        debugLog("[CLAUDE-UI] listSessions failed: \(error)")
+                    }
+                    do {
+                        claudeRunningSessions = try await ClaudeCodeParser.detectRunningSessions(over: transport, tmuxSessions: initialSessions)
+                        debugLog("[CLAUDE-UI] detectRunningSessions returned: \(claudeRunningSessions)")
+                    } catch {
+                        debugLog("[CLAUDE-UI] detectRunningSessions failed: \(error)")
+                    }
+                }
+            } catch {
+                debugLog("[CLAUDE-UI] isInstalled threw: \(error)")
+            }
+            loadingClaude = false
+        }
+    }
+
+    // MARK: - Tmux Tab Content
+
+    @ViewBuilder
+    private var tmuxContent: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            if !sessions.isEmpty {
+                // Session list
+                VStack(spacing: 0) {
+                    ForEach(sessions) { session in
+                        Button {
+                            navigationPath.append(WindowNavigation(session: session, claudeOnly: false))
+                        } label: {
+                            TmuxSessionRow(session: session, aiToolRunning: claudeRunningSessions.contains(session.name) ? "Claude Code" : nil)
+                        }
+                        .contextMenu {
+                            Button {
+                                renameText = session.name
+                                renameTarget = session
+                            } label: {
+                                Label("Rename", systemImage: "pencil")
+                            }
+                            Button(role: .destructive) {
+                                deleteTarget = session
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+
+                        if session.id != sessions.last?.id {
+                            Rectangle()
+                                .fill(palette.border)
+                                .frame(height: 0.5)
+                                .padding(.leading, 52)
+                        }
+                    }
+                }
+                .background(palette.surfaceBackground)
+                .cornerRadius(14)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(palette.border, lineWidth: 0.5)
+                )
+            } else {
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .fill(palette.accent.opacity(0.08))
+                            .frame(width: 72, height: 72)
+                        Image(systemName: "terminal")
+                            .font(.system(size: 28))
+                            .foregroundStyle(palette.accent.opacity(0.4))
+                    }
+                    Text("No Tmux Sessions")
+                        .font(.headline)
+                        .foregroundStyle(palette.primaryText)
+                    Text("Start a new session or connect without tmux")
+                        .font(.caption)
+                        .foregroundStyle(palette.secondaryText)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
+            }
+
+            // Action buttons
+            VStack(spacing: 10) {
+                Button {
+                    onSelect(TmuxSession(name: "new", windowCount: 0, lastAttached: nil, attachedClients: 0), nil, nil)
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(palette.accent)
+                        Text("New tmux session")
+                            .fontWeight(.medium)
+                            .foregroundStyle(palette.primaryText)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(14)
+                    .background(palette.controlBackground)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(palette.accent.opacity(0.2), lineWidth: 0.5)
+                    )
+                }
+
+                Button {
+                    onSelect(nil, nil, nil)
+                } label: {
+                    Text("Connect without tmux")
+                        .font(.subheadline)
+                        .foregroundStyle(palette.secondaryText)
+                        .frame(maxWidth: .infinity)
+                        .padding(14)
+                        .background(palette.elevatedSurfaceBackground)
+                        .cornerRadius(12)
+                }
+            }
+        }
+        .padding(20)
+        .iPadContentWidth(600)
+    }
+
+    // MARK: - Claude Tmux Tab Content (only sessions running Claude)
+
+    @ViewBuilder
+    private var claudeTmuxContent: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            if !claudeTmuxSessions.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(claudeTmuxSessions) { session in
+                        Button {
+                            navigationPath.append(WindowNavigation(session: session, claudeOnly: true))
+                        } label: {
+                            TmuxSessionRow(session: session, aiToolRunning: "Claude Code")
+                        }
+
+                        if session.id != claudeTmuxSessions.last?.id {
+                            Rectangle()
+                                .fill(palette.border)
+                                .frame(height: 0.5)
+                                .padding(.leading, 52)
+                        }
+                    }
+                }
+                .background(palette.surfaceBackground)
+                .cornerRadius(14)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(palette.border, lineWidth: 0.5)
+                )
+            } else {
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.purple.opacity(0.08))
+                            .frame(width: 72, height: 72)
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 28))
+                            .foregroundStyle(Color.purple.opacity(0.4))
+                    }
+                    Text("No Active Claude Sessions")
+                        .font(.headline)
+                        .foregroundStyle(palette.primaryText)
+                    Text("No tmux sessions are currently running Claude Code")
+                        .font(.caption)
+                        .foregroundStyle(palette.secondaryText)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
+            }
+
+            // New Claude session in tmux
+            Button {
+                let cmd = ClaudeCodeParser.newCommand(projectPath: nil, claudePath: claudePath)
+                let tmux = TmuxSession(name: "claude-\(Int(Date().timeIntervalSince1970))", windowCount: 0, lastAttached: nil, attachedClients: 0)
+                onSelect(tmux, nil, cmd)
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundStyle(.purple)
+                    Text("New Claude Code session")
+                        .fontWeight(.medium)
+                        .foregroundStyle(palette.primaryText)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(14)
+                .background(palette.controlBackground)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.purple.opacity(0.2), lineWidth: 0.5)
+                )
+            }
+        }
+        .padding(20)
+        .iPadContentWidth(600)
+    }
+
+    // MARK: - Claude Code Sessions Tab Content
+
+    @ViewBuilder
+    private var claudeContent: some View {
+        ClaudeCodeBrowserView(sessions: claudeSessions, claudePath: claudePath) { shellCommand in
+            let tmux = TmuxSession(name: "claude-\(Int(Date().timeIntervalSince1970))", windowCount: 0, lastAttached: nil, attachedClients: 0)
+            onSelect(tmux, nil, shellCommand)
+        }
     }
 
     private func renameSession(_ session: TmuxSession) {
@@ -230,7 +371,8 @@ struct TmuxBrowserView: View {
 struct TmuxWindowBrowserView: View {
     let session: TmuxSession
     let transport: SSHSession
-    let onSelect: (TmuxSession?, Int?) -> Void
+    let onSelect: (TmuxSession?, Int?, String?) -> Void
+    var claudeOnly: Bool = false
 
     @State private var windows: [TmuxWindow] = []
     @State private var isLoading = true
@@ -241,6 +383,14 @@ struct TmuxWindowBrowserView: View {
     @State private var operationError: String?
     @State private var showOperationError = false
     @State private var settings = TerminalSettings.shared
+    @State private var claudeRunningWindows: Set<Int> = []
+
+    private var displayedWindows: [TmuxWindow] {
+        if claudeOnly {
+            return windows.filter { claudeRunningWindows.contains($0.index) }
+        }
+        return windows
+    }
 
     private var palette: AppThemePalette { settings.appPalette }
 
@@ -262,7 +412,7 @@ struct TmuxWindowBrowserView: View {
                             .font(.title3)
                             .fontWeight(.bold)
                             .foregroundStyle(.white)
-                        Text("\(windows.count) window\(windows.count == 1 ? "" : "s")")
+                        Text("\(displayedWindows.count) window\(displayedWindows.count == 1 ? "" : "s")")
                             .font(.caption)
                             .foregroundStyle(palette.secondaryText)
                     }
@@ -285,14 +435,14 @@ struct TmuxWindowBrowserView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 32)
-                } else if !windows.isEmpty {
+                } else if !displayedWindows.isEmpty {
                     // Window list
                     VStack(spacing: 0) {
-                        ForEach(windows) { window in
+                        ForEach(displayedWindows) { window in
                             Button {
-                                onSelect(session, window.index)
+                                onSelect(session, window.index, nil)
                             } label: {
-                                TmuxWindowRow(window: window)
+                                TmuxWindowRow(window: window, aiToolRunning: claudeRunningWindows.contains(window.index) ? "Claude Code" : nil)
                             }
                             .contextMenu {
                                 Button {
@@ -308,7 +458,7 @@ struct TmuxWindowBrowserView: View {
                                 }
                             }
 
-                            if window.id != windows.last?.id {
+                            if window.id != displayedWindows.last?.id {
                                 Rectangle()
                                     .fill(palette.border)
                                     .frame(height: 0.5)
@@ -326,7 +476,7 @@ struct TmuxWindowBrowserView: View {
 
                 // Attach to whole session
                 Button {
-                    onSelect(session, nil)
+                    onSelect(session, nil, nil)
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "rectangle.stack")
@@ -394,6 +544,8 @@ struct TmuxWindowBrowserView: View {
             errorMessage = "Failed to list windows: \(error.localizedDescription)"
         }
         isLoading = false
+        // Detect which windows are running Claude Code
+        claudeRunningWindows = (try? await ClaudeCodeParser.detectRunningWindows(over: transport, tmuxSessionName: session.name)) ?? []
     }
 
     private func renameWindow(_ window: TmuxWindow) {
@@ -427,17 +579,18 @@ struct TmuxWindowBrowserView: View {
 
 struct TmuxSessionRow: View {
     let session: TmuxSession
+    var aiToolRunning: String? = nil
     @State private var settings = TerminalSettings.shared
 
     private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "terminal")
+            Image(systemName: aiToolRunning != nil ? "sparkles" : "terminal")
                 .font(.caption)
-                .foregroundStyle(palette.accent.opacity(0.8))
+                .foregroundStyle(aiToolRunning != nil ? Color.purple.opacity(0.8) : palette.accent.opacity(0.8))
                 .frame(width: 28, height: 28)
-                .background(palette.accent.opacity(0.12))
+                .background(aiToolRunning != nil ? Color.purple.opacity(0.12) : palette.accent.opacity(0.12))
                 .cornerRadius(7)
 
             VStack(alignment: .leading, spacing: 3) {
@@ -446,6 +599,16 @@ struct TmuxSessionRow: View {
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(.white)
+
+                    if let toolName = aiToolRunning {
+                        Text(toolName)
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
+                            .foregroundStyle(.purple)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.purple.opacity(0.15))
+                            .cornerRadius(4)
+                    }
 
                     if session.attachedClients > 0 {
                         Text("Connected")
@@ -484,17 +647,18 @@ struct TmuxSessionRow: View {
 
 struct TmuxWindowRow: View {
     let window: TmuxWindow
+    var aiToolRunning: String? = nil
     @State private var settings = TerminalSettings.shared
 
     private var palette: AppThemePalette { settings.appPalette }
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "macwindow")
+            Image(systemName: aiToolRunning != nil ? "sparkles" : "macwindow")
                 .font(.caption)
-                .foregroundStyle(palette.accent.opacity(0.8))
+                .foregroundStyle(aiToolRunning != nil ? Color.purple.opacity(0.8) : palette.accent.opacity(0.8))
                 .frame(width: 28, height: 28)
-                .background(palette.accent.opacity(0.12))
+                .background(aiToolRunning != nil ? Color.purple.opacity(0.12) : palette.accent.opacity(0.12))
                 .cornerRadius(7)
 
             VStack(alignment: .leading, spacing: 3) {
@@ -503,6 +667,16 @@ struct TmuxWindowRow: View {
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(.white)
+
+                    if let toolName = aiToolRunning {
+                        Text(toolName)
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
+                            .foregroundStyle(.purple)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.purple.opacity(0.15))
+                            .cornerRadius(4)
+                    }
 
                     if window.isActive {
                         Text("Active")

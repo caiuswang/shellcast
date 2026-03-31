@@ -35,10 +35,17 @@ struct ActiveSessionCard: View {
             }
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(session.tmuxSessionName ?? "Shell")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(palette.primaryText)
+                HStack(spacing: 4) {
+                    if session.aiToolType == "claude" {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.purple)
+                    }
+                    Text(session.aiToolType == "claude" ? "Claude Code" : (session.tmuxSessionName ?? "Shell"))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(palette.primaryText)
+                }
 
                 if let connectionName {
                     Text(connectionName)

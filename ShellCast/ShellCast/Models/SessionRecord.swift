@@ -11,6 +11,8 @@ final class SessionRecord {
     var snapshotImageData: Data?
     var snapshotCapturedAt: Date?
     var isActive: Bool
+    var aiToolType: String?
+    var aiSessionId: String?
 
     init(connectionId: UUID, tmuxSessionName: String? = nil) {
         self.id = UUID()
