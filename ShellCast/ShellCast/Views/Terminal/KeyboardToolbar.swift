@@ -49,7 +49,7 @@ class TerminalKeyboardToolbar: UIView {
     }
 
     private func setupUI() {
-        backgroundColor = UIColor(white: 0.1, alpha: 1.0)
+        backgroundColor = UIColor(white: 0.08, alpha: 1.0)
 
         // Fixed right buttons (mic + keyboard) — always visible
         fixedRightStack = UIStackView()
@@ -95,10 +95,11 @@ class TerminalKeyboardToolbar: UIView {
 
         // Create button groups (no separators — those are added fresh each time)
         let tmuxButton = UIButton(type: .system)
-        tmuxButton.setImage(UIImage(systemName: "rectangle.split.3x1"), for: .normal)
-        tmuxButton.tintColor = .green
-        tmuxButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
-        tmuxButton.layer.cornerRadius = 6
+        let tmuxConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+        tmuxButton.setImage(UIImage(systemName: "rectangle.split.3x1", withConfiguration: tmuxConfig), for: .normal)
+        tmuxButton.tintColor = UIColor(red: 0.2, green: 0.8, blue: 0.4, alpha: 1.0)
+        tmuxButton.backgroundColor = UIColor(white: 0.18, alpha: 1.0)
+        tmuxButton.layer.cornerRadius = 8
         tmuxButton.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
         tmuxButton.addTarget(self, action: #selector(tapTmuxSwitcher), for: .touchUpInside)
         tmuxGroup = [tmuxButton]
@@ -138,10 +139,11 @@ class TerminalKeyboardToolbar: UIView {
         symbolGroup = symbols
 
         micButton = UIButton(type: .system)
-        micButton.setImage(UIImage(systemName: "mic"), for: .normal)
+        let micConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+        micButton.setImage(UIImage(systemName: "mic.fill", withConfiguration: micConfig), for: .normal)
         micButton.tintColor = .white
         micButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
-        micButton.layer.cornerRadius = 6
+        micButton.layer.cornerRadius = 8
         micButton.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
         micButton.addTarget(self, action: #selector(tapMic), for: .touchUpInside)
 
@@ -157,7 +159,7 @@ class TerminalKeyboardToolbar: UIView {
         // Preview bar (hidden by default, shown after speech recognition)
         previewBar = UIView()
         previewBar.translatesAutoresizingMaskIntoConstraints = false
-        previewBar.backgroundColor = UIColor(white: 0.12, alpha: 1.0)
+        previewBar.backgroundColor = UIColor(white: 0.08, alpha: 1.0)
         previewBar.isHidden = true
         addSubview(previewBar)
 
@@ -171,14 +173,16 @@ class TerminalKeyboardToolbar: UIView {
         ])
 
         let cancelBtn = UIButton(type: .system)
-        cancelBtn.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
-        cancelBtn.tintColor = .gray
+        let cancelConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium)
+        cancelBtn.setImage(UIImage(systemName: "xmark.circle.fill", withConfiguration: cancelConfig), for: .normal)
+        cancelBtn.tintColor = UIColor(white: 0.4, alpha: 1.0)
         cancelBtn.addTarget(self, action: #selector(cancelPreview), for: .touchUpInside)
         cancelBtn.translatesAutoresizingMaskIntoConstraints = false
 
         let sendBtn = UIButton(type: .system)
-        sendBtn.setImage(UIImage(systemName: "arrow.up.circle.fill"), for: .normal)
-        sendBtn.tintColor = .green
+        let sendConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .medium)
+        sendBtn.setImage(UIImage(systemName: "arrow.up.circle.fill", withConfiguration: sendConfig), for: .normal)
+        sendBtn.tintColor = UIColor(red: 0.2, green: 0.8, blue: 0.4, alpha: 1.0)
         sendBtn.addTarget(self, action: #selector(confirmPreview), for: .touchUpInside)
         sendBtn.translatesAutoresizingMaskIntoConstraints = false
 
@@ -186,10 +190,12 @@ class TerminalKeyboardToolbar: UIView {
         previewTextView.translatesAutoresizingMaskIntoConstraints = false
         previewTextView.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
         previewTextView.textColor = .white
-        previewTextView.tintColor = .green
-        previewTextView.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
-        previewTextView.layer.cornerRadius = 6
-        previewTextView.textContainerInset = UIEdgeInsets(top: 6, left: 4, bottom: 6, right: 4)
+        previewTextView.tintColor = UIColor(red: 0.2, green: 0.8, blue: 0.4, alpha: 1.0)
+        previewTextView.backgroundColor = UIColor(white: 0.14, alpha: 1.0)
+        previewTextView.layer.cornerRadius = 10
+        previewTextView.layer.borderWidth = 0.5
+        previewTextView.layer.borderColor = UIColor(white: 1.0, alpha: 0.06).cgColor
+        previewTextView.textContainerInset = UIEdgeInsets(top: 8, left: 6, bottom: 8, right: 6)
         previewTextView.autocorrectionType = .no
         previewTextView.autocapitalizationType = .none
         previewTextView.spellCheckingType = .no
@@ -262,8 +268,8 @@ class TerminalKeyboardToolbar: UIView {
         let fontSize: CGFloat = isRegularWidth ? 15 : 14
         button.titleLabel?.font = .monospacedSystemFont(ofSize: fontSize, weight: .medium)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
-        button.layer.cornerRadius = 6
+        button.backgroundColor = UIColor(white: 0.18, alpha: 1.0)
+        button.layer.cornerRadius = 8
         let inset: CGFloat = isRegularWidth ? 16 : 12
         let vInset: CGFloat = isRegularWidth ? 8 : 6
         button.contentEdgeInsets = UIEdgeInsets(top: vInset, left: inset, bottom: vInset, right: inset)
@@ -273,23 +279,23 @@ class TerminalKeyboardToolbar: UIView {
 
     private func makeToggleButton(_ title: String, action: Selector) -> UIButton {
         let button = makeButton(title, action: action)
-        button.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
+        button.backgroundColor = UIColor(white: 0.18, alpha: 1.0)
         return button
     }
 
     private func makeSeparator() -> UIView {
         let sep = UIView()
         sep.translatesAutoresizingMaskIntoConstraints = false
-        sep.backgroundColor = UIColor(white: 0.3, alpha: 1.0)
+        sep.backgroundColor = UIColor(white: 0.25, alpha: 1.0)
         sep.widthAnchor.constraint(equalToConstant: 1).isActive = true
-        sep.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        sep.heightAnchor.constraint(equalToConstant: 18).isActive = true
         return sep
     }
 
     private func updateToggleAppearance(_ button: UIButton, active: Bool) {
         button.backgroundColor = active
-            ? UIColor(red: 0.2, green: 0.5, blue: 0.2, alpha: 1.0)
-            : UIColor(white: 0.22, alpha: 1.0)
+            ? UIColor(red: 0.15, green: 0.45, blue: 0.25, alpha: 1.0)
+            : UIColor(white: 0.18, alpha: 1.0)
     }
 
     // MARK: - Modifier Toggles
@@ -444,8 +450,12 @@ class TerminalKeyboardToolbar: UIView {
                 try AppleSpeechService.shared.startRecording()
             }
             isListening = true
-            micButton.tintColor = .red
-            micButton.backgroundColor = UIColor(red: 0.4, green: 0.15, blue: 0.15, alpha: 1.0)
+            micButton.tintColor = .white
+            micButton.backgroundColor = UIColor(red: 0.75, green: 0.2, blue: 0.2, alpha: 1.0)
+            micButton.layer.shadowColor = UIColor.red.cgColor
+            micButton.layer.shadowRadius = 8
+            micButton.layer.shadowOpacity = 0.4
+            micButton.layer.shadowOffset = .zero
             showPreview(text: "Listening...")
         } catch {
             hidePreview()
@@ -457,6 +467,7 @@ class TerminalKeyboardToolbar: UIView {
         isListening = false
         micButton.tintColor = .white
         micButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
+        micButton.layer.shadowOpacity = 0
         showPreview(text: "Transcribing...")
 
         let engine = TerminalSettings.shared.speechEngine
@@ -482,6 +493,7 @@ class TerminalKeyboardToolbar: UIView {
         isListening = false
         micButton.tintColor = .white
         micButton.backgroundColor = UIColor(white: 0.22, alpha: 1.0)
+        micButton.layer.shadowOpacity = 0
     }
 
     // MARK: - Preview Bar
