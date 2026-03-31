@@ -199,8 +199,12 @@ struct TerminalContainerView: View {
         }
         .onChange(of: bridge.showTmuxSwitcher) { _, show in
             if show && !isSSH && moshExecSession == nil {
-                // Mosh needs a separate SSH connection for tmux exec commands
+                // Mosh needs a temporary SSH connection to list tmux sessions
                 connectExecSessionForMosh()
+            } else if !show && moshExecSession != nil {
+                // Close the exec session when switcher closes — only needed briefly
+                Task { await moshExecSession?.disconnect() }
+                moshExecSession = nil
             }
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
