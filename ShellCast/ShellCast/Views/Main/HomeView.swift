@@ -41,7 +41,7 @@ struct HomeView: View {
         TabView(selection: $selectedTab) {
             historyTab
                 .tabItem {
-                    Image(systemName: "clock")
+                    Image(systemName: "clock.fill")
                     Text("History")
                 }
                 .tag(0)
@@ -55,7 +55,7 @@ struct HomeView: View {
 
             SettingsView()
                 .tabItem {
-                    Image(systemName: "gearshape")
+                    Image(systemName: "gearshape.fill")
                     Text("Settings")
                 }
                 .tag(2)
@@ -63,17 +63,44 @@ struct HomeView: View {
         .tint(.green)
         .overlay {
             if connectionManager.isConnecting {
-                Color.black.opacity(0.6)
+                Color.black.opacity(0.7)
                     .ignoresSafeArea()
-                VStack(spacing: 16) {
-                    ProgressView("Connecting...")
-                        .tint(.green)
-                        .foregroundStyle(.white)
-                    Button("Cancel") {
-                        connectionManager.cancelConnect()
+                VStack(spacing: 20) {
+                    ZStack {
+                        Circle()
+                            .stroke(Color.green.opacity(0.15), lineWidth: 3)
+                            .frame(width: 60, height: 60)
+                        ProgressView()
+                            .controlSize(.large)
+                            .tint(.green)
                     }
-                    .foregroundStyle(.gray)
+
+                    Text("Connecting...")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
+
+                    Button {
+                        connectionManager.cancelConnect()
+                    } label: {
+                        Text("Cancel")
+                            .font(.subheadline)
+                            .foregroundStyle(.gray)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 10)
+                            .background(Color(white: 0.15))
+                            .cornerRadius(20)
+                    }
                 }
+                .padding(32)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color(white: 0.08).opacity(0.95))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+                        )
+                )
             }
         }
         .sheet(item: $activeSheet) { sheet in
@@ -145,13 +172,17 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 if allSessions.isEmpty {
-                    VStack(spacing: 12) {
-                        Image(systemName: "clock")
-                            .font(.system(size: 40))
-                            .foregroundStyle(.gray.opacity(0.5))
-                        Text("No recent sessions")
+                    VStack(spacing: 16) {
+                        Image(systemName: "clock.fill")
+                            .font(.system(size: 44))
+                            .foregroundStyle(.gray.opacity(0.25))
+                        Text("No Recent Sessions")
                             .font(.subheadline)
-                            .foregroundStyle(.gray)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.gray.opacity(0.6))
+                        Text("Your terminal sessions will appear here")
+                            .font(.caption)
+                            .foregroundStyle(.gray.opacity(0.35))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 80)
@@ -185,7 +216,7 @@ struct HomeView: View {
                     .padding()
                 }
             }
-            .background(Color.black)
+            .background(Color(white: 0.04))
             .navigationTitle("History")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -223,16 +254,22 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 if connections.isEmpty {
-                    VStack(spacing: 12) {
-                        Image(systemName: "server.rack")
-                            .font(.system(size: 40))
-                            .foregroundStyle(.gray.opacity(0.5))
-                        Text("No saved connections")
+                    VStack(spacing: 16) {
+                        ZStack {
+                            Circle()
+                                .fill(.green.opacity(0.08))
+                                .frame(width: 80, height: 80)
+                            Image(systemName: "server.rack")
+                                .font(.system(size: 32))
+                                .foregroundStyle(.green.opacity(0.4))
+                        }
+                        Text("No Connections Yet")
                             .font(.subheadline)
-                            .foregroundStyle(.gray)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.gray.opacity(0.6))
                         Text("Tap + to add your first server")
                             .font(.caption)
-                            .foregroundStyle(.gray.opacity(0.7))
+                            .foregroundStyle(.gray.opacity(0.35))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 80)
@@ -260,7 +297,7 @@ struct HomeView: View {
                     .iPadContentWidth(700)
                 }
             }
-            .background(Color.black)
+            .background(Color(white: 0.04))
             .navigationTitle("Connections")
             .navigationBarTitleDisplayMode(.inline)
             .overlay(alignment: .bottomTrailing) {
@@ -272,8 +309,9 @@ struct HomeView: View {
                         .fontWeight(.bold)
                         .foregroundStyle(.black)
                         .frame(width: 56, height: 56)
-                        .background(Color.green)
+                        .background(Color.green.gradient)
                         .clipShape(Circle())
+                        .shadow(color: .green.opacity(0.3), radius: 12, y: 6)
                 }
                 .padding(24)
             }
