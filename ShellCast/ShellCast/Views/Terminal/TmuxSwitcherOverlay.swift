@@ -248,62 +248,36 @@ struct TmuxSwitcherOverlay: View {
         }
     }
 
-    /// Switch tmux session/window by finding the PTY client name and targeting it.
-    /// `tmux switch-client` requires a client context. When run via SSH exec, there's no
-    /// attached client. We find the client TTY from `tmux list-clients` and target it with `-c`.
-    private func switchToSession(_ session: TmuxSession) {
-        Task {
-            do {
-                // Find a client attached to the current session to target
-                let clientTTY = try await findClientTTY()
-                if let tty = clientTTY {
-                    _ = try await transport.exec("/opt/homebrew/bin/tmux switch-client -c \(tty) -t \(session.name)")
-                } else {
-                    // No client found — fall back to sending through PTY
-                    sendToPTY?(Data("tmux switch-client -t \(session.name)\n".utf8))
-                }
-            } catch {
-                debugLog("[TMUX] switch-client failed: \(error)")
-                // Fall back to PTY
-                sendToPTY?(Data("tmux switch-client -t \(session.name)\n".utf8))
-            }
-            isPresented = false
+    /// Send a tmux command via the PTY using tmux prefix key (Ctrl-B :).
+    /// This is the most reliable method because it runs in the actual tmux client context,
+    /// regardless of whether the transport is SSH or Mosh.
+    private func sendTmuxPrefixCommand(_ tmuxCmd: String) {
+        guard let sendToPTY else { return }
+        // Ctrl-B (0x02) activates tmux prefix, then ":" enters command mode
+        var bytes: [UInt8] = [0x02]  // Ctrl-B
+        bytes.append(0x3A)           // ":"
+        sendToPTY(Data(bytes))
+        // Small delay to let tmux enter command mode, then send the command
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            sendToPTY(Data("\(tmuxCmd)\n".utf8))
         }
+    }
+
+    private func switchToSession(_ session: TmuxSession) {
+        sendTmuxPrefixCommand("switch-client -t \(session.name)")
+        isPresented = false
     }
 
     private func switchToWindow(_ session: TmuxSession, window: TmuxWindow) {
-        Task {
-            do {
-                let clientTTY = try await findClientTTY()
-                if session.name != currentSessionName, let tty = clientTTY {
-                    _ = try await transport.exec("/opt/homebrew/bin/tmux switch-client -c \(tty) -t \(session.name)")
-                }
-                _ = try await transport.exec("/opt/homebrew/bin/tmux select-window -t \(session.name):\(window.index)")
-            } catch {
-                debugLog("[TMUX] switch-window failed: \(error)")
+        if session.name != currentSessionName {
+            sendTmuxPrefixCommand("switch-client -t \(session.name)")
+            // Delay the window select to let session switch complete
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                sendTmuxPrefixCommand("select-window -t \(session.name):\(window.index)")
             }
-            isPresented = false
+        } else {
+            sendTmuxPrefixCommand("select-window -t \(session.name):\(window.index)")
         }
-    }
-
-    /// Find the TTY of a tmux client attached to the current session.
-    private func findClientTTY() async throws -> String? {
-        let output = try await transport.exec("/opt/homebrew/bin/tmux list-clients -F '#{client_tty} #{session_name}'")
-        for line in output.components(separatedBy: "\n") {
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { continue }
-            let parts = trimmed.components(separatedBy: " ")
-            if parts.count >= 2 {
-                let tty = parts[0]
-                let sessionName = parts.dropFirst().joined(separator: " ")
-                if currentSessionName == nil || sessionName == currentSessionName {
-                    return tty
-                }
-            }
-        }
-        // If no match for current session, return first client
-        let firstLine = output.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: "\n").first ?? ""
-        let tty = firstLine.components(separatedBy: " ").first
-        return tty?.isEmpty == true ? nil : tty
+        isPresented = false
     }
 }
