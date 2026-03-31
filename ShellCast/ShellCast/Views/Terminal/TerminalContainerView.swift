@@ -436,6 +436,29 @@ class TerminalViewController: UIViewController {
     private var toolbarHeightConstraint: NSLayoutConstraint!
     private var toolbar: TerminalKeyboardToolbar!
 
+    // MARK: - Ctrl+key handling for Mac (Designed for iPad)
+    // On Mac, some Ctrl+key combos (e.g., Ctrl+B) are consumed by the system's
+    // standard key bindings before reaching SwiftTerm's pressesBegan.
+    // We register UIKeyCommands to intercept them at the view controller level.
+
+    override var keyCommands: [UIKeyCommand]? {
+        let letters = "abcdefghijklmnopqrstuvwxyz"
+        return letters.map { char in
+            let cmd = UIKeyCommand(input: String(char), modifierFlags: .control, action: #selector(handleCtrlKey(_:)))
+            cmd.wantsPriorityOverSystemBehavior = true
+            return cmd
+        }
+    }
+
+    @objc private func handleCtrlKey(_ command: UIKeyCommand) {
+        guard let input = command.input, let ascii = input.lowercased().first?.asciiValue else { return }
+        let controlByte = ascii - 0x60  // 'a'=0x61 → 0x01, 'b'=0x62 → 0x02, etc.
+        debugLog("[KEY] UIKeyCommand Ctrl+\(input) → sending 0x\(String(format: "%02x", controlByte))")
+        Task {
+            try? await bridge.transport.send(Data([controlByte]))
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
