@@ -97,6 +97,7 @@ struct HomeView: View {
             if let transport = connectionManager.activeTerminalTransport {
                 let _ = debugLog("[COVER] Rendering TerminalContainerView, transport=\(type(of: transport)), needsDeferredStart=\(transport.needsDeferredStart)")
                 TerminalContainerView(transport: transport, tmuxCommand: activeTmuxCommand, sessionRecord: activeSessionRecord)
+                    .environment(connectionManager)
             } else {
                 let _ = debugLog("[COVER] ERROR: connectionManager.activeTerminalTransport is nil!")
                 Color.black
