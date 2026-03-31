@@ -87,63 +87,44 @@ struct SettingsView: View {
     // MARK: - App Header
 
     private var appHeader: some View {
-        VStack(spacing: 16) {
-            // App icon
-            ZStack {
-                RoundedRectangle(cornerRadius: 22)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.1, green: 0.1, blue: 0.1),
-                                Color(red: 0.05, green: 0.05, blue: 0.05)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .frame(width: 72, height: 72)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 22)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                    )
-
-                Text(">_")
-                    .font(.system(size: 28, weight: .bold, design: .monospaced))
-                    .foregroundStyle(.green)
-            }
-
-            VStack(spacing: 4) {
-                Text("ShellCast")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.white)
-
-                Text("SSH & Mosh Terminal")
-                    .font(.caption)
-                    .foregroundStyle(.gray.opacity(0.6))
-            }
-
-            // Theme color strip — shows all themes, highlights current
-            HStack(spacing: 6) {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
                 ForEach(TerminalTheme.allCases, id: \.self) { theme in
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(theme.previewColor)
-                        .frame(height: 28)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(
-                                    settings.theme == theme ? .green : Color.white.opacity(0.08),
-                                    lineWidth: settings.theme == theme ? 1.5 : 0.5
-                                )
-                        )
-                        .onTapGesture {
+                    let isSelected = settings.theme == theme
+
+                    VStack(spacing: 8) {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(theme.previewColor)
+                            .frame(width: 80, height: 52)
+                            .overlay(
+                                Text(">_")
+                                    .font(.system(size: 14, weight: .bold, design: .monospaced))
+                                    .foregroundStyle(.white.opacity(0.5))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(
+                                        isSelected ? .green : Color.white.opacity(0.06),
+                                        lineWidth: isSelected ? 2 : 0.5
+                                    )
+                            )
+                            .shadow(color: isSelected ? .green.opacity(0.2) : .clear, radius: 8, y: 2)
+
+                        Text(theme.rawValue)
+                            .font(.system(size: 10, weight: isSelected ? .semibold : .regular))
+                            .foregroundStyle(isSelected ? .green : .gray.opacity(0.5))
+                            .lineLimit(1)
+                    }
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
                             settings.theme = theme
                         }
+                    }
                 }
             }
+            .padding(.horizontal, 4)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .padding(.vertical, 4)
     }
 
     // MARK: - Rows
