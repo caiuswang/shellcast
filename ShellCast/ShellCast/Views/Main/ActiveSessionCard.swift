@@ -16,35 +16,46 @@ struct ActiveSessionCard: View {
             ZStack(alignment: .topTrailing) {
                 SnapshotThumbnail(imageData: session.snapshotImageData, width: thumbWidth, height: thumbHeight)
 
-                // Live dot — isolated so its animation doesn't re-render the thumbnail
                 if session.isActive {
-                    LiveDot()
-                        .padding(6)
+                    HStack(spacing: 4) {
+                        LiveDot()
+                        Text("LIVE")
+                            .font(.system(size: 8, weight: .bold, design: .monospaced))
+                            .foregroundStyle(.green)
+                    }
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(.black.opacity(0.6))
+                    .cornerRadius(4)
+                    .padding(6)
                 }
             }
 
-            Text(session.tmuxSessionName ?? "Shell")
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundStyle(.white)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(session.tmuxSessionName ?? "Shell")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
 
-            if let connectionName {
-                Text(connectionName)
+                if let connectionName {
+                    Text(connectionName)
+                        .font(.caption2)
+                        .foregroundStyle(.green.opacity(0.7))
+                }
+
+                Text((session.snapshotCapturedAt ?? session.lastActiveAt).relativeDescription)
                     .font(.caption2)
-                    .foregroundStyle(.green.opacity(0.7))
+                    .foregroundStyle(.gray.opacity(0.6))
             }
-
-            Text((session.snapshotCapturedAt ?? session.lastActiveAt).relativeDescription)
-                .font(.caption2)
-                .foregroundStyle(.gray)
         }
-        .padding(8)
-        .background(Color(white: 0.08))
-        .cornerRadius(12)
-        .overlay(content: {
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(.green.opacity(session.isActive ? 0.25 : 0), lineWidth: 1)
-        })
+        .padding(10)
+        .background(Color(white: 0.09))
+        .cornerRadius(14)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(session.isActive ? .green.opacity(0.3) : Color.white.opacity(0.05), lineWidth: session.isActive ? 1 : 0.5)
+        )
+        .shadow(color: session.isActive ? .green.opacity(0.06) : .clear, radius: 12, y: 4)
     }
 }
 
@@ -55,8 +66,8 @@ private struct SnapshotThumbnail: View {
     var height: CGFloat = 120
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(Color(white: 0.1))
+        RoundedRectangle(cornerRadius: 10)
+            .fill(Color(white: 0.07))
             .frame(width: width, height: height)
             .overlay {
                 if let imageData, let uiImage = UIImage(data: imageData) {
@@ -66,10 +77,10 @@ private struct SnapshotThumbnail: View {
                 } else {
                     Image(systemName: "terminal")
                         .font(.largeTitle)
-                        .foregroundStyle(.green.opacity(0.5))
+                        .foregroundStyle(.green.opacity(0.3))
                 }
             }
-            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
 
@@ -80,10 +91,10 @@ private struct LiveDot: View {
     var body: some View {
         Circle()
             .fill(.green)
-            .frame(width: 8, height: 8)
-            .opacity(isPulsing ? 0.9 : 0.5)
+            .frame(width: 7, height: 7)
+            .opacity(isPulsing ? 1.0 : 0.5)
             .onAppear {
-                withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
+                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
                     isPulsing = true
                 }
             }
