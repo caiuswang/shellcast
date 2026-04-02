@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "xcode-build": {
+      "source": "pzep1/xcode-build-skill",
+      "sourceType": "github",
+      "computedHash": "7df657416e4a1dfbad534f9c2fe1bc9fa5abe57c438f24d1085fc235116e7cce"
+    }
+  }
+}

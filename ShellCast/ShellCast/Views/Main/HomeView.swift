@@ -399,9 +399,9 @@ struct HomeView: View {
                 let connectionId = self.activeConnectionId ?? UUID()
                 let sessionName = tmuxSession?.name
                 let record = findOrCreateSessionRecord(connectionId: connectionId, tmuxSessionName: sessionName)
-                // Track AI tool type if launching Claude Code
-                if shellCommand?.contains("claude") == true {
-                    record.aiToolType = "claude"
+                // Track AI tool type based on command
+                if let cmd = shellCommand {
+                    record.aiToolType = detectAgentType(from: cmd)
                 }
                 self.activeSessionRecord = record
 
@@ -533,6 +533,20 @@ struct HomeView: View {
                 }
             }
         }
+    }
+    
+    // MARK: - AI Agent Detection
+    
+    /// Detect AI agent type from shell command
+    private func detectAgentType(from command: String) -> String? {
+        for plugin in AIAgentRegistry.allPlugins {
+            for binaryName in plugin.binaryNames {
+                if command.contains(binaryName) {
+                    return plugin.agentID
+                }
+            }
+        }
+        return nil
     }
 }
 

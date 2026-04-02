@@ -16,6 +16,28 @@ packages:
     url: https://github.com/argmaxinc/WhisperKit.git
     from: "0.9.0"
 
+schemes:
+  ShellCast:
+    build:
+      targets:
+        ShellCast: all
+    run:
+      config: Debug
+  ShellCastTests:
+    build:
+      targets:
+        ShellCastTests: [test]
+    test:
+      targets:
+        - ShellCastTests
+  ShellCastUITests:
+    build:
+      targets:
+        ShellCastUITests: [test]
+    test:
+      targets:
+        - ShellCastUITests
+
 targets:
   ShellCast:
     type: application

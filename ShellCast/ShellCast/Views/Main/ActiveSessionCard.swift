@@ -36,12 +36,20 @@ struct ActiveSessionCard: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 4) {
-                    if session.aiToolType == "claude" {
-                        Image(systemName: "sparkles")
+                    if let toolType = session.aiToolType {
+                        let iconName = AIAgentRegistry.iconName(for: toolType)
+                        let themeColor = AIAgentRegistry.themeColor(for: toolType)
+                        Image(systemName: iconName)
                             .font(.system(size: 10))
-                            .foregroundStyle(.purple)
+                            .foregroundStyle(themeColor)
                     }
-                    Text(session.aiToolType == "claude" ? "Claude Code" : (session.tmuxSessionName ?? "Shell"))
+                    let displayName: String = {
+                        if let toolType = session.aiToolType {
+                            return AIAgentRegistry.displayName(for: toolType)
+                        }
+                        return session.tmuxSessionName ?? "Shell"
+                    }()
+                    Text(displayName)
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundStyle(palette.primaryText)

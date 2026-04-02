@@ -50,7 +50,14 @@ ShellCast/
 │   │   ├── TransportSession.swift       # Protocol: outputStream, send, resize, disconnect
 │   │   ├── ConnectionManager.swift      # Orchestrator: manages active sessions
 │   │   ├── TmuxParser.swift             # Parse `tmux list-sessions` output
-│   │   ├── ClaudeCodeParser.swift       # Detect, list, resume Claude Code sessions
+│   │   ├── AIAgent/                     # AI agent plugin architecture
+│   │   │   ├── AIAgentPlugin.swift      # Protocol for agent integration
+│   │   │   ├── AIAgentRegistry.swift    # Plugin registry and discovery
+│   │   │   ├── ClaudeCodeParser+Compatibility.swift  # Legacy wrapper
+│   │   │   ├── Plugins/
+│   │   │   │   ├── ClaudeAgent.swift    # Claude Code plugin
+│   │   │   │   └── OpenCodeAgent.swift  # OpenCode plugin
+│   │   │   └── README.md                # Plugin development guide
 │   │   └── KeychainService.swift        # iOS Keychain CRUD for passwords & SSH keys
 │   ├── Terminal/
 │   │   └── TerminalBridge.swift         # Pipes TransportSession ↔ SwiftTerm TerminalView
@@ -257,6 +264,40 @@ HomeView (root)
 - [x] New files: `ClaudeCodeSession.swift`, `ClaudeCodeParser.swift`, `ClaudeCodeBrowserView.swift`
 
 **Milestone: First-class Claude Code session management from phone.** ✅
+
+### Phase 7: AI Agent Plugin Architecture ✅ COMPLETE
+- [x] **Plugin Protocol**: Created `AIAgentPlugin` protocol for extensible agent integration
+  - Default implementations for common operations (detection, process scanning)
+  - Customizable per-agent: session listing, commands, icon, theme color
+- [x] **Plugin Registry**: `AIAgentRegistry` manages all registered plugins
+  - Auto-detects installed agents on connection
+  - Provides unified interface for all AI agent operations
+  - Supports concurrent operations across multiple agents
+- [x] **OpenCode Support**: Added plugin for OpenCode CLI (`opencode`, `oc` binaries)
+  - Session storage in `~/.opencode/sessions/`
+  - Blue theme color, brain icon for visual distinction
+  - Resume with `opencode resume <id>`, new with `opencode start [path]`
+- [x] **Generic Views**: Updated UI components to work with any registered agent
+  - Dynamic tab picker showing all installed agents
+  - Agent-specific session browser with proper theming
+  - Multi-agent session list with filter chips
+- [x] **Backward Compatibility**: `ClaudeCodeParser` wrapper maintains existing API
+  - Existing code continues to work unchanged
+  - Gradual migration path for new features
+- [x] **Documentation**: Added `README.md` explaining how to add new agents
+  - Step-by-step guide for implementing `AIAgentPlugin`
+  - Example code and protocol reference
+
+**New Files:**
+- `Services/AIAgent/AIAgentPlugin.swift` - Protocol definition
+- `Services/AIAgent/AIAgentRegistry.swift` - Plugin registry
+- `Services/AIAgent/ClaudeCodeParser+Compatibility.swift` - Compatibility wrapper
+- `Services/AIAgent/Plugins/ClaudeAgent.swift` - Claude Code plugin
+- `Services/AIAgent/Plugins/OpenCodeAgent.swift` - OpenCode plugin
+- `Services/AIAgent/README.md` - Developer documentation
+- `Views/AITools/AIAgentBrowserView.swift` - Generic agent browser
+
+**Milestone: Easy integration of new AI agents via plugin system.** ✅
 
 ## Risks
 

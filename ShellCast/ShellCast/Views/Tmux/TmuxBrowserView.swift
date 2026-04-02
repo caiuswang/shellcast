@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// Navigation wrapper that carries claudeOnly flag alongside the session
+/// Navigation wrapper that carries agent filter alongside the session
 struct WindowNavigation: Hashable {
     let session: TmuxSession
-    let claudeOnly: Bool
+    let agentFilter: String?  // nil = no filter, "claude" = only Claude, "opencode" = only OpenCode, etc.
 }
 
 struct TmuxBrowserView: View {
@@ -21,46 +21,38 @@ struct TmuxBrowserView: View {
     @State private var showOperationError = false
     @State private var settings = TerminalSettings.shared
 
-    // Claude Code state
-    @State private var claudeInstalled = false
-    @State private var claudeSessions: [ClaudeCodeSession] = []
-    @State private var claudeRunningSessions: Set<String> = []
-    @State private var loadingClaude = true
-    @State private var claudePath = "claude"
-    @State private var selectedTab = 0  // 0 = Tmux, 1 = Claude Tmux, 2 = Claude Code
+    // AI Agent state
+    @State private var installedAgents: [AIAgentPlugin.Type] = []
+    @State private var agentSessions: [AIAgentSession] = []
+    @State private var runningSessionsByAgent: [String: Set<String>] = [:]
+    @State private var loadingAgents = true
+    @State private var agentBinaryPaths: [String: String] = [:]  // agentID -> path
+    @State private var selectedTab = 0  // 0 = Tmux, 1+ = AI Agent tabs
 
     private var palette: AppThemePalette { settings.appPalette }
 
-    /// Tmux sessions that are running Claude Code
-    private var claudeTmuxSessions: [TmuxSession] {
-        sessions.filter { claudeRunningSessions.contains($0.name) }
+    /// All tmux sessions running any AI agent
+    private var allAITmuxSessions: [TmuxSession] {
+        let allRunning = runningSessionsByAgent.values.flatMap { $0 }
+        return sessions.filter { allRunning.contains($0.name) }
+    }
+    
+    /// Get tmux sessions running a specific agent
+    private func tmuxSessionsRunning(agentID: String) -> [TmuxSession] {
+        guard let running = runningSessionsByAgent[agentID] else { return [] }
+        return sessions.filter { running.contains($0.name) }
     }
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
             VStack(spacing: 0) {
                 // Tab picker
-                if claudeInstalled {
-                    Picker("", selection: $selectedTab) {
-                        Text("Tmux").tag(0)
-                        Text("Claude Tmux").tag(1)
-                        Text("Sessions").tag(2)
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 12)
-                    .padding(.bottom, 4)
+                if !installedAgents.isEmpty {
+                    agentTabPicker
                 }
 
                 ScrollView {
-                    switch selectedTab {
-                    case 1:
-                        claudeTmuxContent
-                    case 2:
-                        claudeContent
-                    default:
-                        tmuxContent
-                    }
+                    tabContent
                 }
             }
             .background(palette.screenBackground)
@@ -81,7 +73,7 @@ struct TmuxBrowserView: View {
                     session: nav.session,
                     transport: transport,
                     onSelect: onSelect,
-                    claudeOnly: nav.claudeOnly
+                    agentFilter: nav.agentFilter
                 )
             }
             .alert("Rename Session", isPresented: .init(
@@ -123,33 +115,102 @@ struct TmuxBrowserView: View {
             sessions = initialSessions
         }
         .task {
-            debugLog("[CLAUDE-UI] .task started, initialSessions count: \(initialSessions.count)")
-            do {
-                let installed = try await ClaudeCodeParser.isInstalled(over: transport)
-                debugLog("[CLAUDE-UI] isInstalled: \(installed)")
-                claudeInstalled = installed
-                if claudeInstalled {
-                    claudePath = (try? await ClaudeCodeParser.resolveClaudePath(over: transport)) ?? "claude"
-                    do {
-                        claudeSessions = try await ClaudeCodeParser.listSessions(over: transport)
-                        debugLog("[CLAUDE-UI] listSessions returned \(claudeSessions.count) sessions")
-                    } catch {
-                        debugLog("[CLAUDE-UI] listSessions failed: \(error)")
-                    }
-                    do {
-                        claudeRunningSessions = try await ClaudeCodeParser.detectRunningSessions(over: transport, tmuxSessions: initialSessions)
-                        debugLog("[CLAUDE-UI] detectRunningSessions returned: \(claudeRunningSessions)")
-                    } catch {
-                        debugLog("[CLAUDE-UI] detectRunningSessions failed: \(error)")
-                    }
-                }
-            } catch {
-                debugLog("[CLAUDE-UI] isInstalled threw: \(error)")
-            }
-            loadingClaude = false
+            await loadAIAgents()
         }
     }
 
+    // MARK: - Tab Picker
+    
+    private var agentTabPicker: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                // All Tmux tab
+                TabButton(title: "Tmux", icon: "terminal", isSelected: selectedTab == 0) {
+                    selectedTab = 0
+                }
+                
+                // AI Agent tabs
+                ForEach(Array(installedAgents.enumerated()), id: \.element.agentID) { index, plugin in
+                    let tabIndex = index + 1
+                    TabButton(
+                        title: plugin.displayName,
+                        icon: plugin.iconName,
+                        isSelected: selectedTab == tabIndex,
+                        color: colorFromName(plugin.themeColor)
+                    ) {
+                        selectedTab = tabIndex
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 4)
+        }
+    }
+    
+    @ViewBuilder
+    private var tabContent: some View {
+        if selectedTab == 0 {
+            tmuxContent
+        } else if selectedTab <= installedAgents.count {
+            let agent = installedAgents[selectedTab - 1]
+            aiTmuxContent(for: agent)
+        }
+    }
+    
+    // MARK: - AI Agent Loading
+    
+    private func loadAIAgents() async {
+        debugLog("[AI-AGENTS] Loading AI agents for \(initialSessions.count) tmux sessions")
+        
+        // Detect installed agents
+        installedAgents = await AIAgentRegistry.detectInstalledAgents(over: transport)
+        debugLog("[AI-AGENTS] Installed agents: \(installedAgents.map { $0.agentID })")
+        
+        // Load binary paths for all agents
+        await withTaskGroup(of: (String, String).self) { group in
+            for plugin in installedAgents {
+                group.addTask {
+                    let path = (try? await plugin.resolveBinaryPath(over: transport)) ?? plugin.binaryNames.first ?? plugin.agentID
+                    return (plugin.agentID, path)
+                }
+            }
+            
+            for await (agentID, path) in group {
+                agentBinaryPaths[agentID] = path
+            }
+        }
+        
+        // Load sessions from all agents
+        agentSessions = await AIAgentRegistry.listAllSessions(over: transport)
+        debugLog("[AI-AGENTS] Total sessions from all agents: \(agentSessions.count)")
+        
+        // Detect running sessions
+        runningSessionsByAgent = await AIAgentRegistry.detectAllRunningSessions(
+            over: transport,
+            tmuxSessions: initialSessions
+        )
+        debugLog("[AI-AGENTS] Running sessions by agent: \(runningSessionsByAgent)")
+        
+        loadingAgents = false
+    }
+    
+    private func colorFromName(_ name: String) -> Color {
+        switch name.lowercased() {
+        case "purple": return .purple
+        case "blue": return .blue
+        case "green": return .green
+        case "orange": return .orange
+        case "red": return .red
+        case "pink": return .pink
+        case "cyan", "teal": return .cyan
+        case "indigo": return .indigo
+        case "mint": return .mint
+        case "yellow": return .yellow
+        default: return .purple
+        }
+    }
+    
     // MARK: - Tmux Tab Content
 
     @ViewBuilder
@@ -160,9 +221,10 @@ struct TmuxBrowserView: View {
                 VStack(spacing: 0) {
                     ForEach(sessions) { session in
                         Button {
-                            navigationPath.append(WindowNavigation(session: session, claudeOnly: false))
+                            navigationPath.append(WindowNavigation(session: session, agentFilter: nil))
                         } label: {
-                            TmuxSessionRow(session: session, aiToolRunning: claudeRunningSessions.contains(session.name) ? "Claude Code" : nil)
+                            let runningAgent = firstRunningAgent(in: session.name)
+                            TmuxSessionRow(session: session, aiToolRunning: runningAgent?.displayName)
                         }
                         .contextMenu {
                             Button {
@@ -251,22 +313,38 @@ struct TmuxBrowserView: View {
         .padding(20)
         .iPadContentWidth(600)
     }
+    
+    /// Get the first running agent info for a tmux session
+    private func firstRunningAgent(in sessionName: String) -> RunningAgentInfo? {
+        for (agentID, sessions) in runningSessionsByAgent {
+            if sessions.contains(sessionName) {
+                return RunningAgentInfo(agentID: agentID, tmuxSessionName: sessionName, windowIndex: nil)
+            }
+        }
+        return nil
+    }
 
-    // MARK: - Claude Tmux Tab Content (only sessions running Claude)
+    // MARK: - AI Agent Tmux Tab Content
 
     @ViewBuilder
-    private var claudeTmuxContent: some View {
+    private func aiTmuxContent(for agent: AIAgentPlugin.Type) -> some View {
+        let agentSessions = tmuxSessionsRunning(agentID: agent.agentID)
+        let agentColor = colorFromName(agent.themeColor)
+        let binaryPath = agentBinaryPaths[agent.agentID] ?? agent.binaryNames.first ?? agent.agentID
+        let agentSessionsList = agentSessions.filter { $0.agentID == agent.agentID }
+        
         VStack(alignment: .leading, spacing: 20) {
-            if !claudeTmuxSessions.isEmpty {
+            // AI Tmux Sessions
+            if !agentSessions.isEmpty {
                 VStack(spacing: 0) {
-                    ForEach(claudeTmuxSessions) { session in
+                    ForEach(agentSessions) { session in
                         Button {
-                            navigationPath.append(WindowNavigation(session: session, claudeOnly: true))
+                            navigationPath.append(WindowNavigation(session: session, agentFilter: agent.agentID))
                         } label: {
-                            TmuxSessionRow(session: session, aiToolRunning: "Claude Code")
+                            TmuxSessionRow(session: session, aiToolRunning: agent.displayName)
                         }
 
-                        if session.id != claudeTmuxSessions.last?.id {
+                        if session.id != agentSessions.last?.id {
                             Rectangle()
                                 .fill(palette.border)
                                 .frame(height: 0.5)
@@ -284,16 +362,16 @@ struct TmuxBrowserView: View {
                 VStack(spacing: 16) {
                     ZStack {
                         Circle()
-                            .fill(Color.purple.opacity(0.08))
+                            .fill(agentColor.opacity(0.08))
                             .frame(width: 72, height: 72)
-                        Image(systemName: "sparkles")
+                        Image(systemName: agent.iconName)
                             .font(.system(size: 28))
-                            .foregroundStyle(Color.purple.opacity(0.4))
+                            .foregroundStyle(agentColor.opacity(0.4))
                     }
-                    Text("No Active Claude Sessions")
+                    Text("No Active \(agent.displayName) Sessions")
                         .font(.headline)
                         .foregroundStyle(palette.primaryText)
-                    Text("No tmux sessions are currently running Claude Code")
+                    Text("No tmux sessions are currently running \(agent.displayName)")
                         .font(.caption)
                         .foregroundStyle(palette.secondaryText)
                         .multilineTextAlignment(.center)
@@ -302,16 +380,53 @@ struct TmuxBrowserView: View {
                 .padding(.vertical, 32)
             }
 
-            // New Claude session in tmux
+            // Resumable sessions from this agent
+            let resumableSessions = agentSessionsList.filter { $0.agentID == agent.agentID }
+            if !resumableSessions.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Resume Session")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(palette.secondaryText)
+                        .padding(.horizontal, 4)
+                    
+                    VStack(spacing: 0) {
+                        ForEach(resumableSessions) { session in
+                            Button {
+                                let cmd = agent.resumeCommand(sessionId: session.sessionId, binaryPath: binaryPath)
+                                let tmux = TmuxSession(name: "\(agent.agentID)-\(Int(Date().timeIntervalSince1970))", windowCount: 0, lastAttached: nil, attachedClients: 0)
+                                onSelect(tmux, nil, cmd)
+                            } label: {
+                                AIAgentSessionRow(session: session, agentColor: agentColor)
+                            }
+                            
+                            if session.id != resumableSessions.last?.id {
+                                Rectangle()
+                                    .fill(palette.border)
+                                    .frame(height: 0.5)
+                                    .padding(.leading, 52)
+                            }
+                        }
+                    }
+                    .background(palette.surfaceBackground)
+                    .cornerRadius(14)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(palette.border, lineWidth: 0.5)
+                    )
+                }
+            }
+
+            // New session button
             Button {
-                let cmd = ClaudeCodeParser.newCommand(projectPath: nil, claudePath: claudePath)
-                let tmux = TmuxSession(name: "claude-\(Int(Date().timeIntervalSince1970))", windowCount: 0, lastAttached: nil, attachedClients: 0)
+                let cmd = agent.newCommand(projectPath: nil, binaryPath: binaryPath)
+                let tmux = TmuxSession(name: "\(agent.agentID)-\(Int(Date().timeIntervalSince1970))", windowCount: 0, lastAttached: nil, attachedClients: 0)
                 onSelect(tmux, nil, cmd)
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "plus.circle.fill")
-                        .foregroundStyle(.purple)
-                    Text("New Claude Code session")
+                        .foregroundStyle(agentColor)
+                    Text("New \(agent.displayName) session")
                         .fontWeight(.medium)
                         .foregroundStyle(palette.primaryText)
                 }
@@ -321,22 +436,12 @@ struct TmuxBrowserView: View {
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.purple.opacity(0.2), lineWidth: 0.5)
+                        .stroke(agentColor.opacity(0.2), lineWidth: 0.5)
                 )
             }
         }
         .padding(20)
         .iPadContentWidth(600)
-    }
-
-    // MARK: - Claude Code Sessions Tab Content
-
-    @ViewBuilder
-    private var claudeContent: some View {
-        ClaudeCodeBrowserView(sessions: claudeSessions, claudePath: claudePath) { shellCommand in
-            let tmux = TmuxSession(name: "claude-\(Int(Date().timeIntervalSince1970))", windowCount: 0, lastAttached: nil, attachedClients: 0)
-            onSelect(tmux, nil, shellCommand)
-        }
     }
 
     private func renameSession(_ session: TmuxSession) {
@@ -372,7 +477,7 @@ struct TmuxWindowBrowserView: View {
     let session: TmuxSession
     let transport: SSHSession
     let onSelect: (TmuxSession?, Int?, String?) -> Void
-    var claudeOnly: Bool = false
+    var agentFilter: String? = nil  // nil = no filter, "claude" = only windows running Claude, etc.
 
     @State private var windows: [TmuxWindow] = []
     @State private var isLoading = true
@@ -383,11 +488,11 @@ struct TmuxWindowBrowserView: View {
     @State private var operationError: String?
     @State private var showOperationError = false
     @State private var settings = TerminalSettings.shared
-    @State private var claudeRunningWindows: Set<Int> = []
+    @State private var runningWindowsByAgent: [String: Set<Int>] = [:]
 
     private var displayedWindows: [TmuxWindow] {
-        if claudeOnly {
-            return windows.filter { claudeRunningWindows.contains($0.index) }
+        if let agentFilter = agentFilter, let runningWindows = runningWindowsByAgent[agentFilter] {
+            return windows.filter { runningWindows.contains($0.index) }
         }
         return windows
     }
@@ -442,7 +547,9 @@ struct TmuxWindowBrowserView: View {
                             Button {
                                 onSelect(session, window.index, nil)
                             } label: {
-                                TmuxWindowRow(window: window, aiToolRunning: claudeRunningWindows.contains(window.index) ? "Claude Code" : nil)
+                                let agentID = runningWindowsByAgent.first { $0.value.contains(window.index) }?.key
+                                let agentName = agentID != nil ? AIAgentRegistry.displayName(for: agentID!) : nil
+                                TmuxWindowRow(window: window, aiToolRunning: agentName)
                             }
                             .contextMenu {
                                 Button {
@@ -544,8 +651,17 @@ struct TmuxWindowBrowserView: View {
             errorMessage = "Failed to list windows: \(error.localizedDescription)"
         }
         isLoading = false
-        // Detect which windows are running Claude Code
-        claudeRunningWindows = (try? await ClaudeCodeParser.detectRunningWindows(over: transport, tmuxSessionName: session.name)) ?? []
+        
+        // Detect which windows are running each AI agent
+        var allRunningWindows: [String: Set<Int>] = [:]
+        for plugin in AIAgentRegistry.allPlugins {
+            if let windows = try? await plugin.detectRunningWindows(over: transport, tmuxSessionName: session.name) {
+                if !windows.isEmpty {
+                    allRunningWindows[plugin.agentID] = windows
+                }
+            }
+        }
+        runningWindowsByAgent = allRunningWindows
     }
 
     private func renameWindow(_ window: TmuxWindow) {
@@ -698,5 +814,38 @@ struct TmuxWindowRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
+    }
+}
+
+
+// MARK: - Supporting Views
+
+struct TabButton: View {
+    let title: String
+    let icon: String
+    let isSelected: Bool
+    var color: Color = .accentColor
+    let action: () -> Void
+    
+    @State private var settings = TerminalSettings.shared
+    
+    private var palette: AppThemePalette { settings.appPalette }
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.caption)
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(isSelected ? .semibold : .medium)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(isSelected ? color : palette.controlBackground)
+            .foregroundStyle(isSelected ? .white : palette.primaryText)
+            .cornerRadius(20)
+        }
+        .buttonStyle(.plain)
     }
 }
