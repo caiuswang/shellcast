@@ -126,7 +126,9 @@ struct TmuxBrowserView: View {
             HStack(spacing: 8) {
                 // All Tmux tab
                 TabButton(title: "Tmux", icon: "terminal", isSelected: selectedTab == 0) {
-                    selectedTab = 0
+                    withAnimation(.spring(duration: 0.2)) {
+                        selectedTab = 0
+                    }
                 }
                 
                 // AI Agent tabs - use indexed access to avoid complex ForEach
@@ -148,7 +150,9 @@ struct TmuxBrowserView: View {
                 isSelected: selectedTab == tabIndex,
                 color: colorFromName(plugin.themeColor)
             ) {
-                selectedTab = tabIndex
+                withAnimation(.spring(duration: 0.2)) {
+                    selectedTab = tabIndex
+                }
             }
         }
     }
@@ -158,8 +162,7 @@ struct TmuxBrowserView: View {
         if selectedTab == 0 {
             tmuxContent
         } else if selectedTab <= installedAgents.count {
-            let agent = installedAgents[selectedTab - 1]
-            aiTmuxContent(for: agent)
+            aiTmuxContent(for: installedAgents[selectedTab - 1])
         }
     }
     
@@ -219,57 +222,58 @@ struct TmuxBrowserView: View {
     // MARK: - AI Agents Status
     
     private var aiAgentsStatusHeader: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("AI Agents Detected")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundStyle(palette.secondaryText)
-            
-            // Use indexed access to avoid ForEach issues with metatypes
-            aiAgentStatusCards
-        }
-        .padding(.horizontal, 4)
+        aiAgentStatusCards
+            .padding(.horizontal, 4)
     }
     
     private var aiAgentStatusCards: some View {
         HStack(spacing: 12) {
             ForEach(0..<installedAgents.count, id: \.self) { index in
                 let plugin = installedAgents[index]
+                let tabIndex = index + 1
                 let runningCount = runningSessionsByAgent[plugin.agentID]?.count ?? 0
                 let agentColor = colorFromName(plugin.themeColor)
+                let isSelected = selectedTab == tabIndex
                 
-                HStack(spacing: 6) {
-                    if AIAgentRegistry.isCustomIcon(plugin.iconName) {
-                        Image(plugin.iconName)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 12, height: 12)
-                            .foregroundStyle(agentColor)
-                    } else {
-                        Image(systemName: plugin.iconName)
-                            .font(.caption)
-                            .foregroundStyle(agentColor)
+                Button {
+                    withAnimation(.spring(duration: 0.2)) {
+                        selectedTab = tabIndex
                     }
-                    
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(plugin.displayName)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundStyle(palette.primaryText)
+                } label: {
+                    HStack(spacing: 6) {
+                        if AIAgentRegistry.isCustomIcon(plugin.iconName) {
+                            Image(plugin.iconName)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 12, height: 12)
+                                .foregroundStyle(isSelected ? .white : agentColor)
+                        } else {
+                            Image(systemName: plugin.iconName)
+                                .font(.caption)
+                                .foregroundStyle(isSelected ? .white : agentColor)
+                        }
                         
-                        Text(runningCount > 0 ? "\(runningCount) running" : "idle")
-                            .font(.caption2)
-                            .foregroundStyle(runningCount > 0 ? agentColor : palette.tertiaryText)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(plugin.displayName)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundStyle(isSelected ? .white : palette.primaryText)
+                            
+                            Text(runningCount > 0 ? "\(runningCount) running" : "idle")
+                                .font(.caption2)
+                                .foregroundStyle(isSelected ? .white.opacity(0.8) : (runningCount > 0 ? agentColor : palette.tertiaryText))
+                        }
                     }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(isSelected ? agentColor : palette.surfaceBackground)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(isSelected ? agentColor : (runningCount > 0 ? agentColor.opacity(0.3) : palette.border), lineWidth: runningCount > 0 || isSelected ? 1 : 0.5)
+                    )
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(palette.surfaceBackground)
-                .cornerRadius(10)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(runningCount > 0 ? agentColor.opacity(0.3) : palette.border, lineWidth: runningCount > 0 ? 1 : 0.5)
-                )
+                .buttonStyle(.plain)
             }
         }
     }
@@ -959,6 +963,46 @@ struct TmuxSessionRow: View {
     }
 }
 
+// MARK: - Supporting Views
+
+struct TabButton: View {
+    let title: String
+    let icon: String
+    let isSelected: Bool
+    var color: Color = .accentColor
+    let action: () -> Void
+    
+    @State private var settings = TerminalSettings.shared
+    
+    private var palette: AppThemePalette { settings.appPalette }
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if AIAgentRegistry.isCustomIcon(icon) {
+                    Image(icon)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12, height: 12)
+                } else {
+                    Image(systemName: icon)
+                        .font(.caption)
+                }
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(isSelected ? .semibold : .medium)
+            }
+            .frame(minWidth: 80)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(isSelected ? color : palette.controlBackground)
+            .foregroundStyle(isSelected ? .white : palette.primaryText)
+            .cornerRadius(20)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct TmuxWindowRow: View {
     let window: TmuxWindow
     var aiAgentID: String? = nil  // e.g., "claude", "opencode"
@@ -1040,42 +1084,3 @@ struct TmuxWindowRow: View {
     }
 }
 
-
-// MARK: - Supporting Views
-
-struct TabButton: View {
-    let title: String
-    let icon: String
-    let isSelected: Bool
-    var color: Color = .accentColor
-    let action: () -> Void
-    
-    @State private var settings = TerminalSettings.shared
-    
-    private var palette: AppThemePalette { settings.appPalette }
-    
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                if AIAgentRegistry.isCustomIcon(icon) {
-                    Image(icon)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 12, height: 12)
-                } else {
-                    Image(systemName: icon)
-                        .font(.caption)
-                }
-                Text(title)
-                    .font(.subheadline)
-                    .fontWeight(isSelected ? .semibold : .medium)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(isSelected ? color : palette.controlBackground)
-            .foregroundStyle(isSelected ? .white : palette.primaryText)
-            .cornerRadius(20)
-        }
-        .buttonStyle(.plain)
-    }
-}
