@@ -2,6 +2,8 @@
 
 This directory contains a plugin-based architecture for integrating AI coding assistants (like Claude Code, OpenCode, etc.) with ShellCast.
 
+> **Important:** Read [COMMON_MISTAKES.md](./COMMON_MISTAKES.md) before developing new plugins!
+
 ## Architecture
 
 ```
@@ -9,8 +11,11 @@ AIAgent/
 ├── AIAgentPlugin.swift          # Protocol definition + default implementations
 ├── AIAgentRegistry.swift        # Central registry for all plugins
 ├── ClaudeCodeParser+Compatibility.swift  # Backward compatibility wrapper
+├── README.md                    # This file
+├── COMMON_MISTAKES.md           # Pitfalls and lessons learned ⭐
 └── Plugins/
     ├── ClaudeAgent.swift        # Claude Code plugin
+    ├── KimiAgent.swift          # Kimi (Moonshot AI) plugin
     └── OpenCodeAgent.swift      # OpenCode plugin
 ```
 

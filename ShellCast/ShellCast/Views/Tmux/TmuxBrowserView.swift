@@ -129,22 +129,27 @@ struct TmuxBrowserView: View {
                     selectedTab = 0
                 }
                 
-                // AI Agent tabs
-                ForEach(Array(installedAgents.enumerated()), id: \.element.agentID) { index, plugin in
-                    let tabIndex = index + 1
-                    TabButton(
-                        title: plugin.displayName,
-                        icon: plugin.iconName,
-                        isSelected: selectedTab == tabIndex,
-                        color: colorFromName(plugin.themeColor)
-                    ) {
-                        selectedTab = tabIndex
-                    }
-                }
+                // AI Agent tabs - use indexed access to avoid complex ForEach
+                agentTabButtons
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
             .padding(.bottom, 4)
+        }
+    }
+    
+    private var agentTabButtons: some View {
+        ForEach(0..<installedAgents.count, id: \.self) { index in
+            let plugin = installedAgents[index]
+            let tabIndex = index + 1
+            TabButton(
+                title: plugin.displayName,
+                icon: plugin.iconName,
+                isSelected: selectedTab == tabIndex,
+                color: colorFromName(plugin.themeColor)
+            ) {
+                selectedTab = tabIndex
+            }
         }
     }
     
@@ -211,11 +216,74 @@ struct TmuxBrowserView: View {
         }
     }
     
+    // MARK: - AI Agents Status
+    
+    private var aiAgentsStatusHeader: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("AI Agents Detected")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundStyle(palette.secondaryText)
+            
+            // Use indexed access to avoid ForEach issues with metatypes
+            aiAgentStatusCards
+        }
+        .padding(.horizontal, 4)
+    }
+    
+    private var aiAgentStatusCards: some View {
+        HStack(spacing: 12) {
+            ForEach(0..<installedAgents.count, id: \.self) { index in
+                let plugin = installedAgents[index]
+                let runningCount = runningSessionsByAgent[plugin.agentID]?.count ?? 0
+                let agentColor = colorFromName(plugin.themeColor)
+                
+                HStack(spacing: 6) {
+                    if AIAgentRegistry.isCustomIcon(plugin.iconName) {
+                        Image(plugin.iconName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 12, height: 12)
+                            .foregroundStyle(agentColor)
+                    } else {
+                        Image(systemName: plugin.iconName)
+                            .font(.caption)
+                            .foregroundStyle(agentColor)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(plugin.displayName)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundStyle(palette.primaryText)
+                        
+                        Text(runningCount > 0 ? "\(runningCount) running" : "idle")
+                            .font(.caption2)
+                            .foregroundStyle(runningCount > 0 ? agentColor : palette.tertiaryText)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(palette.surfaceBackground)
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(runningCount > 0 ? agentColor.opacity(0.3) : palette.border, lineWidth: runningCount > 0 ? 1 : 0.5)
+                )
+            }
+        }
+    }
+    
     // MARK: - Tmux Tab Content
 
     @ViewBuilder
     private var tmuxContent: some View {
         VStack(alignment: .leading, spacing: 20) {
+            // AI Agents Status Header
+            if !installedAgents.isEmpty {
+                aiAgentsStatusHeader
+            }
+            
             if !sessions.isEmpty {
                 // Session list
                 VStack(spacing: 0) {
@@ -223,8 +291,8 @@ struct TmuxBrowserView: View {
                         Button {
                             navigationPath.append(WindowNavigation(session: session, agentFilter: nil))
                         } label: {
-                            let runningAgent = firstRunningAgent(in: session.name)
-                            TmuxSessionRow(session: session, aiToolRunning: runningAgent?.displayName)
+                            let runningAgentID = firstRunningAgentID(in: session.name)
+                            TmuxSessionRow(session: session, aiAgentID: runningAgentID)
                         }
                         .contextMenu {
                             Button {
@@ -314,11 +382,11 @@ struct TmuxBrowserView: View {
         .iPadContentWidth(600)
     }
     
-    /// Get the first running agent info for a tmux session
-    private func firstRunningAgent(in sessionName: String) -> RunningAgentInfo? {
+    /// Get the first running agent ID for a tmux session
+    private func firstRunningAgentID(in sessionName: String) -> String? {
         for (agentID, sessions) in runningSessionsByAgent {
             if sessions.contains(sessionName) {
-                return RunningAgentInfo(agentID: agentID, tmuxSessionName: sessionName, windowIndex: nil)
+                return agentID
             }
         }
         return nil
@@ -328,23 +396,23 @@ struct TmuxBrowserView: View {
 
     @ViewBuilder
     private func aiTmuxContent(for agent: AIAgentPlugin.Type) -> some View {
-        let agentSessions = tmuxSessionsRunning(agentID: agent.agentID)
+        let runningTmuxSessions = tmuxSessionsRunning(agentID: agent.agentID)
         let agentColor = colorFromName(agent.themeColor)
         let binaryPath = agentBinaryPaths[agent.agentID] ?? agent.binaryNames.first ?? agent.agentID
-        let agentSessionsList = agentSessions.filter { $0.agentID == agent.agentID }
+        let resumableSessions = agentSessions.filter { $0.agentID == agent.agentID }
         
         VStack(alignment: .leading, spacing: 20) {
             // AI Tmux Sessions
-            if !agentSessions.isEmpty {
+            if !runningTmuxSessions.isEmpty {
                 VStack(spacing: 0) {
-                    ForEach(agentSessions) { session in
+                    ForEach(runningTmuxSessions) { session in
                         Button {
                             navigationPath.append(WindowNavigation(session: session, agentFilter: agent.agentID))
                         } label: {
-                            TmuxSessionRow(session: session, aiToolRunning: agent.displayName)
+                            TmuxSessionRow(session: session, aiAgentID: agent.agentID)
                         }
 
-                        if session.id != agentSessions.last?.id {
+                        if session.id != runningTmuxSessions.last?.id {
                             Rectangle()
                                 .fill(palette.border)
                                 .frame(height: 0.5)
@@ -364,9 +432,17 @@ struct TmuxBrowserView: View {
                         Circle()
                             .fill(agentColor.opacity(0.08))
                             .frame(width: 72, height: 72)
-                        Image(systemName: agent.iconName)
-                            .font(.system(size: 28))
-                            .foregroundStyle(agentColor.opacity(0.4))
+                        if AIAgentRegistry.isCustomIcon(agent.iconName) {
+                            Image(agent.iconName)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 28, height: 28)
+                                .foregroundStyle(agentColor.opacity(0.4))
+                        } else {
+                            Image(systemName: agent.iconName)
+                                .font(.system(size: 28))
+                                .foregroundStyle(agentColor.opacity(0.4))
+                        }
                     }
                     Text("No Active \(agent.displayName) Sessions")
                         .font(.headline)
@@ -381,7 +457,6 @@ struct TmuxBrowserView: View {
             }
 
             // Resumable sessions from this agent
-            let resumableSessions = agentSessionsList.filter { $0.agentID == agent.agentID }
             if !resumableSessions.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Resume Session")
@@ -491,41 +566,95 @@ struct TmuxWindowBrowserView: View {
     @State private var runningWindowsByAgent: [String: Set<Int>] = [:]
 
     private var displayedWindows: [TmuxWindow] {
-        if let agentFilter = agentFilter, let runningWindows = runningWindowsByAgent[agentFilter] {
+        if let agentFilter = agentFilter {
+            // When filtering by agent, only show windows after detection completes
+            guard let runningWindows = runningWindowsByAgent[agentFilter] else {
+                // Detection not yet complete, return empty
+                return []
+            }
             return windows.filter { runningWindows.contains($0.index) }
         }
+        // No filter, show all windows
         return windows
+    }
+    
+    // Track if we're still detecting agent windows
+    private var isDetectingAgentWindows: Bool {
+        agentFilter != nil && runningWindowsByAgent[agentFilter!] == nil
     }
 
     private var palette: AppThemePalette { settings.appPalette }
+    
+    private var filterAgentInfo: AgentDisplayInfo? { AgentDisplayInfo(agentID: agentFilter) }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 // Header
                 HStack(spacing: 12) {
-                    Image(systemName: "rectangle.split.3x1")
-                        .font(.callout)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.white)
-                        .frame(width: 36, height: 36)
-                        .background(palette.accent.gradient)
-                        .cornerRadius(10)
+                    // Show agent icon if filtered, otherwise session icon
+                    Group {
+                        if let icon = filterAgentInfo?.icon, AIAgentRegistry.isCustomIcon(icon) {
+                            Image(icon)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 20, height: 20)
+                                .font(.callout)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.white)
+                                .frame(width: 36, height: 36)
+                                .background((filterAgentInfo?.color ?? palette.accent).gradient)
+                                .cornerRadius(10)
+                        } else {
+                            Image(systemName: filterAgentInfo?.icon ?? "rectangle.split.3x1")
+                                .font(.callout)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.white)
+                                .frame(width: 36, height: 36)
+                                .background((filterAgentInfo?.color ?? palette.accent).gradient)
+                                .cornerRadius(10)
+                        }
+                    }
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(session.name)
                             .font(.title3)
                             .fontWeight(.bold)
                             .foregroundStyle(.white)
-                        Text("\(displayedWindows.count) window\(displayedWindows.count == 1 ? "" : "s")")
-                            .font(.caption)
-                            .foregroundStyle(palette.secondaryText)
+                        
+                        HStack(spacing: 6) {
+                            Text("\(displayedWindows.count) window\(displayedWindows.count == 1 ? "" : "s")")
+                                .font(.caption)
+                                .foregroundStyle(palette.secondaryText)
+                            
+                            // Show filter badge if agent filter is active
+                            if let agent = filterAgentInfo {
+                                HStack(spacing: 4) {
+                                    if AIAgentRegistry.isCustomIcon(agent.icon) {
+                                        Image(agent.icon)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(width: 8, height: 8)
+                                    } else {
+                                        Image(systemName: agent.icon)
+                                            .font(.system(size: 8))
+                                    }
+                                    Text(agent.name)
+                                }
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(agent.color)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(agent.color.opacity(0.15))
+                                .cornerRadius(4)
+                            }
+                        }
                     }
                 }
 
-                if isLoading {
+                if isLoading || isDetectingAgentWindows {
                     ProgressView()
-                        .tint(.green)
+                        .tint(filterAgentInfo?.color ?? .green)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 32)
                 } else if let error = errorMessage {
@@ -548,8 +677,7 @@ struct TmuxWindowBrowserView: View {
                                 onSelect(session, window.index, nil)
                             } label: {
                                 let agentID = runningWindowsByAgent.first { $0.value.contains(window.index) }?.key
-                                let agentName = agentID != nil ? AIAgentRegistry.displayName(for: agentID!) : nil
-                                TmuxWindowRow(window: window, aiToolRunning: agentName)
+                                TmuxWindowRow(window: window, aiAgentID: agentID)
                             }
                             .contextMenu {
                                 Button {
@@ -579,6 +707,35 @@ struct TmuxWindowBrowserView: View {
                         RoundedRectangle(cornerRadius: 14)
                             .stroke(palette.border, lineWidth: 0.5)
                     )
+                } else if agentFilter != nil {
+                    // Empty state when filtering by agent but no windows match
+                    VStack(spacing: 16) {
+                        ZStack {
+                            Circle()
+                                .fill((filterAgentInfo?.color ?? palette.accent).opacity(0.08))
+                                .frame(width: 72, height: 72)
+                            if let icon = filterAgentInfo?.icon, AIAgentRegistry.isCustomIcon(icon) {
+                                Image(icon)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 28, height: 28)
+                                    .foregroundStyle((filterAgentInfo?.color ?? palette.accent).opacity(0.4))
+                            } else {
+                                Image(systemName: filterAgentInfo?.icon ?? "sparkles")
+                                    .font(.system(size: 28))
+                                    .foregroundStyle((filterAgentInfo?.color ?? palette.accent).opacity(0.4))
+                            }
+                        }
+                        Text("No \(filterAgentInfo?.name ?? "AI Agent") Windows")
+                            .font(.headline)
+                            .foregroundStyle(palette.primaryText)
+                        Text("No windows in this session are running \(filterAgentInfo?.name ?? "the AI agent")")
+                            .font(.caption)
+                            .foregroundStyle(palette.secondaryText)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 32)
                 }
 
                 // Attach to whole session
@@ -691,23 +848,52 @@ struct TmuxWindowBrowserView: View {
     }
 }
 
+// MARK: - Agent Info Helper
+
+/// Helper to get agent display info from agent ID
+struct AgentDisplayInfo {
+    let name: String
+    let icon: String
+    let color: Color
+    
+    init?(agentID: String?) {
+        guard let agentID = agentID, !agentID.isEmpty else { return nil }
+        self.name = AIAgentRegistry.displayName(for: agentID)
+        self.icon = AIAgentRegistry.iconName(for: agentID)
+        self.color = AIAgentRegistry.themeColor(for: agentID)
+    }
+}
+
 // MARK: - Row Views
 
 struct TmuxSessionRow: View {
     let session: TmuxSession
-    var aiToolRunning: String? = nil
+    var aiAgentID: String? = nil  // e.g., "claude", "opencode"
     @State private var settings = TerminalSettings.shared
 
     private var palette: AppThemePalette { settings.appPalette }
+    private var agentInfo: AgentDisplayInfo? { AgentDisplayInfo(agentID: aiAgentID) }
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: aiToolRunning != nil ? "sparkles" : "terminal")
-                .font(.caption)
-                .foregroundStyle(aiToolRunning != nil ? Color.purple.opacity(0.8) : palette.accent.opacity(0.8))
-                .frame(width: 28, height: 28)
-                .background(aiToolRunning != nil ? Color.purple.opacity(0.12) : palette.accent.opacity(0.12))
-                .cornerRadius(7)
+            // Icon shows agent-specific icon if running, otherwise terminal icon
+            if let icon = agentInfo?.icon, AIAgentRegistry.isCustomIcon(icon) {
+                Image(icon)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 14, height: 14)
+                    .foregroundStyle(agentInfo?.color.opacity(0.8) ?? palette.accent.opacity(0.8))
+                    .frame(width: 28, height: 28)
+                    .background((agentInfo?.color ?? palette.accent).opacity(0.12))
+                    .cornerRadius(7)
+            } else {
+                Image(systemName: agentInfo?.icon ?? "terminal")
+                    .font(.caption)
+                    .foregroundStyle(agentInfo?.color.opacity(0.8) ?? palette.accent.opacity(0.8))
+                    .frame(width: 28, height: 28)
+                    .background((agentInfo?.color ?? palette.accent).opacity(0.12))
+                    .cornerRadius(7)
+            }
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 8) {
@@ -716,14 +902,26 @@ struct TmuxSessionRow: View {
                         .fontWeight(.medium)
                         .foregroundStyle(.white)
 
-                    if let toolName = aiToolRunning {
-                        Text(toolName)
-                            .font(.system(size: 9, weight: .bold, design: .monospaced))
-                            .foregroundStyle(.purple)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.purple.opacity(0.15))
-                            .cornerRadius(4)
+                    // AI Agent badge with agent-specific color
+                    if let agent = agentInfo {
+                        HStack(spacing: 4) {
+                            if AIAgentRegistry.isCustomIcon(agent.icon) {
+                                Image(agent.icon)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 8, height: 8)
+                            } else {
+                                Image(systemName: agent.icon)
+                                    .font(.system(size: 8))
+                            }
+                            Text(agent.name)
+                        }
+                        .font(.system(size: 9, weight: .bold, design: .monospaced))
+                        .foregroundStyle(agent.color)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(agent.color.opacity(0.15))
+                        .cornerRadius(4)
                     }
 
                     if session.attachedClients > 0 {
@@ -763,19 +961,32 @@ struct TmuxSessionRow: View {
 
 struct TmuxWindowRow: View {
     let window: TmuxWindow
-    var aiToolRunning: String? = nil
+    var aiAgentID: String? = nil  // e.g., "claude", "opencode"
     @State private var settings = TerminalSettings.shared
 
     private var palette: AppThemePalette { settings.appPalette }
+    private var agentInfo: AgentDisplayInfo? { AgentDisplayInfo(agentID: aiAgentID) }
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: aiToolRunning != nil ? "sparkles" : "macwindow")
-                .font(.caption)
-                .foregroundStyle(aiToolRunning != nil ? Color.purple.opacity(0.8) : palette.accent.opacity(0.8))
-                .frame(width: 28, height: 28)
-                .background(aiToolRunning != nil ? Color.purple.opacity(0.12) : palette.accent.opacity(0.12))
-                .cornerRadius(7)
+            // Icon shows agent-specific icon if running, otherwise window icon
+            if let icon = agentInfo?.icon, AIAgentRegistry.isCustomIcon(icon) {
+                Image(icon)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 14, height: 14)
+                    .foregroundStyle(agentInfo?.color.opacity(0.8) ?? palette.accent.opacity(0.8))
+                    .frame(width: 28, height: 28)
+                    .background((agentInfo?.color ?? palette.accent).opacity(0.12))
+                    .cornerRadius(7)
+            } else {
+                Image(systemName: agentInfo?.icon ?? "macwindow")
+                    .font(.caption)
+                    .foregroundStyle(agentInfo?.color.opacity(0.8) ?? palette.accent.opacity(0.8))
+                    .frame(width: 28, height: 28)
+                    .background((agentInfo?.color ?? palette.accent).opacity(0.12))
+                    .cornerRadius(7)
+            }
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 8) {
@@ -784,14 +995,26 @@ struct TmuxWindowRow: View {
                         .fontWeight(.medium)
                         .foregroundStyle(.white)
 
-                    if let toolName = aiToolRunning {
-                        Text(toolName)
-                            .font(.system(size: 9, weight: .bold, design: .monospaced))
-                            .foregroundStyle(.purple)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.purple.opacity(0.15))
-                            .cornerRadius(4)
+                    // AI Agent badge with agent-specific color
+                    if let agent = agentInfo {
+                        HStack(spacing: 4) {
+                            if AIAgentRegistry.isCustomIcon(agent.icon) {
+                                Image(agent.icon)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 8, height: 8)
+                            } else {
+                                Image(systemName: agent.icon)
+                                    .font(.system(size: 8))
+                            }
+                            Text(agent.name)
+                        }
+                        .font(.system(size: 9, weight: .bold, design: .monospaced))
+                        .foregroundStyle(agent.color)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(agent.color.opacity(0.15))
+                        .cornerRadius(4)
                     }
 
                     if window.isActive {
@@ -834,8 +1057,15 @@ struct TabButton: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.caption)
+                if AIAgentRegistry.isCustomIcon(icon) {
+                    Image(icon)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12, height: 12)
+                } else {
+                    Image(systemName: icon)
+                        .font(.caption)
+                }
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(isSelected ? .semibold : .medium)

@@ -7,8 +7,8 @@ struct ClaudeAgent: AIAgentPlugin {
     
     static var agentID: String { "claude" }
     static var displayName: String { "Claude Code" }
-    static var iconName: String { "sparkles" }
-    static var themeColor: String { "purple" }
+    static var iconName: String { "ClaudeIcon" }  // Claude brand icon from @lobehub/icons
+    static var themeColor: String { "orange" }  // Claude brand color
     static var binaryNames: [String] { ["claude"] }
     
     // MARK: - Custom Session Listing

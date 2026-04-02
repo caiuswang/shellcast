@@ -13,6 +13,7 @@ enum AIAgentRegistry {
     /// Add new plugins here to enable them throughout the app
     static let allPlugins: [AIAgentPlugin.Type] = [
         ClaudeAgent.self,
+        KimiAgent.self,
         OpenCodeAgent.self
     ]
     
@@ -31,6 +32,18 @@ enum AIAgentRegistry {
     /// Get icon name for an agent ID
     static func iconName(for agentID: String) -> String {
         plugin(for: agentID)?.iconName ?? "sparkles"
+    }
+    
+    /// Check if the icon is a custom image asset (not an SF Symbol)
+    /// Custom assets are identified by PascalCase naming (e.g., "KimiIcon", "ClaudeIcon")
+    /// SF Symbols are lowercase with dots (e.g., "sparkles", "moon.stars", "brain")
+    static func isCustomIcon(_ iconName: String) -> Bool {
+        // Custom asset names start with uppercase letter (PascalCase)
+        // SF Symbols are all lowercase
+        if let firstChar = iconName.first {
+            return firstChar.isUppercase
+        }
+        return false
     }
     
     /// Get theme color for an agent ID
@@ -118,6 +131,8 @@ enum AIAgentRegistry {
         case "indigo": return .indigo
         case "mint": return .mint
         case "yellow": return .yellow
+        case "gray", "grey": return .gray
+        case "black": return .black
         default: return .purple
         }
     }

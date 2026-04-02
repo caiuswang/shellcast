@@ -37,7 +37,8 @@ ShellCast/
 │   │   ├── Connection/
 │   │   │   └── EditConnectionView.swift # Add/edit connection form (modal sheet)
 │   │   ├── AITools/
-│   │   │   └── ClaudeCodeBrowserView.swift  # Claude Code session browser (grouped by project)
+│   │   │   ├── ClaudeCodeBrowserView.swift  # Claude Code session browser (grouped by project)
+│   │   │   └── AIAgentBrowserView.swift     # Generic multi-agent session browser
 │   │   ├── Tmux/
 │   │   │   └── TmuxBrowserView.swift    # Tabbed browser: Tmux | Claude Tmux | Sessions
 │   │   ├── Terminal/
@@ -56,9 +57,17 @@ ShellCast/
 │   │   │   ├── ClaudeCodeParser+Compatibility.swift  # Legacy wrapper
 │   │   │   ├── Plugins/
 │   │   │   │   ├── ClaudeAgent.swift    # Claude Code plugin
+│   │   │   │   ├── KimiAgent.swift      # Kimi (Moonshot AI) plugin
 │   │   │   │   └── OpenCodeAgent.swift  # OpenCode plugin
-│   │   │   └── README.md                # Plugin development guide
+│   │   │   ├── README.md                # Plugin development guide
+│   │   │   └── COMMON_MISTAKES.md       # Common pitfalls documentation
 │   │   └── KeychainService.swift        # iOS Keychain CRUD for passwords & SSH keys
+│   ├── Resources/
+│   │   └── Assets.xcassets/
+│   │       ├── AppIcon.appiconset/      # App icon
+│   │       ├── ClaudeIcon.imageset/     # Claude Code brand icon (PNG)
+│   │       ├── KimiIcon.imageset/       # Kimi brand icon (PNG)
+│   │       └── OpenCodeIcon.imageset/   # OpenCode brand icon (PNG)
 │   ├── Terminal/
 │   │   └── TerminalBridge.swift         # Pipes TransportSession ↔ SwiftTerm TerminalView
 │   └── Utilities/
@@ -259,9 +268,8 @@ HomeView (root)
   - `#{pane_current_command}` shows `node` not `claude`, so child process inspection is required
 - [x] Launch Claude Code inside new tmux sessions (`tmux new-session -s claude-<ts> 'claude --resume <id>'`)
 - [x] SessionRecord enhanced with `aiToolType` and `aiSessionId` fields
-- [x] ActiveSessionCard shows sparkles icon for Claude Code sessions in history
+- [x] ActiveSessionCard shows agent-specific brand icons (from @lobehub/icons) for AI sessions in history
 - [x] `WindowNavigation` wrapper for correct claude-only filtering when navigating into windows
-- [x] New files: `ClaudeCodeSession.swift`, `ClaudeCodeParser.swift`, `ClaudeCodeBrowserView.swift`
 
 **Milestone: First-class Claude Code session management from phone.** ✅
 
@@ -273,31 +281,33 @@ HomeView (root)
   - Auto-detects installed agents on connection
   - Provides unified interface for all AI agent operations
   - Supports concurrent operations across multiple agents
-- [x] **OpenCode Support**: Added plugin for OpenCode CLI (`opencode`, `oc` binaries)
-  - Session storage in `~/.opencode/sessions/`
-  - Blue theme color, brain icon for visual distinction
-  - Resume with `opencode resume <id>`, new with `opencode start [path]`
+- [x] **Multi-Agent Support**: Added plugins for major AI coding assistants
+  - **Claude Code** (`claude`): Orange theme, brand icon from @lobehub/icons
+  - **Kimi** (`kimi`, `kimi-cli`): Gray theme, Moonshot AI brand icon from @lobehub/icons
+  - **OpenCode** (`opencode`): Blue theme, brand icon from @lobehub/icons
+  - Each plugin provides: binary detection, session listing, resume/new commands, process detection
+- [x] **Brand Icons**: All agents use official brand icons from @lobehub/icons
+  - PNG assets with 1x/2x/3x scales for crisp rendering on iPhone
+  - Icons stored in Asset Catalog (ClaudeIcon, KimiIcon, OpenCodeIcon)
+  - Custom icon support in UI views with `AIAgentRegistry.isCustomIcon()` helper
 - [x] **Generic Views**: Updated UI components to work with any registered agent
   - Dynamic tab picker showing all installed agents
   - Agent-specific session browser with proper theming
   - Multi-agent session list with filter chips
+  - Custom icon rendering for both SF Symbols and image assets
 - [x] **Backward Compatibility**: `ClaudeCodeParser` wrapper maintains existing API
   - Existing code continues to work unchanged
   - Gradual migration path for new features
-- [x] **Documentation**: Added `README.md` explaining how to add new agents
+- [x] **Documentation**: Added `README.md` and `COMMON_MISTAKES.md` explaining how to add new agents
   - Step-by-step guide for implementing `AIAgentPlugin`
   - Example code and protocol reference
-
-**New Files:**
-- `Services/AIAgent/AIAgentPlugin.swift` - Protocol definition
-- `Services/AIAgent/AIAgentRegistry.swift` - Plugin registry
-- `Services/AIAgent/ClaudeCodeParser+Compatibility.swift` - Compatibility wrapper
-- `Services/AIAgent/Plugins/ClaudeAgent.swift` - Claude Code plugin
-- `Services/AIAgent/Plugins/OpenCodeAgent.swift` - OpenCode plugin
-- `Services/AIAgent/README.md` - Developer documentation
-- `Views/AITools/AIAgentBrowserView.swift` - Generic agent browser
+  - Common pitfalls and best practices (short binary names, etc.)
 
 **Milestone: Easy integration of new AI agents via plugin system.** ✅
+
+**Lessons Learned:**
+- **Short binary names cause false matches**: Pattern `oc` matched `Co` in `Kimi Code` due to macOS pgrep's partial string matching. Always use full binary names (4+ characters).
+- **Documented in**: `ShellCast/Services/AIAgent/COMMON_MISTAKES.md`
 
 ## Risks
 

@@ -4,13 +4,14 @@ import Foundation
 
 /// Plugin for OpenCode CLI integration (https://github.com/opencode-ai/opencode)
 /// OpenCode is an open-source AI coding assistant
+/// Note: Also detects 'kimi' (Moonshot AI) as it's commonly aliased or packaged together
 struct OpenCodeAgent: AIAgentPlugin {
     
     static var agentID: String { "opencode" }
     static var displayName: String { "OpenCode" }
-    static var iconName: String { "brain" }
+    static var iconName: String { "OpenCodeIcon" }  // OpenCode brand icon from @lobehub/icons
     static var themeColor: String { "blue" }
-    static var binaryNames: [String] { ["opencode", "oc"] }
+    static var binaryNames: [String] { ["opencode"] }  // Note: removed "oc" as it's too short and matches 'Co' in 'Kimi Code'
     
     // MARK: - Custom Session Listing
     

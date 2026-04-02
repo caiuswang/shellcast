@@ -116,18 +116,24 @@ extension AIAgentPlugin {
     static func detectRunningSessions(over session: SSHSession, tmuxSessions: [TmuxSession]) async throws -> Set<String> {
         guard !tmuxSessions.isEmpty else { return [] }
         
-        let sessionNames = tmuxSessions.map { $0.name }.joined(separator: " ")
-        let pattern = binaryNames.joined(separator: "|")
+        // Build a pattern that matches any of the binary names
+        // Check ALL panes in each session, not just the first one
         let tmuxPath = "/opt/homebrew/bin/tmux"
+        let pattern = binaryNames.joined(separator: "|")
         
+        // Build command that checks all panes in each session
+        // For each session, iterate through all panes and check if any has the agent running
         let command = """
-        for s in \(sessionNames); do \
-        p=$(\(tmuxPath) list-panes -t "$s" -F '#{pane_pid}' 2>/dev/null | head -1); \
-        [ -n "$p" ] && pgrep -P "$p" -E "\(pattern)" >/dev/null 2>&1 && echo "$s"; \
-        done; true
+        \(tmuxPath) list-panes -a -F '#{session_name} #{pane_pid}' 2>/dev/null | while read session pane_pid; do \
+        [ -n "$pane_pid" ] && pgrep -P "$pane_pid" -f "\(pattern)" >/dev/null 2>&1 && echo "$session"; \
+        done | sort -u; true
         """
         
+        debugLog("[AIAGENT] detectRunningSessions command: \(command)")
+        
         let output = try await session.exec(command)
+        debugLog("[AIAGENT] detectRunningSessions output: '\(output)'")
+        
         var result = Set<String>()
         for line in output.split(separator: "\n") {
             let name = line.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -139,16 +145,25 @@ extension AIAgentPlugin {
     }
     
     static func detectRunningWindows(over session: SSHSession, tmuxSessionName: String) async throws -> Set<Int> {
-        let pattern = binaryNames.joined(separator: "|")
         let tmuxPath = "/opt/homebrew/bin/tmux"
+        let pattern = binaryNames.joined(separator: "|")
+        
+        // Use list-panes -a to get all windows, filter by session name
+        // Note: -t session only shows active window, -a shows all but from all sessions
+        // grep pattern: session name at start of line followed by space
+        let escapedSession = tmuxSessionName.replacingOccurrences(of: "'", with: "'\\''")
         
         let command = """
-        \(tmuxPath) list-panes -t '\(shellEscape(tmuxSessionName))' -F '#{window_index} #{pane_pid}' 2>/dev/null | while read widx pid; do \
-        pgrep -P "$pid" -E "\(pattern)" >/dev/null 2>&1 && echo "$widx"; \
-        done; true
+        \(tmuxPath) list-panes -a -F '#{session_name} #{window_index} #{pane_pid}' 2>/dev/null | grep '^\(escapedSession) ' | while read session widx pid; do \
+        pgrep -P "$pid" -f "\(pattern)" >/dev/null 2>&1 && echo "$widx"; \
+        done | sort -u; true
         """
         
+        debugLog("[AIAGENT] detectRunningWindows command: \(command)")
+        
         let output = try await session.exec(command)
+        debugLog("[AIAGENT] detectRunningWindows output: '\(output)'")
+        
         var result = Set<Int>()
         for line in output.split(separator: "\n") {
             if let idx = Int(line.trimmingCharacters(in: .whitespacesAndNewlines)) {

@@ -12,6 +12,7 @@
 		0B6941701BCFCBA7DD665F6E /* normalizer.json in Resources */ = {isa = PBXBuildFile; fileRef = 934D46518265B5BF6A5DEDBF /* normalizer.json */; };
 		125D46A7939E10F7C7AA7113 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECABCA12E098111E14451F77 /* NetworkMonitor.swift */; };
 		1728B69915976FB516D2F266 /* generation_config.json in Resources */ = {isa = PBXBuildFile; fileRef = 32382F16DCDC62F522C6AEAF /* generation_config.json */; };
+		17B0BA9CC4238893CCE8935F /* COMMON_MISTAKES.md in Resources */ = {isa = PBXBuildFile; fileRef = CBEA7B00AF5CBF6B4EE9AF62 /* COMMON_MISTAKES.md */; };
 		2166959FB8276DDF0B2D0415 /* ConnectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D941806241DCF9F5A72299C8 /* ConnectionType.swift */; };
 		2A564E6C7C7292E1311CF8C6 /* AppleSpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0361E85DF9B8851B5F4B10 /* AppleSpeechService.swift */; };
 		2F80963338411CA796CE07D4 /* ShellCastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ED85687617B1A5C79A9437 /* ShellCastApp.swift */; };
@@ -57,6 +58,7 @@
 		CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */; };
 		CE35D5F91B70E3D62EA5BA94 /* ClaudeCodeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B120F558A8FB902812C51510 /* ClaudeCodeSession.swift */; };
 		D1697AFEF68A9BC9D6B098CE /* ConnectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */; };
+		D3AB85A1094F2DBAAFF12B7A /* KimiAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31491B7197A0AC0B555C93CE /* KimiAgent.swift */; };
 		D8E0106A70EA257C8160A171 /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */; };
 		DC781359A20E8E2128EEC1F9 /* TmuxSwitcherOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C23234FBB9E4B647294C2F4 /* TmuxSwitcherOverlay.swift */; };
 		E16D2496E935F03D5D4DE84E /* config.json in Resources */ = {isa = PBXBuildFile; fileRef = B3BD57C2918A942D29425698 /* config.json */; };
@@ -116,6 +118,7 @@
 		23FFFC26F812935ACB1AE1A9 /* WhisperService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperService.swift; sourceTree = "<group>"; };
 		25786352B6CFFDAC177133C9 /* merges.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = merges.txt; sourceTree = "<group>"; };
 		2D70BAEA3CD12FEADCFA387B /* EditConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditConnectionView.swift; sourceTree = "<group>"; };
+		31491B7197A0AC0B555C93CE /* KimiAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KimiAgent.swift; sourceTree = "<group>"; };
 		32382F16DCDC62F522C6AEAF /* generation_config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = generation_config.json; sourceTree = "<group>"; };
 		35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxBrowserView.swift; sourceTree = "<group>"; };
 		36B824D527DCAF8B7F84AA2C /* Connection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Connection.swift; sourceTree = "<group>"; };
@@ -143,7 +146,7 @@
 		A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCard.swift; sourceTree = "<group>"; };
 		A7764FF4377D60000A6D5B61 /* JetBrainsMonoNerdFont-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFont-Regular.ttf"; sourceTree = "<group>"; };
 		AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSession.swift; sourceTree = "<group>"; };
-		AA4F2160E25985C381E065CE /* ShellCast.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ShellCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA4F2160E25985C381E065CE /* ShellCast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShellCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD78C13923FD491B76957AD7 /* TransportSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportSession.swift; sourceTree = "<group>"; };
 		B120F558A8FB902812C51510 /* ClaudeCodeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCodeSession.swift; sourceTree = "<group>"; };
 		B3BD57C2918A942D29425698 /* config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = config.json; sourceTree = "<group>"; };
@@ -151,6 +154,7 @@
 		BC8D9CA8FFF23021EB510289 /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		C2A6BDCA94266B0457F457D2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C698034D08F700820A025B61 /* MoshService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoshService.swift; sourceTree = "<group>"; };
+		CBEA7B00AF5CBF6B4EE9AF62 /* COMMON_MISTAKES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = COMMON_MISTAKES.md; sourceTree = "<group>"; };
 		D35C95DA1DB825ACD9831A6C /* DebugLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLog.swift; sourceTree = "<group>"; };
 		D5124CDBF147AA4F8371D642 /* tokenizer_config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokenizer_config.json; sourceTree = "<group>"; };
 		D886DD705902431727A8D5CE /* AuthMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethod.swift; sourceTree = "<group>"; };
@@ -268,6 +272,7 @@
 			isa = PBXGroup;
 			children = (
 				0B8D2814FE2A15CD08EA0D9A /* ClaudeAgent.swift */,
+				31491B7197A0AC0B555C93CE /* KimiAgent.swift */,
 				56C9A53F29AB4D9292EA773A /* OpenCodeAgent.swift */,
 			);
 			path = Plugins;
@@ -406,6 +411,7 @@
 				9A7D15874D447664BBBD13CF /* AIAgentPlugin.swift */,
 				99621CC1EA794899289542FD /* AIAgentRegistry.swift */,
 				1B47FA5B02A2FE45570D2467 /* ClaudeCodeParser+Compatibility.swift */,
+				CBEA7B00AF5CBF6B4EE9AF62 /* COMMON_MISTAKES.md */,
 				F33C44921975EB3FA086E855 /* README.md */,
 				69F6F9189446A537F2206913 /* Plugins */,
 			);
@@ -502,9 +508,6 @@
 					12DA4D0499E76E0F9E1B0BE8 = {
 						TestTargetID = 2DB9E1E934CFCED0689F5211;
 					};
-					2DB9E1E934CFCED0689F5211 = {
-						DevelopmentTeam = "";
-					};
 				};
 			};
 			buildConfigurationList = 8D26705189B5FE5C872C9531 /* Build configuration list for PBXProject "ShellCast" */;
@@ -539,6 +542,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ADC84C52F3BB8F143772DB75 /* Assets.xcassets in Resources */,
+				17B0BA9CC4238893CCE8935F /* COMMON_MISTAKES.md in Resources */,
 				077428F7CF8D6557B70C1C6A /* JetBrainsMonoNerdFont-Regular.ttf in Resources */,
 				67E85238EDBA27838AA7DF29 /* JetBrainsMonoNerdFontMono-Light.ttf in Resources */,
 				FE4242B53FD97409FD5CD6C4 /* README.md in Resources */,
@@ -590,6 +594,7 @@
 				97A5F4A101629D6161484D69 /* HomeView.swift in Sources */,
 				A9C02678D8863EC499917960 /* KeyboardToolbar.swift in Sources */,
 				3F092D55A30EA060E5CC9281 /* KeychainService.swift in Sources */,
+				D3AB85A1094F2DBAAFF12B7A /* KimiAgent.swift in Sources */,
 				3F8CFE6AB3CC4EB6922780FA /* MoshService.swift in Sources */,
 				125D46A7939E10F7C7AA7113 /* NetworkMonitor.swift in Sources */,
 				A906674E5535C999E976ECF3 /* OpenCodeAgent.swift in Sources */,
@@ -737,7 +742,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = RR3B8A7J66;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Frameworks\"",
@@ -860,7 +865,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = RR3B8A7J66;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Frameworks\"",

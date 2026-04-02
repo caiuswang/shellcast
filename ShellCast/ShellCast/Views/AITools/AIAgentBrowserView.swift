@@ -113,9 +113,17 @@ struct AIAgentBrowserView: View {
                 Circle()
                     .fill(agentColor.opacity(0.08))
                     .frame(width: 72, height: 72)
-                Image(systemName: iconName)
-                    .font(.system(size: 28))
-                    .foregroundStyle(agentColor.opacity(0.4))
+                if AIAgentRegistry.isCustomIcon(iconName) {
+                    Image(iconName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 28, height: 28)
+                        .foregroundStyle(agentColor.opacity(0.4))
+                } else {
+                    Image(systemName: iconName)
+                        .font(.system(size: 28))
+                        .foregroundStyle(agentColor.opacity(0.4))
+                }
             }
             
             Text("No \(displayName) Sessions")
@@ -297,8 +305,16 @@ struct AgentChip: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 6) {
-                Image(systemName: AIAgentRegistry.iconName(for: agentID))
-                    .font(.caption)
+                let iconName = AIAgentRegistry.iconName(for: agentID)
+                if AIAgentRegistry.isCustomIcon(iconName) {
+                    Image(iconName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12, height: 12)
+                } else {
+                    Image(systemName: iconName)
+                        .font(.caption)
+                }
                 Text(AIAgentRegistry.displayName(for: agentID))
                     .font(.subheadline)
                     .fontWeight(isSelected ? .semibold : .medium)
@@ -332,12 +348,24 @@ struct MultiAgentSessionRow: View {
     var body: some View {
         HStack(spacing: 12) {
             // Agent icon
-            Image(systemName: AIAgentRegistry.iconName(for: session.agentID))
-                .font(.caption)
-                .foregroundStyle(agentColor)
-                .frame(width: 28, height: 28)
-                .background(agentColor.opacity(0.12))
-                .cornerRadius(7)
+            let iconName = AIAgentRegistry.iconName(for: session.agentID)
+            if AIAgentRegistry.isCustomIcon(iconName) {
+                Image(iconName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 14, height: 14)
+                    .foregroundStyle(agentColor)
+                    .frame(width: 28, height: 28)
+                    .background(agentColor.opacity(0.12))
+                    .cornerRadius(7)
+            } else {
+                Image(systemName: iconName)
+                    .font(.caption)
+                    .foregroundStyle(agentColor)
+                    .frame(width: 28, height: 28)
+                    .background(agentColor.opacity(0.12))
+                    .cornerRadius(7)
+            }
             
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 8) {

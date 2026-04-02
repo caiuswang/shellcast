@@ -39,9 +39,17 @@ struct ActiveSessionCard: View {
                     if let toolType = session.aiToolType {
                         let iconName = AIAgentRegistry.iconName(for: toolType)
                         let themeColor = AIAgentRegistry.themeColor(for: toolType)
-                        Image(systemName: iconName)
-                            .font(.system(size: 10))
-                            .foregroundStyle(themeColor)
+                        if AIAgentRegistry.isCustomIcon(iconName) {
+                            Image(iconName)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 10, height: 10)
+                                .foregroundStyle(themeColor)
+                        } else {
+                            Image(systemName: iconName)
+                                .font(.system(size: 10))
+                                .foregroundStyle(themeColor)
+                        }
                     }
                     let displayName: String = {
                         if let toolType = session.aiToolType {
