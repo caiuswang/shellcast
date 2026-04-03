@@ -69,37 +69,46 @@ struct AIAgentSession: Identifiable {
 // MARK: - Default Implementations
 
 extension AIAgentPlugin {
-    
+
     static var commonPaths: [String] {
         [
             "/opt/homebrew/bin",
             "/usr/local/bin",
             "/usr/bin",
-            "$HOME/.local/bin"
+            "$HOME/.local/bin",
+            "/snap/bin",
+            "/home/linuxbrew/.linuxbrew/bin"
         ]
     }
-    
+
     static func isInstalled(over session: SSHSession) async throws -> Bool {
-        let pathChecks = commonPaths.map { "\($0)/\(binaryNames.first ?? agentID)" }
-        let whichChecks = binaryNames.map { "which \($0) >/dev/null 2>&1 && echo yes" }
-        
-        let allChecks = pathChecks.map { "test -x \($0) && echo yes" } + whichChecks
+        let platform = try await RemotePlatform.detect(over: session)
+        let paths = platform.commonBinaryPaths
+        let binary = binaryNames.first ?? agentID
+        let pathChecks = paths.map { "test -x \($0)/\(binary) && echo yes" }
+        // Use `command -v` (POSIX) instead of `which` for portability
+        let commandVChecks = binaryNames.map { "command -v \($0) >/dev/null 2>&1 && echo yes" }
+
+        let allChecks = pathChecks + commandVChecks
         let command = allChecks.joined(separator: " || ") + " || echo no"
-        
+
         let output = try await session.exec(command)
         return output.trimmingCharacters(in: .whitespacesAndNewlines).contains("yes")
     }
-    
+
     static func resolveBinaryPath(over session: SSHSession) async throws -> String {
-        let pathChecks = commonPaths.map { "\($0)/\(binaryNames.first ?? agentID)" }
-        let conditions = pathChecks.map { "test -x \($0) && echo \($0)" }
-        let whichCheck = "which \(binaryNames.first ?? agentID) 2>/dev/null"
-        
-        let command = conditions.joined(separator: " || ") + " || " + whichCheck + " || echo \(binaryNames.first ?? agentID)"
-        
+        let platform = try await RemotePlatform.detect(over: session)
+        let paths = platform.commonBinaryPaths
+        let binary = binaryNames.first ?? agentID
+        let conditions = paths.map { "test -x \($0)/\(binary) && echo \($0)/\(binary)" }
+        // Use `command -v` (POSIX) instead of `which` for portability
+        let commandVCheck = "command -v \(binary) 2>/dev/null"
+
+        let command = conditions.joined(separator: " || ") + " || " + commandVCheck + " || echo \(binary)"
+
         let output = try await session.exec(command)
         let path = output.trimmingCharacters(in: .whitespacesAndNewlines)
-        return path.isEmpty ? (binaryNames.first ?? agentID) : path
+        return path.isEmpty ? binary : path
     }
     
     static func resumeCommand(sessionId: String, binaryPath: String) -> String {
@@ -115,25 +124,23 @@ extension AIAgentPlugin {
     
     static func detectRunningSessions(over session: SSHSession, tmuxSessions: [TmuxSession]) async throws -> Set<String> {
         guard !tmuxSessions.isEmpty else { return [] }
-        
-        // Build a pattern that matches any of the binary names
-        // Check ALL panes in each session, not just the first one
-        let tmuxPath = "/opt/homebrew/bin/tmux"
+
+        let platform = try await RemotePlatform.detect(over: session)
         let pattern = binaryNames.joined(separator: "|")
-        
-        // Build command that checks all panes in each session
-        // For each session, iterate through all panes and check if any has the agent running
+
+        // Resolve tmux path dynamically instead of hardcoding /opt/homebrew/bin/tmux
         let command = """
-        \(tmuxPath) list-panes -a -F '#{session_name} #{pane_pid}' 2>/dev/null | while read session pane_pid; do \
-        [ -n "$pane_pid" ] && pgrep -P "$pane_pid" -f "\(pattern)" >/dev/null 2>&1 && echo "$session"; \
+        TMUX_BIN=$(command -v tmux 2>/dev/null || echo tmux); \
+        $TMUX_BIN list-panes -a -F '#{session_name} #{pane_pid}' 2>/dev/null | while read session pane_pid; do \
+        [ -n "$pane_pid" ] && \(platform.pgrepChildCommand(parentPid: "$pane_pid", pattern: pattern)) && echo "$session"; \
         done | sort -u; true
         """
-        
+
         debugLog("[AIAGENT] detectRunningSessions command: \(command)")
-        
+
         let output = try await session.exec(command)
         debugLog("[AIAGENT] detectRunningSessions output: '\(output)'")
-        
+
         var result = Set<String>()
         for line in output.split(separator: "\n") {
             let name = line.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -143,27 +150,25 @@ extension AIAgentPlugin {
         }
         return result
     }
-    
+
     static func detectRunningWindows(over session: SSHSession, tmuxSessionName: String) async throws -> Set<Int> {
-        let tmuxPath = "/opt/homebrew/bin/tmux"
+        let platform = try await RemotePlatform.detect(over: session)
         let pattern = binaryNames.joined(separator: "|")
-        
-        // Use list-panes -a to get all windows, filter by session name
-        // Note: -t session only shows active window, -a shows all but from all sessions
-        // grep pattern: session name at start of line followed by space
         let escapedSession = tmuxSessionName.replacingOccurrences(of: "'", with: "'\\''")
-        
+
+        // Resolve tmux path dynamically instead of hardcoding /opt/homebrew/bin/tmux
         let command = """
-        \(tmuxPath) list-panes -a -F '#{session_name} #{window_index} #{pane_pid}' 2>/dev/null | grep '^\(escapedSession) ' | while read session widx pid; do \
-        pgrep -P "$pid" -f "\(pattern)" >/dev/null 2>&1 && echo "$widx"; \
+        TMUX_BIN=$(command -v tmux 2>/dev/null || echo tmux); \
+        $TMUX_BIN list-panes -a -F '#{session_name} #{window_index} #{pane_pid}' 2>/dev/null | grep '^\(escapedSession) ' | while read session widx pid; do \
+        \(platform.pgrepChildCommand(parentPid: "$pid", pattern: pattern)) && echo "$widx"; \
         done | sort -u; true
         """
-        
+
         debugLog("[AIAGENT] detectRunningWindows command: \(command)")
-        
+
         let output = try await session.exec(command)
         debugLog("[AIAGENT] detectRunningWindows output: '\(output)'")
-        
+
         var result = Set<Int>()
         for line in output.split(separator: "\n") {
             if let idx = Int(line.trimmingCharacters(in: .whitespacesAndNewlines)) {

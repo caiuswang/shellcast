@@ -4,15 +4,45 @@ This directory contains a plugin-based architecture for integrating AI coding as
 
 > **Important:** Read [COMMON_MISTAKES.md](./COMMON_MISTAKES.md) before developing new plugins!
 
+## Remote Server Prerequisites
+
+AI agent detection runs shell commands over SSH on the remote server. The following tools must be available:
+
+| Tool | Required For | Notes |
+|------|-------------|-------|
+| `tmux` | Session/window listing, process detection | Must be in `$PATH` |
+| `uname` | Platform detection (macOS vs Linux) | Available on virtually all Unix systems |
+| `find` | Discovering agent session files | Standard POSIX utility |
+| `stat` | Reading file modification timestamps | macOS (`-f`) and Linux (`-c`) formats are auto-detected |
+| `grep`, `sed`, `awk`, `cut`, `sort` | Parsing session metadata | Standard POSIX utilities |
+| `pgrep` | Detecting running agent processes in tmux panes | Falls back to `ps + awk` if unavailable |
+
+### Supported Server Platforms
+
+| Platform | Status | Notes |
+|----------|--------|-------|
+| **macOS** (ARM/Intel) | Fully supported | Homebrew and system paths checked |
+| **Linux** (x86_64/ARM) | Fully supported | Standard paths, snap, and linuxbrew checked |
+| **Windows (WSL)** | Should work | Detected as Linux; WSL must have the tools above |
+| **Windows (native)** | Not supported | No native Windows SSH server support planned |
+
+### Binary Search Paths
+
+The plugin checks these paths (platform-dependent) plus `$PATH` via `command -v`:
+
+- **macOS**: `/opt/homebrew/bin`, `/usr/local/bin`, `/usr/bin`, `$HOME/.local/bin`
+- **Linux**: `/usr/local/bin`, `/usr/bin`, `$HOME/.local/bin`, `/snap/bin`, `/home/linuxbrew/.linuxbrew/bin`
+
 ## Architecture
 
 ```
 AIAgent/
 ├── AIAgentPlugin.swift          # Protocol definition + default implementations
 ├── AIAgentRegistry.swift        # Central registry for all plugins
+├── RemotePlatform.swift         # Remote OS detection + platform-aware commands
 ├── ClaudeCodeParser+Compatibility.swift  # Backward compatibility wrapper
 ├── README.md                    # This file
-├── COMMON_MISTAKES.md           # Pitfalls and lessons learned ⭐
+├── COMMON_MISTAKES.md           # Pitfalls and lessons learned
 └── Plugins/
     ├── ClaudeAgent.swift        # Claude Code plugin
     ├── KimiAgent.swift          # Kimi (Moonshot AI) plugin

@@ -14,10 +14,11 @@ struct ClaudeAgent: AIAgentPlugin {
     // MARK: - Custom Session Listing
     
     static func listSessions(over session: SSHSession) async throws -> [AIAgentSession] {
-        // Single command: find files, get timestamps, extract first user message as summary
+        let platform = try await RemotePlatform.detect(over: session)
+        // Use platform-aware `stat` format: macOS uses -f '%m %N', Linux uses -c '%Y %n'
         let command = """
-        for f in $(find ~/.claude/projects -maxdepth 2 -name '*.jsonl' ! -path '*/subagents/*' -exec stat -f '%m %N' {} \\; 2>/dev/null | sort -rn | head -20 | awk '{print $2}'); do \
-        ts=$(stat -f '%m' "$f" 2>/dev/null); \
+        for f in $(find ~/.claude/projects -maxdepth 2 -name '*.jsonl' ! -path '*/subagents/*' -exec \(platform.statModTimeAndPath) {} \\; 2>/dev/null | sort -rn | head -20 | awk '{print $2}'); do \
+        ts=$(\(platform.statModTime) "$f" 2>/dev/null); \
         msg=$(grep -m1 '"type":"user"' "$f" 2>/dev/null | head -1 | sed 's/.*"content":"\\([^"]*\\)".*/\\1/' | cut -c1-80); \
         echo "${ts}|||${f}|||${msg}"; \
         done; true

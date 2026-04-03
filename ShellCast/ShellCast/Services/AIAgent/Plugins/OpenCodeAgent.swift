@@ -16,11 +16,12 @@ struct OpenCodeAgent: AIAgentPlugin {
     // MARK: - Custom Session Listing
     
     static func listSessions(over session: SSHSession) async throws -> [AIAgentSession] {
+        let platform = try await RemotePlatform.detect(over: session)
         // OpenCode stores sessions in ~/.opencode/sessions/
-        // Each session is a JSON file with metadata
+        // Use platform-aware `stat` format: macOS uses -f '%m %N', Linux uses -c '%Y %n'
         let command = """
-        for f in $(find ~/.opencode/sessions -maxdepth 1 -name '*.json' -exec stat -f '%m %N' {} \\; 2>/dev/null | sort -rn | head -20 | awk '{print $2}'); do \
-        ts=$(stat -f '%m' "$f" 2>/dev/null); \
+        for f in $(find ~/.opencode/sessions -maxdepth 1 -name '*.json' -exec \(platform.statModTimeAndPath) {} \\; 2>/dev/null | sort -rn | head -20 | awk '{print $2}'); do \
+        ts=$(\(platform.statModTime) "$f" 2>/dev/null); \
         msg=$(cat "$f" 2>/dev/null | grep -o '"last_message"[^}]*' | head -1 | sed 's/.*"content":"\\([^"]*\\)".*/\\1/' | cut -c1-80); \
         proj=$(cat "$f" 2>/dev/null | grep -o '"project_path"[^,]*' | head -1 | sed 's/.*":"\\([^"]*\\)".*/\\1/'); \
         sid=$(basename "$f" .json); \

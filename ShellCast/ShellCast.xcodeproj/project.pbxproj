@@ -36,6 +36,7 @@
 		82118C48FF254F1FD174CF61 /* EditConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D70BAEA3CD12FEADCFA387B /* EditConnectionView.swift */; };
 		8F056A1D8350A397A7F53E7D /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CC941FEE664D2431303055E /* libresolv.tbd */; };
 		90B835EE68B26BAC80928BB0 /* AIAgentPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7D15874D447664BBBD13CF /* AIAgentPlugin.swift */; };
+		A1B2C3D4E5F60001AABB0001 /* RemotePlatform.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001AABB0002 /* RemotePlatform.swift */; };
 		95A11B7D19067799A640C7C4 /* tokenizer_config.json in Resources */ = {isa = PBXBuildFile; fileRef = D5124CDBF147AA4F8371D642 /* tokenizer_config.json */; };
 		971CCCD754C7A42CC74540AC /* AIAgentRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99621CC1EA794899289542FD /* AIAgentRegistry.swift */; };
 		977FC8F659DBF5F4FBD5F883 /* TerminalBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88ACE22C2518FC93E029EE41 /* TerminalBridge.swift */; };
@@ -142,6 +143,7 @@
 		9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFontMono-Light.ttf"; sourceTree = "<group>"; };
 		99621CC1EA794899289542FD /* AIAgentRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAgentRegistry.swift; sourceTree = "<group>"; };
 		9A7D15874D447664BBBD13CF /* AIAgentPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAgentPlugin.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60001AABB0002 /* RemotePlatform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemotePlatform.swift; sourceTree = "<group>"; };
 		9C23234FBB9E4B647294C2F4 /* TmuxSwitcherOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSwitcherOverlay.swift; sourceTree = "<group>"; };
 		A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCard.swift; sourceTree = "<group>"; };
 		A7764FF4377D60000A6D5B61 /* JetBrainsMonoNerdFont-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFont-Regular.ttf"; sourceTree = "<group>"; };
@@ -410,6 +412,7 @@
 			children = (
 				9A7D15874D447664BBBD13CF /* AIAgentPlugin.swift */,
 				99621CC1EA794899289542FD /* AIAgentRegistry.swift */,
+				A1B2C3D4E5F60001AABB0002 /* RemotePlatform.swift */,
 				1B47FA5B02A2FE45570D2467 /* ClaudeCodeParser+Compatibility.swift */,
 				CBEA7B00AF5CBF6B4EE9AF62 /* COMMON_MISTAKES.md */,
 				F33C44921975EB3FA086E855 /* README.md */,
@@ -578,6 +581,7 @@
 				35367EBABEEB9500BBE49FB6 /* AIAgentBrowserView.swift in Sources */,
 				90B835EE68B26BAC80928BB0 /* AIAgentPlugin.swift in Sources */,
 				971CCCD754C7A42CC74540AC /* AIAgentRegistry.swift in Sources */,
+				A1B2C3D4E5F60001AABB0001 /* RemotePlatform.swift in Sources */,
 				2FA6DDCBC8ED256F995110F1 /* ActiveSessionCard.swift in Sources */,
 				2A564E6C7C7292E1311CF8C6 /* AppleSpeechService.swift in Sources */,
 				7563E1D7A8085874F68DA607 /* AuthMethod.swift in Sources */,
