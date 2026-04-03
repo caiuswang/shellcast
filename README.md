@@ -1,5 +1,7 @@
 # ShellCast
 
+**Website:** [shellcast.ccday.top](https://shellcast.ccday.top)
+
 A native iOS/iPadOS terminal app for managing remote sessions from your phone. Built for the use case of operating terminal sessions (e.g. Claude Code) on your laptop while away from it — grant permissions, send commands, check output, all from your pocket.
 
 ## How It Works
