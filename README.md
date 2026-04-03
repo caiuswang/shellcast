@@ -25,20 +25,17 @@ iPhone/iPad  →  Tailscale VPN  →  SSH  →  tmux attach  →  Full Terminal
 
 ### Implemented
 
-- **SSH Connections** — password auth, Tailscale SSH (zero-password), saved connections with Keychain storage
+- **SSH Connections** — password auth, SSH key authentication, Tailscale SSH (zero-password), saved connections with Keychain storage
+- **Mosh Protocol** — survive network switches and long sleep without reconnecting
 - **Tmux Integration** — list sessions, attach to existing, create new, or connect without tmux
 - **Full Terminal Emulator** — xterm-256color via SwiftTerm with proper ANSI rendering
 - **Keyboard Toolbar** — Ctrl, Alt, Esc, Tab, arrow keys, PgUp/PgDn, and common symbols (`| / \ ~ - _`) above the keyboard
 - **Auto-Reconnect** — detects connection loss on returning from background, automatically reconnects SSH and reattaches tmux session
 - **Voice Input** — dictate commands via WhisperKit (on-device) or Apple Speech Recognition, with multiline preview before sending
+- **AI Agent Detection** — plugin architecture to detect and display AI agents (Claude, OpenCode, Kimi) with brand icons
+- **Session Snapshots** — terminal preview thumbnails on the home screen
 - **Settings** — theme (dark/light/custom), font selection (SF Mono, Menlo, JetBrains Mono Nerd Font), font size, cursor mode/blink, scrollback buffer size
 - **Background Resilience** — extends background execution to keep SSH alive during brief phone locks
-
-### Planned
-
-- **Mosh Protocol** — survive network switches and long sleep without reconnecting
-- **SSH Key Authentication** — key file import and management
-- **Session Thumbnails** — terminal preview snapshots on the home screen
 
 ## Requirements
 
