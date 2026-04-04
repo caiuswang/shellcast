@@ -170,36 +170,54 @@ struct TmuxBrowserView: View {
     
     private func loadAIAgents() async {
         debugLog("[AI-AGENTS] Loading AI agents for \(initialSessions.count) tmux sessions")
-        
-        // Detect installed agents
+
+        // Step 1: Detect installed agents (must complete first)
         installedAgents = await AIAgentRegistry.detectInstalledAgents(over: transport)
         debugLog("[AI-AGENTS] Installed agents: \(installedAgents.map { $0.agentID })")
-        
-        // Load binary paths for all agents
-        await withTaskGroup(of: (String, String).self) { group in
-            for plugin in installedAgents {
-                group.addTask {
-                    let path = (try? await plugin.resolveBinaryPath(over: transport)) ?? plugin.binaryNames.first ?? plugin.agentID
-                    return (plugin.agentID, path)
+
+        guard !installedAgents.isEmpty else {
+            loadingAgents = false
+            return
+        }
+
+        // Step 2: Run binary paths, session listing, and running detection in parallel
+        // These are all independent of each other.
+        await withTaskGroup(of: Void.self) { group in
+            // Binary paths
+            group.addTask { @MainActor in
+                var paths: [String: String] = [:]
+                await withTaskGroup(of: (String, String).self) { inner in
+                    for plugin in installedAgents {
+                        inner.addTask {
+                            let path = (try? await plugin.resolveBinaryPath(over: transport)) ?? plugin.binaryNames.first ?? plugin.agentID
+                            return (plugin.agentID, path)
+                        }
+                    }
+                    for await (agentID, path) in inner {
+                        paths[agentID] = path
+                    }
                 }
+                agentBinaryPaths = paths
             }
-            
-            for await (agentID, path) in group {
-                agentBinaryPaths[agentID] = path
+
+            // List resumable sessions (pass installed agents to skip redundant isInstalled checks)
+            group.addTask { @MainActor in
+                let sessions = await AIAgentRegistry.listAllSessions(over: transport, installedAgents: installedAgents)
+                debugLog("[AI-AGENTS] Total sessions from all agents: \(sessions.count)")
+                agentSessions = sessions
+            }
+
+            // Detect running sessions
+            group.addTask { @MainActor in
+                let running = await AIAgentRegistry.detectAllRunningSessions(
+                    over: transport,
+                    tmuxSessions: initialSessions
+                )
+                debugLog("[AI-AGENTS] Running sessions by agent: \(running)")
+                runningSessionsByAgent = running
             }
         }
-        
-        // Load sessions from all agents
-        agentSessions = await AIAgentRegistry.listAllSessions(over: transport)
-        debugLog("[AI-AGENTS] Total sessions from all agents: \(agentSessions.count)")
-        
-        // Detect running sessions
-        runningSessionsByAgent = await AIAgentRegistry.detectAllRunningSessions(
-            over: transport,
-            tmuxSessions: initialSessions
-        )
-        debugLog("[AI-AGENTS] Running sessions by agent: \(runningSessionsByAgent)")
-        
+
         loadingAgents = false
     }
     
@@ -404,8 +422,21 @@ struct TmuxBrowserView: View {
         let agentColor = colorFromName(agent.themeColor)
         let binaryPath = agentBinaryPaths[agent.agentID] ?? agent.binaryNames.first ?? agent.agentID
         let resumableSessions = agentSessions.filter { $0.agentID == agent.agentID }
-        
+
         VStack(alignment: .leading, spacing: 20) {
+            // Loading indicator
+            if loadingAgents {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .tint(agentColor)
+                    Text("Detecting \(agent.displayName) sessions...")
+                        .font(.subheadline)
+                        .foregroundStyle(palette.secondaryText)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
+            }
+
             // AI Tmux Sessions
             if !runningTmuxSessions.isEmpty {
                 VStack(spacing: 0) {
@@ -430,7 +461,7 @@ struct TmuxBrowserView: View {
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(palette.border, lineWidth: 0.5)
                 )
-            } else {
+            } else if !loadingAgents {
                 VStack(spacing: 16) {
                     ZStack {
                         Circle()

@@ -97,23 +97,25 @@ enum AIAgentRegistry {
     
     /// Get sessions from all installed agents
     static func listAllSessions(over session: SSHSession) async -> [AIAgentSession] {
+        await listAllSessions(over: session, installedAgents: allPlugins)
+    }
+
+    /// Get sessions from a known set of installed agents (skips redundant isInstalled checks)
+    static func listAllSessions(over session: SSHSession, installedAgents: [AIAgentPlugin.Type]) async -> [AIAgentSession] {
         var allSessions: [AIAgentSession] = []
-        
+
         await withTaskGroup(of: [AIAgentSession].self) { group in
-            for plugin in allPlugins {
+            for plugin in installedAgents {
                 group.addTask {
-                    if let installed = try? await plugin.isInstalled(over: session), installed {
-                        return (try? await plugin.listSessions(over: session)) ?? []
-                    }
-                    return []
+                    return (try? await plugin.listSessions(over: session)) ?? []
                 }
             }
-            
+
             for await sessions in group {
                 allSessions.append(contentsOf: sessions)
             }
         }
-        
+
         return allSessions.sorted { ($0.lastModified ?? .distantPast) > ($1.lastModified ?? .distantPast) }
     }
     
