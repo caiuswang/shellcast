@@ -32,6 +32,7 @@ iPhone/iPad  →  Tailscale VPN  →  SSH  →  tmux attach  →  Full Terminal
 - **Keyboard Toolbar** — Ctrl, Alt, Esc, Tab, arrow keys, PgUp/PgDn, and common symbols (`| / \ ~ - _`) above the keyboard
 - **Auto-Reconnect** — detects connection loss on returning from background, automatically reconnects SSH and reattaches tmux session
 - **Voice Input** — dictate commands via WhisperKit (on-device) or Apple Speech Recognition, with multiline preview before sending
+- **Image Paste** — paste images from iOS clipboard into Claude Code sessions with native `[image1]` support; configurable quality (Low/Medium/High) for data saving
 - **AI Agent Detection** — plugin architecture to detect and display AI agents (Claude, OpenCode, Kimi) with brand icons
 - **Session Snapshots** — terminal preview thumbnails on the home screen
 - **Settings** — theme (dark/light/custom), font selection (SF Mono, Menlo, JetBrains Mono Nerd Font), font size, cursor mode/blink, scrollback buffer size
