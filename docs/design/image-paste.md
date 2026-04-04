@@ -142,8 +142,16 @@ Compression strategy: Try PNG first (lossless). If PNG exceeds `maxBytes`, fall 
 | `Views/Settings/SettingsView.swift` | Quality picker UI |
 | `ShellCastTests/ImagePasteServiceTests.swift` | Unit tests for image preparation |
 
+## macOS Requirements
+
+- **Remote Login (SSH) enabled** — System Settings > General > Sharing > Remote Login
+- **Active GUI session** — A user must be logged in to the Mac desktop. The clipboard belongs to the GUI session; `osascript` cannot access it from the login screen
+- **Mac must be awake** — If the lid is closed and the Mac sleeps, the GUI session becomes inaccessible. Use `caffeinate` or energy saver settings to prevent sleep
+- **No extra config needed** — `osascript` is built-in, no Automation permissions required for `set the clipboard`
+
 ## Limitations
 
-- **macOS only** — `osascript` is macOS-specific. Linux remotes would need a different clipboard mechanism (e.g., `xclip`), not currently implemented.
-- **Mosh requires separate SSH** — Mosh runs over UDP and doesn't support exec channels. A separate SSH connection is needed for file transfer.
-- **Clipboard permission** — iOS may show a paste permission prompt on first `UIPasteboard.general.image` access.
+- **macOS only** — `osascript` is macOS-specific. Linux remotes would need a different clipboard mechanism (e.g., `xclip`), not currently implemented
+- **GUI session required** — The remote Mac must have an active desktop session for clipboard access
+- **Mosh requires separate SSH** — Mosh runs over UDP and doesn't support exec channels. A separate SSH connection is needed for file transfer
+- **Clipboard permission** — iOS may show a paste permission prompt on first `UIPasteboard.general.image` access
