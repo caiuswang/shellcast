@@ -91,7 +91,7 @@ enum RemotePlatform: String {
         // Use ps + awk to walk the entire descendant tree from parentPid
         // and check if any descendant's command line matches the pattern.
         // Must be single-line to work inside backslash-continued while loops.
-        // IGNORECASE makes the pattern match case-insensitive (e.g., "kimi" matches "Kimi Code")
-        return "(ps -eo pid=,ppid=,args= 2>/dev/null | awk -v root=\"\(parentPid)\" -v pat=\"\(pattern)\" 'BEGIN{IGNORECASE=1} { pid=$1; ppid=$2; p[pid]=ppid; a[pid]=$0 } END { for (pid in p) { cur=pid; d=0; while (cur!=\"\" && cur+0!=0 && cur!=root && d<10) { cur=p[cur]; d++ } if (cur==root && pid!=root && a[pid]~pat) exit 0 } exit 1 }')"
+        // Use tolower() for case-insensitive matching (works on both BSD awk and gawk)
+        return "(ps -eo pid=,ppid=,args= 2>/dev/null | awk -v root=\"\(parentPid)\" -v pat=\"\(pattern)\" '{ pid=$1; ppid=$2; p[pid]=ppid; a[pid]=tolower($0) } END { for (pid in p) { cur=pid; d=0; while (cur!=\"\" && cur+0!=0 && cur!=root && d<10) { cur=p[cur]; d++ } if (cur==root && pid!=root && a[pid]~pat) exit 0 } exit 1 }')"
     }
 }
