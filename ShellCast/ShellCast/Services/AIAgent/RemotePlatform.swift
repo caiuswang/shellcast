@@ -84,12 +84,13 @@ enum RemotePlatform: String {
         "command -v tmux 2>/dev/null || echo tmux"
     }
 
-    /// pgrep command to find child processes matching a pattern.
-    /// Uses `-P` (parent PID) which works on both macOS and Linux.
-    /// Falls back to ps-based detection if pgrep is unavailable.
+    /// Check if any descendant process of parentPid matches the pattern.
+    /// Walks the full process tree (not just direct children) because the agent
+    /// binary may be a grandchild or deeper (e.g., fish -> subshell -> node/claude).
     func pgrepChildCommand(parentPid: String, pattern: String) -> String {
-        // Try pgrep first, fall back to ps + grep for systems without pgrep
-        return "(pgrep -P \"\(parentPid)\" -f \"\(pattern)\" >/dev/null 2>&1 || " +
-            "ps -o pid=,ppid=,comm= 2>/dev/null | awk '$2 == \"\(parentPid)\" && /\(pattern)/' | grep -q .)"
+        // Use ps + awk to walk the entire descendant tree from parentPid
+        // and check if any descendant's command line matches the pattern.
+        // Must be single-line to work inside backslash-continued while loops.
+        return "(ps -eo pid=,ppid=,args= 2>/dev/null | awk -v root=\"\(parentPid)\" -v pat=\"\(pattern)\" '{ pid=$1; ppid=$2; p[pid]=ppid; a[pid]=$0 } END { for (pid in p) { cur=pid; d=0; while (cur!=\"\" && cur+0!=0 && cur!=root && d<10) { cur=p[cur]; d++ } if (cur==root && pid!=root && a[pid]~pat) exit 0 } exit 1 }')"
     }
 }
