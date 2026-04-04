@@ -228,6 +228,12 @@ struct TerminalContainerView: View {
         .toolbar(.hidden, for: .navigationBar)
         .preferredColorScheme(.dark)
         .onAppear {
+            // Set exec session — SSH uses the transport directly, Mosh creates one eagerly
+            if let ssh = transport as? SSHSession {
+                bridge.execSession = ssh
+            } else if !isSSH {
+                connectExecSessionForMosh()
+            }
             if let sessionRecord {
                 connectionManager.registerBridge(bridge, for: sessionRecord.id)
             }
@@ -255,17 +261,27 @@ struct TerminalContainerView: View {
             if let exec = moshExecSession {
                 Task { await exec.disconnect() }
                 moshExecSession = nil
+                bridge.execSession = nil
+            }
+        }
+        .onChange(of: bridge.imagePasteRequested) { _, requested in
+            if requested {
+                bridge.imagePasteRequested = false
+                performImagePaste()
+            }
+        }
+        .onChange(of: bridge.toastMessage) { _, message in
+            if let message {
+                showToast(message)
+                bridge.toastMessage = nil
             }
         }
         .onChange(of: bridge.showTmuxSwitcher) { _, show in
             if show && !isSSH && moshExecSession == nil {
                 // Mosh needs a temporary SSH connection to list tmux sessions
                 connectExecSessionForMosh()
-            } else if !show && moshExecSession != nil {
-                // Close the exec session when switcher closes — only needed briefly
-                Task { await moshExecSession?.disconnect() }
-                moshExecSession = nil
             }
+            // Keep exec session alive for reuse (image paste, future tmux switches)
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .background || newPhase == .inactive {
@@ -360,11 +376,76 @@ struct TerminalContainerView: View {
                 }
                 let session = try await connectionManager.connectExecSession(connection)
                 moshExecSession = session
+                bridge.execSession = session
+                debugLog("[MOSH] Exec session created successfully")
             } catch {
-                debugLog("[TMUX] Failed to create exec session for Mosh: \(error)")
+                debugLog("[MOSH] Failed to create exec session: \(error)")
                 bridge.showTmuxSwitcher = false
             }
         }
+    }
+
+    /// Perform image paste: get exec session, transfer image, set clipboard, send Ctrl+V.
+    private func performImagePaste() {
+        guard let image = UIPasteboard.general.image else {
+            showToast("No image in clipboard")
+            return
+        }
+        bridge.keyboardToolbar?.setImageUploading(true)
+
+        Task {
+            do {
+                // Get exec session — prefer existing, create if needed
+                var session = sshTransportForExec
+                if let s = session, !s.isConnected { session = nil }
+
+                if session == nil {
+                    showToast("Connecting...")
+                    session = try await createExecSessionForMosh()
+                }
+
+                guard let session else {
+                    showToast("No SSH session available")
+                    bridge.keyboardToolbar?.setImageUploading(false)
+                    return
+                }
+
+                try await ImagePasteService.transferAndSetClipboard(image: image, session: session)
+                // Send Ctrl+V (0x16) to trigger Claude Code's native clipboard read
+                try? await transport.send(Data([0x16]))
+                debugLog("[IMAGE] Ctrl+V sent to terminal")
+                showToast("Image pasted")
+            } catch {
+                debugLog("[IMAGE] Image paste failed: \(error)")
+                showToast("Image paste failed")
+            }
+            bridge.keyboardToolbar?.setImageUploading(false)
+        }
+    }
+
+    /// Create a fresh SSH exec session for Mosh transport. Reuses existing if available.
+    private func createExecSessionForMosh() async throws -> SSHSession {
+        if let existing = moshExecSession, existing.isConnected {
+            return existing
+        }
+        // Disconnect stale session
+        if let stale = moshExecSession {
+            await stale.disconnect()
+            moshExecSession = nil
+            bridge.execSession = nil
+        }
+        guard let sessionRecord else {
+            throw SSHError.connectionFailed("No session record for exec session")
+        }
+        let connectionId = sessionRecord.connectionId
+        let descriptor = FetchDescriptor<Connection>(predicate: #Predicate { $0.id == connectionId })
+        guard let connection = try? modelContext.fetch(descriptor).first else {
+            throw SSHError.connectionFailed("Cannot find connection for exec session")
+        }
+        let session = try await connectionManager.connectExecSession(connection)
+        moshExecSession = session
+        bridge.execSession = session
+        return session
     }
 
     private func showToast(_ message: String) {
@@ -556,6 +637,9 @@ class TerminalViewController: UIViewController {
             guard let self else { return }
             self.bridge.showTmuxSwitcher = true
         }
+        toolbar.onPasteImage = { [weak self] in
+            self?.handleImagePaste()
+        }
         bridge.terminalView = terminalView
         bridge.keyboardToolbar = toolbar
 
@@ -706,6 +790,12 @@ class TerminalViewController: UIViewController {
             resizeTerminal(availableHeight: availableHeight)
         }
         lastLayoutHeight = availableHeight
+    }
+
+    // MARK: - Image Paste
+
+    private func handleImagePaste() {
+        bridge.imagePasteRequested = true
     }
 
     override func viewWillDisappear(_ animated: Bool) {

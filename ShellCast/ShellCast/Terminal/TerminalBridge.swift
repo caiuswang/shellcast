@@ -12,6 +12,13 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
     @Published var isReconnecting = false
     @Published var isDisconnected = false
     @Published var showTmuxSwitcher = false
+    @Published var toastMessage: String?
+
+    /// SSH session for exec-only commands (image transfer, etc.).
+    /// For SSH transport this is the transport itself; for Mosh it's a separate session.
+    var execSession: SSHSession?
+    /// Set to true by the VC when the user taps the image paste button. Observed by SwiftUI view.
+    @Published var imagePasteRequested = false
 
     private var readTask: Task<Void, Never>?
 

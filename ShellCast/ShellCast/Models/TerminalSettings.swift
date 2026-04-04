@@ -228,6 +228,36 @@ enum TerminalFont: String, CaseIterable {
     }
 }
 
+enum ImagePasteQuality: String, CaseIterable {
+    case low = "Low"
+    case medium = "Medium"
+    case high = "High"
+
+    var maxDimension: CGFloat {
+        switch self {
+        case .low: 800
+        case .medium: 1600
+        case .high: 2048
+        }
+    }
+
+    var maxBytes: Int {
+        switch self {
+        case .low: 300_000
+        case .medium: 1_000_000
+        case .high: 2_000_000
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .low: "Save data (~100KB)"
+        case .medium: "Balanced (~500KB)"
+        case .high: "Best quality (~2MB)"
+        }
+    }
+}
+
 enum SpeechEngine: String, CaseIterable {
     case apple = "apple"
     case whisper = "whisper"
@@ -325,6 +355,10 @@ final class TerminalSettings {
         didSet { UserDefaults.standard.set(whisperModel.rawValue, forKey: "whisper_model") }
     }
 
+    var imagePasteQuality: ImagePasteQuality {
+        didSet { UserDefaults.standard.set(imagePasteQuality.rawValue, forKey: "image_paste_quality") }
+    }
+
     var appPalette: AppThemePalette { appTheme.palette }
 
     private init() {
@@ -339,5 +373,6 @@ final class TerminalSettings {
         self.scrollbackSize = ScrollbackSize(rawValue: ud.integer(forKey: "terminal_scrollback")) ?? .k10
         self.speechEngine = SpeechEngine(rawValue: ud.string(forKey: "speech_engine") ?? "") ?? .apple
         self.whisperModel = WhisperModel(rawValue: ud.string(forKey: "whisper_model") ?? "") ?? .base
+        self.imagePasteQuality = ImagePasteQuality(rawValue: ud.string(forKey: "image_paste_quality") ?? "") ?? .high
     }
 }

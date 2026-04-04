@@ -35,6 +35,19 @@ struct SettingsView: View {
                             .stroke(palette.border, lineWidth: 0.5)
                     )
 
+                    // IMAGE PASTE section
+                    sectionHeader("IMAGE PASTE", icon: "photo.on.rectangle.angled", color: .teal)
+
+                    VStack(spacing: 0) {
+                        imagePasteQualityRow
+                    }
+                    .background(palette.surfaceBackground)
+                    .cornerRadius(14)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(palette.border, lineWidth: 0.5)
+                    )
+
                     // VOICE INPUT section
                     sectionHeader("VOICE INPUT", icon: "waveform", color: .orange)
 
@@ -259,6 +272,33 @@ struct SettingsView: View {
                             .padding(.horizontal, 8)
                             .padding(.vertical, 7)
                             .background(settings.scrollbackSize == size ? palette.selectedControlBackground : Color.clear)
+                            .cornerRadius(6)
+                    }
+                }
+            }
+            .background(palette.controlBackground)
+            .cornerRadius(8)
+        }
+    }
+
+    private var imagePasteQualityRow: some View {
+        settingsRow(
+            icon: "photo",
+            iconColor: .teal,
+            title: "Quality"
+        ) {
+            HStack(spacing: 2) {
+                ForEach(ImagePasteQuality.allCases, id: \.self) { quality in
+                    Button {
+                        settings.imagePasteQuality = quality
+                    } label: {
+                        Text(quality.rawValue)
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .foregroundStyle(settings.imagePasteQuality == quality ? palette.primaryText : palette.secondaryText)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 7)
+                            .background(settings.imagePasteQuality == quality ? palette.selectedControlBackground : Color.clear)
                             .cornerRadius(6)
                     }
                 }

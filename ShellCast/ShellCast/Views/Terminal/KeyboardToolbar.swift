@@ -11,6 +11,8 @@ class TerminalKeyboardToolbar: UIView {
     var onSend: (([UInt8]) -> Void)?
     /// Callback to show the tmux session/window switcher overlay.
     var onTmuxSwitcher: (() -> Void)?
+    /// Callback to paste an image from the iOS clipboard to the remote Mac clipboard.
+    var onPasteImage: (() -> Void)?
 
     private(set) var ctrlActive = false
     private(set) var altActive = false
@@ -27,6 +29,10 @@ class TerminalKeyboardToolbar: UIView {
     private var stack: UIStackView!
     private var scrollView: UIScrollView!
     private var fixedRightStack: UIStackView!
+
+    // Image paste
+    private var imagePasteButton: UIButton!
+    private(set) var isUploadingImage = false
 
     // Voice input
     private var micButton: UIButton!
@@ -139,6 +145,15 @@ class TerminalKeyboardToolbar: UIView {
         }
         symbolGroup = symbols
 
+        // Image paste button
+        imagePasteButton = UIButton(type: .system)
+        let imgConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+        imagePasteButton.setImage(UIImage(systemName: "photo.on.rectangle.angled", withConfiguration: imgConfig), for: .normal)
+        imagePasteButton.tintColor = .white
+        imagePasteButton.backgroundColor = TerminalSettings.shared.appPalette.controlBackgroundUIColor
+        imagePasteButton.layer.cornerRadius = 8
+        imagePasteButton.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
+        imagePasteButton.addTarget(self, action: #selector(tapImagePaste), for: .touchUpInside)
         micButton = UIButton(type: .system)
         let micConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
         micButton.setImage(UIImage(systemName: "mic.fill", withConfiguration: micConfig), for: .normal)
@@ -151,11 +166,13 @@ class TerminalKeyboardToolbar: UIView {
         let kbButton = makeButton("⌨", action: #selector(tapKeyboard))
         kbButton.titleLabel?.font = .systemFont(ofSize: 18)
 
-        // Add separator + mic + keyboard to fixed right area
+        // Add separator + image paste + mic + keyboard to fixed right area
         let fixedSep = makeSeparator()
         fixedRightStack.addArrangedSubview(fixedSep)
+        fixedRightStack.addArrangedSubview(imagePasteButton)
         fixedRightStack.addArrangedSubview(micButton)
         fixedRightStack.addArrangedSubview(kbButton)
+
 
         // Preview bar (hidden by default, shown after speech recognition)
         previewBar = UIView()
@@ -390,6 +407,25 @@ class TerminalKeyboardToolbar: UIView {
             terminalView?.resignFirstResponder()
         } else {
             terminalView?.becomeFirstResponder()
+        }
+    }
+
+    // MARK: - Image Paste
+
+    @objc private func tapImagePaste() {
+        guard !isUploadingImage else { return }
+        onPasteImage?()
+    }
+
+    /// Show uploading spinner state on the image paste button.
+    func setImageUploading(_ uploading: Bool) {
+        isUploadingImage = uploading
+        if uploading {
+            imagePasteButton.tintColor = TerminalSettings.shared.appPalette.accentUIColor
+            imagePasteButton.alpha = 0.6
+        } else {
+            imagePasteButton.tintColor = .white
+            imagePasteButton.alpha = 1.0
         }
     }
 
