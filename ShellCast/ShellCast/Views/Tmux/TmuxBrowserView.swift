@@ -114,6 +114,14 @@ struct TmuxBrowserView: View {
         .onAppear {
             sessions = initialSessions
         }
+        .onChange(of: navigationPath) {
+            // Refresh sessions when navigating back to the session list
+            if navigationPath.isEmpty {
+                Task {
+                    sessions = (try? await TmuxParser.listSessions(over: transport)) ?? sessions
+                }
+            }
+        }
         .task {
             await loadAIAgents()
         }
@@ -589,6 +597,7 @@ struct TmuxWindowBrowserView: View {
     let onSelect: (TmuxSession?, Int?, String?) -> Void
     var agentFilter: String? = nil  // nil = no filter, "claude" = only windows running Claude, etc.
 
+    @Environment(\.dismiss) private var dismiss
     @State private var windows: [TmuxWindow] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
@@ -599,6 +608,7 @@ struct TmuxWindowBrowserView: View {
     @State private var showOperationError = false
     @State private var settings = TerminalSettings.shared
     @State private var runningWindowsByAgent: [String: Set<Int>] = [:]
+    @State private var agentDetectionDone = false
 
     private var displayedWindows: [TmuxWindow] {
         if let agentFilter = agentFilter {
@@ -612,10 +622,10 @@ struct TmuxWindowBrowserView: View {
         // No filter, show all windows
         return windows
     }
-    
+
     // Track if we're still detecting agent windows
     private var isDetectingAgentWindows: Bool {
-        agentFilter != nil && runningWindowsByAgent[agentFilter!] == nil
+        agentFilter != nil && !agentDetectionDone
     }
 
     private var palette: AppThemePalette { settings.appPalette }
@@ -843,7 +853,7 @@ struct TmuxWindowBrowserView: View {
             errorMessage = "Failed to list windows: \(error.localizedDescription)"
         }
         isLoading = false
-        
+
         // Detect which windows are running each AI agent
         var allRunningWindows: [String: Set<Int>] = [:]
         for plugin in AIAgentRegistry.allPlugins {
@@ -854,6 +864,7 @@ struct TmuxWindowBrowserView: View {
             }
         }
         runningWindowsByAgent = allRunningWindows
+        agentDetectionDone = true
     }
 
     private func renameWindow(_ window: TmuxWindow) {
@@ -878,7 +889,13 @@ struct TmuxWindowBrowserView: View {
                 operationError = "Failed to delete window: \(error.localizedDescription)"
                 showOperationError = true
             }
-            windows = (try? await TmuxParser.listWindows(over: transport, sessionName: session.name)) ?? windows
+            let updatedWindows = try? await TmuxParser.listWindows(over: transport, sessionName: session.name)
+            if let updatedWindows, !updatedWindows.isEmpty {
+                windows = updatedWindows
+            } else {
+                // Session was destroyed (last window deleted) — navigate back
+                dismiss()
+            }
         }
     }
 }
