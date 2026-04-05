@@ -120,9 +120,6 @@ struct TerminalContainerView: View {
             if bridge.showTmuxSwitcher, let sshTransport = sshTransportForExec {
                 TmuxSwitcherOverlay(
                     transport: sshTransport,
-                    sendToPTY: { data in
-                        Task { try? await transport.send(data) }
-                    },
                     isPresented: $bridge.showTmuxSwitcher
                 )
                 .transition(.opacity)

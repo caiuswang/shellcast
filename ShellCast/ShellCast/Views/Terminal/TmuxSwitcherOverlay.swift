@@ -3,8 +3,6 @@ import SwiftUI
 /// In-terminal overlay for switching tmux sessions and windows without leaving the terminal.
 struct TmuxSwitcherOverlay: View {
     let transport: SSHSession
-    /// Send raw bytes through the terminal PTY (for tmux commands that must run in the attached client)
-    var sendToPTY: ((Data) -> Void)?
     @Binding var isPresented: Bool
 
     @Environment(\.horizontalSizeClass) private var sizeClass
@@ -291,35 +289,19 @@ struct TmuxSwitcherOverlay: View {
         }
     }
 
-    /// Send a tmux command via the PTY using tmux prefix key (Ctrl-B :).
-    /// This is the most reliable method because it runs in the actual tmux client context,
-    /// regardless of whether the transport is SSH or Mosh.
-    private func sendTmuxPrefixCommand(_ tmuxCmd: String) {
-        guard let sendToPTY else { return }
-        // Ctrl-B (0x02) activates tmux prefix, then ":" enters command mode
-        var bytes: [UInt8] = [0x02]  // Ctrl-B
-        bytes.append(0x3A)           // ":"
-        sendToPTY(Data(bytes))
-        // Small delay to let tmux enter command mode, then send the command
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            sendToPTY(Data("\(tmuxCmd)\n".utf8))
-        }
-    }
-
     private func switchToSession(_ session: TmuxSession) {
-        sendTmuxPrefixCommand("switch-client -t \(session.name)")
+        Task {
+            try? await TmuxParser.switchClient(over: transport, targetSession: session.name)
+        }
         isPresented = false
     }
 
     private func switchToWindow(_ session: TmuxSession, window: TmuxWindow) {
-        if session.name != currentSessionName {
-            sendTmuxPrefixCommand("switch-client -t \(session.name)")
-            // Delay the window select to let session switch complete
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                sendTmuxPrefixCommand("select-window -t \(session.name):\(window.index)")
+        Task {
+            if session.name != currentSessionName {
+                try? await TmuxParser.switchClient(over: transport, targetSession: session.name)
             }
-        } else {
-            sendTmuxPrefixCommand("select-window -t \(session.name):\(window.index)")
+            try? await TmuxParser.selectWindow(over: transport, sessionName: session.name, windowIndex: window.index)
         }
         isPresented = false
     }
