@@ -311,6 +311,20 @@ enum WhisperModel: String, CaseIterable {
     }
 }
 
+enum HistoryLimit: Int, CaseIterable {
+    case h5 = 5
+    case h10 = 10
+    case h20 = 20
+
+    var label: String {
+        switch self {
+        case .h5: "5"
+        case .h10: "10"
+        case .h20: "20"
+        }
+    }
+}
+
 @Observable
 final class TerminalSettings {
     static let shared = TerminalSettings()
@@ -359,6 +373,10 @@ final class TerminalSettings {
         didSet { UserDefaults.standard.set(imagePasteQuality.rawValue, forKey: "image_paste_quality") }
     }
 
+    var historyLimit: HistoryLimit {
+        didSet { UserDefaults.standard.set(historyLimit.rawValue, forKey: "history_limit") }
+    }
+
     var appPalette: AppThemePalette { appTheme.palette }
 
     private init() {
@@ -374,5 +392,7 @@ final class TerminalSettings {
         self.speechEngine = SpeechEngine(rawValue: ud.string(forKey: "speech_engine") ?? "") ?? .apple
         self.whisperModel = WhisperModel(rawValue: ud.string(forKey: "whisper_model") ?? "") ?? .base
         self.imagePasteQuality = ImagePasteQuality(rawValue: ud.string(forKey: "image_paste_quality") ?? "") ?? .high
+        let storedLimit = ud.object(forKey: "history_limit") == nil ? -1 : ud.integer(forKey: "history_limit")
+        self.historyLimit = storedLimit == -1 ? .h10 : (HistoryLimit(rawValue: storedLimit) ?? .h10)
     }
 }

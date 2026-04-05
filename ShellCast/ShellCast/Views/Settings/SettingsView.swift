@@ -63,6 +63,19 @@ struct SettingsView: View {
                             .stroke(palette.border, lineWidth: 0.5)
                     )
 
+                    // DATA section
+                    sectionHeader("DATA", icon: "externaldrive", color: .gray)
+
+                    VStack(spacing: 0) {
+                        historyLimitRow
+                    }
+                    .background(palette.surfaceBackground)
+                    .cornerRadius(14)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(palette.border, lineWidth: 0.5)
+                    )
+
                     // Version footer
                     HStack {
                         Spacer()
@@ -346,6 +359,33 @@ struct SettingsView: View {
                 .foregroundStyle(palette.secondaryText)
         }
         .opacity(settings.speechEngine == .whisper ? 1 : 0.4)
+    }
+
+    private var historyLimitRow: some View {
+        settingsRow(
+            icon: "clock.arrow.circlepath",
+            iconColor: .gray,
+            title: "History per Host"
+        ) {
+            HStack(spacing: 2) {
+                ForEach(HistoryLimit.allCases, id: \.self) { limit in
+                    Button {
+                        settings.historyLimit = limit
+                    } label: {
+                        Text(limit.label)
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .foregroundStyle(settings.historyLimit == limit ? palette.primaryText : palette.secondaryText)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 7)
+                            .background(settings.historyLimit == limit ? palette.selectedControlBackground : Color.clear)
+                            .cornerRadius(6)
+                    }
+                }
+            }
+            .background(palette.controlBackground)
+            .cornerRadius(8)
+        }
     }
 
     // MARK: - Helpers

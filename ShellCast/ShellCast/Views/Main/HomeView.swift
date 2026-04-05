@@ -223,6 +223,7 @@ struct HomeView: View {
             .background(palette.screenBackground)
             .navigationTitle("History")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear { pruneAllHistory() }
         }
     }
 
@@ -331,10 +332,12 @@ struct HomeView: View {
     }
 
     private var groupedSessions: [SessionGroup] {
+        let limit = TerminalSettings.shared.historyLimit.rawValue
         let grouped = Dictionary(grouping: allSessions) { $0.connectionId }
         return grouped.map { (connectionId, sessions) in
             let name = connections.first(where: { $0.id == connectionId })?.name ?? "Unknown"
-            return SessionGroup(connectionId: connectionId, connectionName: name, sessions: sessions)
+            let capped = Array(sessions.prefix(limit))
+            return SessionGroup(connectionId: connectionId, connectionName: name, sessions: capped)
         }
         .sorted { ($0.sessions.first?.lastActiveAt ?? .distantPast) > ($1.sessions.first?.lastActiveAt ?? .distantPast) }
     }
@@ -456,7 +459,27 @@ struct HomeView: View {
         }
         let record = SessionRecord(connectionId: connectionId, tmuxSessionName: tmuxSessionName)
         modelContext.insert(record)
+        pruneHistory(for: connectionId)
         return record
+    }
+
+    private func pruneHistory(for connectionId: UUID) {
+        let limit = TerminalSettings.shared.historyLimit.rawValue
+        let hostSessions = allSessions
+            .filter { $0.connectionId == connectionId }
+            .sorted { $0.lastActiveAt > $1.lastActiveAt }
+        if hostSessions.count > limit {
+            for session in hostSessions.dropFirst(limit) {
+                modelContext.delete(session)
+            }
+        }
+    }
+
+    private func pruneAllHistory() {
+        let connectionIds = Set(allSessions.map { $0.connectionId })
+        for connectionId in connectionIds {
+            pruneHistory(for: connectionId)
+        }
     }
 
     // MARK: - Delete Connection
