@@ -103,6 +103,7 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
     /// User typed something — send it over SSH, applying toolbar modifiers if active.
     func send(source: TerminalView, data: ArraySlice<UInt8>) {
         let modifiers = keyboardToolbar?.consumeModifiers()
+        let wasInCopyMode = keyboardToolbar?.consumeCopyModeIfNeeded() ?? false
         let finalData: Data
 
         if let modifiers, modifiers.ctrl, data.count == 1,
@@ -124,6 +125,10 @@ final class TerminalBridge: NSObject, ObservableObject, TerminalViewDelegate {
         }
 
         Task {
+            // Exit tmux copy mode first if needed, so typed text goes to the shell
+            if wasInCopyMode {
+                try? await transport.send(Data([0x71]))  // 'q' exits copy mode
+            }
             try? await transport.send(finalData)
         }
     }

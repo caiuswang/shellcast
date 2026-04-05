@@ -16,6 +16,8 @@ class TerminalKeyboardToolbar: UIView {
 
     private(set) var ctrlActive = false
     private(set) var altActive = false
+    /// Tracks whether tmux is likely in copy mode (entered via PgUp).
+    private(set) var inTmuxCopyMode = false
     private var ctrlButton: UIButton!
     private var altButton: UIButton!
 
@@ -342,6 +344,24 @@ class TerminalKeyboardToolbar: UIView {
         return result
     }
 
+    /// If in tmux copy mode, consume the flag so the caller can send 'q' to exit first.
+    func consumeCopyModeIfNeeded() -> Bool {
+        if inTmuxCopyMode {
+            inTmuxCopyMode = false
+            return true
+        }
+        return false
+    }
+
+    /// Exit tmux copy mode by sending 'q', then send the intended bytes.
+    private func exitCopyModeAndSend(_ bytes: [UInt8]) {
+        if inTmuxCopyMode {
+            inTmuxCopyMode = false
+            onSend?([0x71])  // 'q' exits tmux copy mode
+        }
+        sendKey(bytes)
+    }
+
     /// Send bytes — always uses onSend to go directly to SSH.
     private func sendKey(_ bytes: [UInt8]) {
         onSend?(bytes)
@@ -357,6 +377,11 @@ class TerminalKeyboardToolbar: UIView {
     }
 
     private func sendChar(_ char: String) {
+        // Exit tmux copy mode before sending regular characters
+        if inTmuxCopyMode {
+            inTmuxCopyMode = false
+            onSend?([0x71])  // 'q' exits tmux copy mode
+        }
         if ctrlActive, let ascii = char.uppercased().unicodeScalars.first?.value,
            ascii >= 0x40 && ascii <= 0x5F {
             // Ctrl+letter: send control character (ASCII value - 0x40)
@@ -373,21 +398,27 @@ class TerminalKeyboardToolbar: UIView {
 
     // MARK: - Key Actions
 
-    @objc private func tapEsc() { sendKey([0x1B]) }
-    @objc private func tapTab() { sendKey([0x09]) }
+    @objc private func tapEsc() { exitCopyModeAndSend([0x1B]) }
+    @objc private func tapTab() { exitCopyModeAndSend([0x09]) }
 
     // Arrow keys: send ANSI escape sequences
-    @objc private func tapUp()       { sendKey([0x1B, 0x5B, 0x41]) }  // ESC [ A
-    @objc private func tapDown()     { sendKey([0x1B, 0x5B, 0x42]) }  // ESC [ B
-    @objc private func tapRight()    { sendKey([0x1B, 0x5B, 0x43]) }  // ESC [ C
-    @objc private func tapLeft()     { sendKey([0x1B, 0x5B, 0x44]) }  // ESC [ D
+    @objc private func tapUp()       { exitCopyModeAndSend([0x1B, 0x5B, 0x41]) }  // ESC [ A
+    @objc private func tapDown()     { exitCopyModeAndSend([0x1B, 0x5B, 0x42]) }  // ESC [ B
+    @objc private func tapRight()    { exitCopyModeAndSend([0x1B, 0x5B, 0x43]) }  // ESC [ C
+    @objc private func tapLeft()     { exitCopyModeAndSend([0x1B, 0x5B, 0x44]) }  // ESC [ D
     // Send Ctrl+B [ to enter tmux copy mode, then PgUp/PgDn to scroll
     @objc private func tapPageUp() {
-        // Ctrl+B (tmux prefix) + PgUp — tmux default binds PgUp in copy mode
-        sendKey([0x02, 0x1B, 0x5B, 0x35, 0x7E])
+        if !inTmuxCopyMode {
+            // First PgUp: send Ctrl+B (tmux prefix) + PgUp to enter copy mode and scroll
+            sendKey([0x02, 0x1B, 0x5B, 0x35, 0x7E])
+            inTmuxCopyMode = true
+        } else {
+            // Already in copy mode: just send PgUp to scroll further
+            sendKey([0x1B, 0x5B, 0x35, 0x7E])
+        }
     }
     @objc private func tapPageDown() {
-        sendKey([0x1B, 0x5B, 0x36, 0x7E])  // PgDn (works once already in copy mode)
+        sendKey([0x1B, 0x5B, 0x36, 0x7E])  // PgDn (works in copy mode)
     }
 
     // Special characters
