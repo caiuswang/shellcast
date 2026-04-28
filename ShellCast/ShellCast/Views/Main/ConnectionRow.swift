@@ -68,6 +68,7 @@ struct ConnectionRow: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("connection-edit-\(connection.host)")
             }
 
             Image(systemName: "chevron.right")
@@ -81,5 +82,6 @@ struct ConnectionRow: View {
             RoundedRectangle(cornerRadius: 14)
                 .stroke(palette.border, lineWidth: 0.5)
         )
+        .accessibilityIdentifier("connection-row-\(connection.host)")
     }
 }

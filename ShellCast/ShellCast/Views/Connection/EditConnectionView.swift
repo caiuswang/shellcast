@@ -3,6 +3,15 @@ import SwiftData
 import UniformTypeIdentifiers
 
 struct EditConnectionView: View {
+    private enum Field: Hashable {
+        case name
+        case host
+        case port
+        case username
+        case password
+        case keyPassphrase
+    }
+
     enum Mode {
         case add
         case edit(Connection)
@@ -27,6 +36,7 @@ struct EditConnectionView: View {
     @State private var keyPassphrase: String = ""
     @State private var validationError: String?
     @State private var settings = TerminalSettings.shared
+    @FocusState private var focusedField: Field?
 
     init(mode: Mode, onConnect: ((Connection) -> Void)? = nil) {
         self.mode = mode
@@ -54,14 +64,17 @@ struct EditConnectionView: View {
                             fieldRow(icon: "tag", title: "Name") {
                                 TextField("My Server", text: $name)
                                     .textFieldStyle(DarkFieldStyle(palette: palette))
+                                    .focused($focusedField, equals: .name)
                             }
 
                             HStack(spacing: 12) {
-                                fieldRow(icon: "globe", title: "Host") {
-                                    TextField("hostname or IP", text: $host)
-                                        .textFieldStyle(DarkFieldStyle(palette: palette))
-                                        .textInputAutocapitalization(.never)
-                                        .autocorrectionDisabled()
+                            fieldRow(icon: "globe", title: "Host") {
+                                TextField("hostname or IP", text: $host)
+                                    .textFieldStyle(DarkFieldStyle(palette: palette))
+                                    .textInputAutocapitalization(.never)
+                                    .autocorrectionDisabled()
+                                    .focused($focusedField, equals: .host)
+                                    .accessibilityIdentifier("connection-host-field")
                                     if !host.isEmpty && !isHostValid {
                                         Text("Invalid hostname")
                                             .font(.caption2)
@@ -72,6 +85,7 @@ struct EditConnectionView: View {
                                     TextField("22", text: $port)
                                         .textFieldStyle(DarkFieldStyle(palette: palette))
                                         .keyboardType(.numberPad)
+                                        .focused($focusedField, equals: .port)
                                     if !port.isEmpty && !isPortValid {
                                         Text("1-65535")
                                             .font(.caption2)
@@ -85,6 +99,8 @@ struct EditConnectionView: View {
                                     .textFieldStyle(DarkFieldStyle(palette: palette))
                                     .textInputAutocapitalization(.never)
                                     .autocorrectionDisabled()
+                                    .focused($focusedField, equals: .username)
+                                    .accessibilityIdentifier("connection-username-field")
                             }
                         }
                     }
@@ -104,6 +120,10 @@ struct EditConnectionView: View {
                             if authMethod == .password {
                                 SecureField("Password", text: $password)
                                     .textFieldStyle(DarkFieldStyle(palette: palette))
+                                    .textInputAutocapitalization(.never)
+                                    .autocorrectionDisabled()
+                                    .focused($focusedField, equals: .password)
+                                    .accessibilityIdentifier("connection-password-field")
                             } else if authMethod == .keyFile {
                                 Button {
                                     showKeyFilePicker = true
@@ -131,6 +151,7 @@ struct EditConnectionView: View {
 
                                 SecureField("Passphrase (optional)", text: $keyPassphrase)
                                     .textFieldStyle(DarkFieldStyle(palette: palette))
+                                    .focused($focusedField, equals: .keyPassphrase)
                             }
 
                             if authMethod == .tailscaleSSH {
@@ -159,7 +180,7 @@ struct EditConnectionView: View {
 
                     // Connect button
                     Button {
-                        saveAndConnect()
+                        submit(connectAfterSave: true)
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "bolt.fill")
@@ -178,6 +199,7 @@ struct EditConnectionView: View {
                     .disabled(!canSave)
                     .opacity(canSave ? 1 : 0.5)
                     .padding(.top, 4)
+                    .accessibilityIdentifier("connection-connect-button")
                 }
                 .padding(20)
                 .iPadContentWidth(600)
@@ -197,12 +219,13 @@ struct EditConnectionView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        save()
+                        submit(connectAfterSave: false)
                     } label: {
                         Text("Save")
                             .fontWeight(.semibold)
                             .foregroundStyle(palette.accent)
                     }
+                    .accessibilityIdentifier("connection-save-button")
                 }
             }
             .onAppear {
@@ -223,6 +246,14 @@ struct EditConnectionView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .alert("Save Failed", isPresented: Binding(
+            get: { validationError != nil },
+            set: { if !$0 { validationError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(validationError ?? "Unknown error")
+        }
         .fileImporter(
             isPresented: $showKeyFilePicker,
             allowedContentTypes: [.data, .plainText],
@@ -312,19 +343,24 @@ struct EditConnectionView: View {
         return false
     }
 
-    private func saveAndConnect() {
-        let connection = saveConnection()
-        dismiss()
-        onConnect?(connection)
-    }
-
-    private func save() {
-        _ = saveConnection()
-        dismiss()
+    private func submit(connectAfterSave: Bool) {
+        focusedField = nil
+        Task { @MainActor in
+            await Task.yield()
+            do {
+                let connection = try saveConnection()
+                dismiss()
+                if connectAfterSave {
+                    onConnect?(connection)
+                }
+            } catch {
+                validationError = error.localizedDescription
+            }
+        }
     }
 
     @discardableResult
-    private func saveConnection() -> Connection {
+    private func saveConnection() throws -> Connection {
         let portNumber = Int(port) ?? 22
 
         if case .edit(let connection) = mode {
@@ -334,7 +370,8 @@ struct EditConnectionView: View {
             connection.username = username
             connection.authMethod = authMethod
             connection.connectionType = connectionType
-            saveCredentials(for: connection.id, keyFilePath: &connection.keyFilePath)
+            try saveCredentials(for: connection.id, keyFilePath: &connection.keyFilePath)
+            try modelContext.save()
             return connection
         } else {
             let connection = Connection(
@@ -346,23 +383,24 @@ struct EditConnectionView: View {
                 connectionType: connectionType
             )
             modelContext.insert(connection)
-            saveCredentials(for: connection.id, keyFilePath: &connection.keyFilePath)
+            try saveCredentials(for: connection.id, keyFilePath: &connection.keyFilePath)
+            try modelContext.save()
             return connection
         }
     }
 
     /// Save all provided credentials regardless of selected auth method,
     /// so switching auth modes doesn't discard previously entered secrets.
-    private func saveCredentials(for connectionId: UUID, keyFilePath: inout String?) {
+    private func saveCredentials(for connectionId: UUID, keyFilePath: inout String?) throws {
         if !password.isEmpty {
-            try? KeychainService.savePassword(password, for: connectionId)
+            try KeychainService.savePassword(password, for: connectionId)
         }
         if let keyData = keyFileData, !keyData.isEmpty {
-            try? KeychainService.savePrivateKey(keyData, for: connectionId)
+            try KeychainService.savePrivateKey(keyData, for: connectionId)
         }
         keyFilePath = keyFileName
         if !keyPassphrase.isEmpty {
-            try? KeychainService.saveKeyPassphrase(keyPassphrase, for: connectionId)
+            try KeychainService.saveKeyPassphrase(keyPassphrase, for: connectionId)
         }
     }
 }

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0324D23344C318E49D749844 /* BackgroundSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71ADD980E8F01B1CCE2B626E /* BackgroundSessionTests.swift */; };
-		C2D3E4F5A6B7C8D9E0F1A2B3 /* ImagePasteServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6A7B8C9D0E1F2A3B4C5 /* ImagePasteServiceTests.swift */; };
 		077428F7CF8D6557B70C1C6A /* JetBrainsMonoNerdFont-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A7764FF4377D60000A6D5B61 /* JetBrainsMonoNerdFont-Regular.ttf */; };
 		0B6941701BCFCBA7DD665F6E /* normalizer.json in Resources */ = {isa = PBXBuildFile; fileRef = 934D46518265B5BF6A5DEDBF /* normalizer.json */; };
 		125D46A7939E10F7C7AA7113 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECABCA12E098111E14451F77 /* NetworkMonitor.swift */; };
@@ -26,6 +25,7 @@
 		41CE7E2EBD800643D19F03EE /* TransportSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD78C13923FD491B76957AD7 /* TransportSession.swift */; };
 		4C1A2BB48ABB6BEA56C0ED72 /* DebugLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C95DA1DB825ACD9831A6C /* DebugLog.swift */; };
 		50EDBE5339E7B20F0AF162EE /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC8D9CA8FFF23021EB510289 /* ScreenshotTests.swift */; };
+		50EDBE5339E7B20F0AF162EF /* ConnectionCredentialsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC8D9CA8FFF23021EB51028A /* ConnectionCredentialsUITests.swift */; };
 		5149F292471846A0B2B70560 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 90386C1F71AF752095B7FB33 /* WhisperKit */; };
 		54330C917B154E3D36EEF18D /* tokenizer.json in Resources */ = {isa = PBXBuildFile; fileRef = FA207C1E249CDFC75F5AAB75 /* tokenizer.json */; };
 		67E85238EDBA27838AA7DF29 /* JetBrainsMonoNerdFontMono-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9709A5D271157A13994F86DC /* JetBrainsMonoNerdFontMono-Light.ttf */; };
@@ -58,6 +58,7 @@
 		B8F0A8D4D5C8C4745A87846F /* WhisperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FFFC26F812935ACB1AE1A9 /* WhisperService.swift */; };
 		B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */; };
 		BFB95968FB306F0A8F0DABE6 /* TerminalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4800BD4740F6F26923B912F2 /* TerminalSettings.swift */; };
+		C2D3E4F5A6B7C8D9E0F1A2B3 /* ImagePasteServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6A7B8C9D0E1F2A3B4C5 /* ImagePasteServiceTests.swift */; };
 		CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */; };
 		CE35D5F91B70E3D62EA5BA94 /* ClaudeCodeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B120F558A8FB902812C51510 /* ClaudeCodeSession.swift */; };
 		D1697AFEF68A9BC9D6B098CE /* ConnectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */; };
@@ -112,7 +113,7 @@
 		037CB0AA879D4E4E6496F4D7 /* TmuxParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxParser.swift; sourceTree = "<group>"; };
 		0B8D2814FE2A15CD08EA0D9A /* ClaudeAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeAgent.swift; sourceTree = "<group>"; };
 		1409313AD4E6449B02295511 /* mosh.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = mosh.xcframework; path = Frameworks/mosh.xcframework; sourceTree = "<group>"; };
-		181D6D7FB964ADB23B8ABEB2 /* ShellCastUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ShellCastUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		181D6D7FB964ADB23B8ABEB2 /* ShellCastUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ShellCastUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		18ED85687617B1A5C79A9437 /* ShellCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellCastApp.swift; sourceTree = "<group>"; };
 		1B47FA5B02A2FE45570D2467 /* ClaudeCodeParser+Compatibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeCodeParser+Compatibility.swift"; sourceTree = "<group>"; };
 		1CF9CE4693072E56B9DFA92B /* added_tokens.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = added_tokens.json; sourceTree = "<group>"; };
@@ -133,9 +134,7 @@
 		5CC941FEE664D2431303055E /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
 		61579C0F481E05873DEEB3A2 /* special_tokens_map.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = special_tokens_map.json; sourceTree = "<group>"; };
 		6726B66D9CC86DDD8EA70798 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60718293A4B5C /* ImagePasteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePasteService.swift; sourceTree = "<group>"; };
 		71ADD980E8F01B1CCE2B626E /* BackgroundSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSessionTests.swift; sourceTree = "<group>"; };
-		D4E5F6A7B8C9D0E1F2A3B4C5 /* ImagePasteServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePasteServiceTests.swift; sourceTree = "<group>"; };
 		76DF3B39727ABA9F4C4327A3 /* vocab.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = vocab.json; sourceTree = "<group>"; };
 		7F2A13D23161A4F56DD8B1B3 /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
 		86A413C952647072F83FE1F3 /* SSHService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHService.swift; sourceTree = "<group>"; };
@@ -149,6 +148,7 @@
 		9A7D15874D447664BBBD13CF /* AIAgentPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAgentPlugin.swift; sourceTree = "<group>"; };
 		9C23234FBB9E4B647294C2F4 /* TmuxSwitcherOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSwitcherOverlay.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60001AABB0002 /* RemotePlatform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemotePlatform.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B5C /* ImagePasteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePasteService.swift; sourceTree = "<group>"; };
 		A3551A79C59357E04AB2FC96 /* ActiveSessionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionCard.swift; sourceTree = "<group>"; };
 		A7764FF4377D60000A6D5B61 /* JetBrainsMonoNerdFont-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMonoNerdFont-Regular.ttf"; sourceTree = "<group>"; };
 		AA0C04D691AF3EBB4A397AD5 /* TmuxSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TmuxSession.swift; sourceTree = "<group>"; };
@@ -158,10 +158,12 @@
 		B3BD57C2918A942D29425698 /* config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = config.json; sourceTree = "<group>"; };
 		B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionRow.swift; sourceTree = "<group>"; };
 		BC8D9CA8FFF23021EB510289 /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
+		BC8D9CA8FFF23021EB51028A /* ConnectionCredentialsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionCredentialsUITests.swift; sourceTree = "<group>"; };
 		C2A6BDCA94266B0457F457D2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C698034D08F700820A025B61 /* MoshService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoshService.swift; sourceTree = "<group>"; };
 		CBEA7B00AF5CBF6B4EE9AF62 /* COMMON_MISTAKES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = COMMON_MISTAKES.md; sourceTree = "<group>"; };
 		D35C95DA1DB825ACD9831A6C /* DebugLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLog.swift; sourceTree = "<group>"; };
+		D4E5F6A7B8C9D0E1F2A3B4C5 /* ImagePasteServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePasteServiceTests.swift; sourceTree = "<group>"; };
 		D5124CDBF147AA4F8371D642 /* tokenizer_config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokenizer_config.json; sourceTree = "<group>"; };
 		D886DD705902431727A8D5CE /* AuthMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethod.swift; sourceTree = "<group>"; };
 		D941806241DCF9F5A72299C8 /* ConnectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionType.swift; sourceTree = "<group>"; };
@@ -170,7 +172,7 @@
 		E2EA76447CCB1F4716C33090 /* KeyboardToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardToolbar.swift; sourceTree = "<group>"; };
 		ECABCA12E098111E14451F77 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		F33C44921975EB3FA086E855 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		F844CA2ECE9A070493D67508 /* ShellCastTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ShellCastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F844CA2ECE9A070493D67508 /* ShellCastTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ShellCastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F992B3B0F836D3D8CDF50AB8 /* WhisperModels */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WhisperModels; path = ShellCast/Resources/WhisperModels; sourceTree = SOURCE_ROOT; };
 		FA207C1E249CDFC75F5AAB75 /* tokenizer.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokenizer.json; sourceTree = "<group>"; };
 		FAE9EAEC11DACCA884A4AAD2 /* AIAgentBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAgentBrowserView.swift; sourceTree = "<group>"; };
@@ -438,6 +440,7 @@
 		FD8B63AFBDCC8BAAC27009AA /* ShellCastUITests */ = {
 			isa = PBXGroup;
 			children = (
+				BC8D9CA8FFF23021EB51028A /* ConnectionCredentialsUITests.swift */,
 				BC8D9CA8FFF23021EB510289 /* ScreenshotTests.swift */,
 			);
 			path = ShellCastUITests;
@@ -631,6 +634,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				50EDBE5339E7B20F0AF162EF /* ConnectionCredentialsUITests.swift in Sources */,
 				50EDBE5339E7B20F0AF162EE /* ScreenshotTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -655,6 +659,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = RR3B8A7J66;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -735,6 +740,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = RR3B8A7J66;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -842,6 +848,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = RR3B8A7J66;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -859,6 +866,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = RR3B8A7J66;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
