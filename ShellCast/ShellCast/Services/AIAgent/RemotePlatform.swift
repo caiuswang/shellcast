@@ -79,9 +79,12 @@ enum RemotePlatform: String {
         }
     }
 
-    /// Resolve tmux binary path dynamically
+    /// Resolve tmux binary path dynamically. Checks common install dirs first,
+    /// because non-interactive SSH sessions often have a minimal PATH that
+    /// excludes /opt/homebrew/bin etc., causing `command -v tmux` to fail.
     var tmuxResolveCommand: String {
-        "command -v tmux 2>/dev/null || echo tmux"
+        let candidates = commonBinaryPaths.map { "\($0)/tmux" }.joined(separator: " ")
+        return "for __t in \(candidates); do [ -x \"$__t\" ] && echo \"$__t\" && exit 0; done; command -v tmux 2>/dev/null || echo tmux"
     }
 
     /// Check if any descendant process of parentPid matches the pattern.
@@ -91,7 +94,23 @@ enum RemotePlatform: String {
         // Use ps + awk to walk the entire descendant tree from parentPid
         // and check if any descendant's command line matches the pattern.
         // Must be single-line to work inside backslash-continued while loops.
-        // Use tolower() for case-insensitive matching (works on both BSD awk and gawk)
-        return "(ps -eo pid=,ppid=,args= 2>/dev/null | awk -v root=\"\(parentPid)\" -v pat=\"\(pattern)\" '{ pid=$1; ppid=$2; p[pid]=ppid; a[pid]=tolower($0) } END { for (pid in p) { cur=pid; d=0; while (cur!=\"\" && cur+0!=0 && cur!=root && d<10) { cur=p[cur]; d++ } if (cur==root && pid!=root && a[pid]~pat) exit 0 } exit 1 }')"
+        // Use tolower() for case-insensitive matching (works on both BSD awk and gawk).
+        // The pattern is a POSIX ERE; we escape it for shell double-quote interpolation
+        // so authors don't need to bake shell-escapes into their regex.
+        let escapedPattern = Self.escapeForShellDoubleQuote(pattern)
+        return "(ps -eo pid=,ppid=,args= 2>/dev/null | awk -v root=\"\(parentPid)\" -v pat=\"\(escapedPattern)\" '{ pid=$1; ppid=$2; p[pid]=ppid; a[pid]=tolower($0) } END { for (pid in p) { cur=pid; d=0; while (cur!=\"\" && cur+0!=0 && cur!=root && d<10) { cur=p[cur]; d++ } if (cur==root && pid!=root && a[pid]~pat) exit 0 } exit 1 }')"
+    }
+
+    /// Escape a string so it survives shell double-quote interpolation. Replaces
+    /// the four characters that retain meaning inside double quotes (`\\`, `"`,
+    /// `$`, `` ` ``). Backslash MUST be replaced first, otherwise we'd double-escape
+    /// the escapes we add for the other three.
+    static func escapeForShellDoubleQuote(_ raw: String) -> String {
+        var out = raw
+        out = out.replacingOccurrences(of: "\\", with: "\\\\")
+        out = out.replacingOccurrences(of: "\"", with: "\\\"")
+        out = out.replacingOccurrences(of: "$", with: "\\$")
+        out = out.replacingOccurrences(of: "`", with: "\\`")
+        return out
     }
 }

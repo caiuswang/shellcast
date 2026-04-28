@@ -46,6 +46,7 @@
 		9CB87BBA1B337982879B1B9F /* TerminalCursorLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567834C81A984BCF32EEF785 /* TerminalCursorLayoutTests.swift */; };
 		A1B2C3D4E5F60001AABB0001 /* RemotePlatform.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001AABB0002 /* RemotePlatform.swift */; };
 		A906674E5535C999E976ECF3 /* OpenCodeAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56C9A53F29AB4D9292EA773A /* OpenCodeAgent.swift */; };
+		C0B11070AAA10001CCDD0001 /* CopilotAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0B11070AAA10002CCDD0002 /* CopilotAgent.swift */; };
 		A9C02678D8863EC499917960 /* KeyboardToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2EA76447CCB1F4716C33090 /* KeyboardToolbar.swift */; };
 		AA4C312A6AF355D5068E9629 /* mosh.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1409313AD4E6449B02295511 /* mosh.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		AC7233A415BF3267D4EA4F06 /* TimeFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */; };
@@ -59,6 +60,7 @@
 		B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = E03BAD42634CD05DC3880CE3 /* SessionRecord.swift */; };
 		BFB95968FB306F0A8F0DABE6 /* TerminalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4800BD4740F6F26923B912F2 /* TerminalSettings.swift */; };
 		C2D3E4F5A6B7C8D9E0F1A2B3 /* ImagePasteServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6A7B8C9D0E1F2A3B4C5 /* ImagePasteServiceTests.swift */; };
+		C0B11070AAA10003CCDD0003 /* CopilotAgentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0B11070AAA10004CCDD0004 /* CopilotAgentTests.swift */; };
 		CC80805014D8226190734E8F /* TmuxBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35EC85FB046776C91A6D8647 /* TmuxBrowserView.swift */; };
 		CE35D5F91B70E3D62EA5BA94 /* ClaudeCodeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B120F558A8FB902812C51510 /* ClaudeCodeSession.swift */; };
 		D1697AFEF68A9BC9D6B098CE /* ConnectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42AD82B5084ABF23C00E375 /* ConnectionRow.swift */; };
@@ -131,6 +133,7 @@
 		4DBDBEE3C6330C9C21BECA39 /* TimeFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormatting.swift; sourceTree = "<group>"; };
 		567834C81A984BCF32EEF785 /* TerminalCursorLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalCursorLayoutTests.swift; sourceTree = "<group>"; };
 		56C9A53F29AB4D9292EA773A /* OpenCodeAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCodeAgent.swift; sourceTree = "<group>"; };
+		C0B11070AAA10002CCDD0002 /* CopilotAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotAgent.swift; sourceTree = "<group>"; };
 		5CC941FEE664D2431303055E /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
 		61579C0F481E05873DEEB3A2 /* special_tokens_map.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = special_tokens_map.json; sourceTree = "<group>"; };
 		6726B66D9CC86DDD8EA70798 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
@@ -164,6 +167,7 @@
 		CBEA7B00AF5CBF6B4EE9AF62 /* COMMON_MISTAKES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = COMMON_MISTAKES.md; sourceTree = "<group>"; };
 		D35C95DA1DB825ACD9831A6C /* DebugLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLog.swift; sourceTree = "<group>"; };
 		D4E5F6A7B8C9D0E1F2A3B4C5 /* ImagePasteServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePasteServiceTests.swift; sourceTree = "<group>"; };
+		C0B11070AAA10004CCDD0004 /* CopilotAgentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotAgentTests.swift; sourceTree = "<group>"; };
 		D5124CDBF147AA4F8371D642 /* tokenizer_config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tokenizer_config.json; sourceTree = "<group>"; };
 		D886DD705902431727A8D5CE /* AuthMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethod.swift; sourceTree = "<group>"; };
 		D941806241DCF9F5A72299C8 /* ConnectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionType.swift; sourceTree = "<group>"; };
@@ -280,6 +284,7 @@
 			isa = PBXGroup;
 			children = (
 				0B8D2814FE2A15CD08EA0D9A /* ClaudeAgent.swift */,
+				C0B11070AAA10002CCDD0002 /* CopilotAgent.swift */,
 				31491B7197A0AC0B555C93CE /* KimiAgent.swift */,
 				56C9A53F29AB4D9292EA773A /* OpenCodeAgent.swift */,
 			);
@@ -290,6 +295,7 @@
 			isa = PBXGroup;
 			children = (
 				71ADD980E8F01B1CCE2B626E /* BackgroundSessionTests.swift */,
+				C0B11070AAA10004CCDD0004 /* CopilotAgentTests.swift */,
 				D4E5F6A7B8C9D0E1F2A3B4C5 /* ImagePasteServiceTests.swift */,
 				567834C81A984BCF32EEF785 /* TerminalCursorLayoutTests.swift */,
 			);
@@ -579,6 +585,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0324D23344C318E49D749844 /* BackgroundSessionTests.swift in Sources */,
+				C0B11070AAA10003CCDD0003 /* CopilotAgentTests.swift in Sources */,
 				C2D3E4F5A6B7C8D9E0F1A2B3 /* ImagePasteServiceTests.swift in Sources */,
 				9CB87BBA1B337982879B1B9F /* TerminalCursorLayoutTests.swift in Sources */,
 			);
@@ -612,6 +619,7 @@
 				3F8CFE6AB3CC4EB6922780FA /* MoshService.swift in Sources */,
 				125D46A7939E10F7C7AA7113 /* NetworkMonitor.swift in Sources */,
 				A906674E5535C999E976ECF3 /* OpenCodeAgent.swift in Sources */,
+				C0B11070AAA10001CCDD0001 /* CopilotAgent.swift in Sources */,
 				B7E1A2C3D4F506789AB0CDE1 /* ImagePasteService.swift in Sources */,
 				EBDEDB9BE8D7E51EC0B98FEF /* SSHService.swift in Sources */,
 				B9F316615A7F222D586A92D7 /* SessionRecord.swift in Sources */,

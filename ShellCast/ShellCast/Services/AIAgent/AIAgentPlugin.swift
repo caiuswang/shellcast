@@ -19,7 +19,11 @@ protocol AIAgentPlugin {
     
     /// Binary names to search for (e.g., ["claude"], ["opencode", "oc"])
     static var binaryNames: [String] { get }
-    
+
+    /// Regex (POSIX ERE) used to match `ps`-style argv during running-session detection.
+    /// Defaults to `binaryNames.joined("|")`. Override when binary names collide with other tools.
+    static var detectionPattern: String { get }
+
     /// Common installation paths to check
     static var commonPaths: [String] { get }
     
@@ -81,6 +85,10 @@ extension AIAgentPlugin {
         ]
     }
 
+    static var detectionPattern: String {
+        binaryNames.joined(separator: "|")
+    }
+
     static func isInstalled(over session: SSHSession) async throws -> Bool {
         let platform = try await RemotePlatform.detect(over: session)
         let paths = platform.commonBinaryPaths
@@ -126,11 +134,11 @@ extension AIAgentPlugin {
         guard !tmuxSessions.isEmpty else { return [] }
 
         let platform = try await RemotePlatform.detect(over: session)
-        let pattern = binaryNames.joined(separator: "|")
+        let pattern = Self.detectionPattern
 
         // Resolve tmux path dynamically instead of hardcoding /opt/homebrew/bin/tmux
         let command = """
-        TMUX_BIN=$(command -v tmux 2>/dev/null || echo tmux); \
+        TMUX_BIN=$(\(platform.tmuxResolveCommand)); \
         $TMUX_BIN list-panes -a -F '#{session_name} #{pane_pid}' 2>/dev/null | while read session pane_pid; do \
         [ -n "$pane_pid" ] && \(platform.pgrepChildCommand(parentPid: "$pane_pid", pattern: pattern)) && echo "$session"; \
         done | sort -u; true
@@ -153,12 +161,12 @@ extension AIAgentPlugin {
 
     static func detectRunningWindows(over session: SSHSession, tmuxSessionName: String) async throws -> Set<Int> {
         let platform = try await RemotePlatform.detect(over: session)
-        let pattern = binaryNames.joined(separator: "|")
+        let pattern = Self.detectionPattern
         let escapedSession = tmuxSessionName.replacingOccurrences(of: "'", with: "'\\''")
 
         // Resolve tmux path dynamically instead of hardcoding /opt/homebrew/bin/tmux
         let command = """
-        TMUX_BIN=$(command -v tmux 2>/dev/null || echo tmux); \
+        TMUX_BIN=$(\(platform.tmuxResolveCommand)); \
         $TMUX_BIN list-panes -a -F '#{session_name} #{window_index} #{pane_pid}' 2>/dev/null | grep '^\(escapedSession) ' | while read session widx pid; do \
         \(platform.pgrepChildCommand(parentPid: "$pid", pattern: pattern)) && echo "$widx"; \
         done | sort -u; true

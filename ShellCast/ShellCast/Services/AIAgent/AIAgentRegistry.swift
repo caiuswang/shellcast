@@ -14,7 +14,8 @@ enum AIAgentRegistry {
     static let allPlugins: [AIAgentPlugin.Type] = [
         ClaudeAgent.self,
         KimiAgent.self,
-        OpenCodeAgent.self
+        OpenCodeAgent.self,
+        CopilotAgent.self
     ]
     
     // MARK: - Plugin Lookup
